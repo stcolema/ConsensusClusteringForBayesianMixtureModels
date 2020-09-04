@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+*.log
+*.aux
+*.synctex
+*.synctex.gz
+*.bbl
+*.blg
+OUP_First_SBk_Bot_8401*
+Template*

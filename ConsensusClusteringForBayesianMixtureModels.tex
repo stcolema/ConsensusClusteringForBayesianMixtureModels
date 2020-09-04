@@ -62,12 +62,34 @@ We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as
 \begin{align}
 x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
 \end{align}
-where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. Here $K$, the number of components, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
+where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. Here $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
+
+\begin{equation}
+	\label{eqn:mixModel}
+	\begin{array}{r@{}l l}
+		p(c_i = k) = \pi_k&  &\textrm{for $k = 1,\ldots,K$,} \\
+		x_i | c_i \sim f(x_i | \theta_k)& &\textrm{independently for $i = 1,\ldots,N$.} 
+	\end{array}
+\end{equation}
+The joint model can then be written
 
 \begin{align}
-	&p(c_i = k) = \pi_k&  \textrm{for $k = 1,\ldots,K$,} \nonumber\\
-	&x_i | c_i \sim f(x_i | \theta_k)& \textrm{independently for $i = 1,\ldots,N$.} \nonumber
+	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
 \end{align}
+In our case $f(\cdot| \theta)$ is the probability density function of a Gaussian distribution and $\theta=(\mu, \sigma^2)$. A common assumption is that the density of each feature is independent, with the $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
+
+\begin{align}
+	p(X, c, \theta, \pi, K) &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K) p(K).  \label{eqn:jointMixModel}
+%	\\
+%	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+%	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
+\end{align}
+
+%\begin{align}
+%	
+%	&p(c_i = k) = \pi_k&  \textrm{for $k = 1,\ldots,K$,} \nonumber\\
+%	&x_i | c_i \sim f(x_i | \theta_k)& \textrm{independently for $i = 1,\ldots,N$.} \nonumber
+%\end{align}
 
 %Visualisations of different embeddings of the data (such as Principal Component Analysis \cite{wold1987principal} or non-linear methods such as t-stochastic neighbourhood embedding \cite{maaten2008visualizing} or Poincaré maps \cite{klimovskaia2020poincare}) might offer some beliefs about the $K$.
 
@@ -96,7 +118,7 @@ where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. H
 %\end{itemize}
 
 %\subsection{Problem}
-Bayesian inference of mixture models is often performed using Markov-chain Monte Carlo (MCMC) methods. However, MCMC methods in general are known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This means that there is a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
+Bayesian inference of mixture models is normally performed using Markov-chain Monte Carlo (MCMC) methods. However, MCMC methods in general are known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This means that there is a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
 
 
 %with the collapsed Gibbs sampler \cite{liu1994collapsed} being particularly prominent for mixture models as it enables integrating over nuisance parameters. An example of this is marginalising out the covariance matrix in a mixture of Gaussian models. This quantity is often the cause of singularities in the likelihood surface that cause the inference to fail, a common issue for MLE inference of mixture models.
@@ -185,38 +207,37 @@ We extend CC to use Bayesian mixture models as the underlying model. This offers
 We use the \texttt{maxpear} function \cite{fritsch2009improved} from the R package \texttt{mcclust} \cite{fritsch2012mcclust} to infer a point clustering from CMs. This function was designed to perform inference upon the posterior similarity matrix (\textbf{PSM}) from the samples of a single long chain (this is analogous to a CM, except the partitions are all drawn from a single Markov chain), predicting a clustering that has maximum posterior expected adjusted Rand index \cite{hubert1985comparing} with the true clustering. In the context of the CM, the function does not have this interpretation. However, the method produces a kind of ``sample average clustering" based upon all sampled partitions. This appears a sensible method for predicting a point clustering from the CM, averaging over each learner in the ensemble.
 
 \subsection{Data generating mechanism}
-We use the notation:
+%We use the notation:
+%
+%\begin{itemize}
+%	\item
+%	\(N\): the number of items generated;
+%	\item
+%	\(P\): the number of features in the dataset;
+%	\item
+%	\(P_n\): the number of irrelevant features used;
+%	\item
+%	\(K\): the true number of clusters present;
+%	\item
+%	\(X = (x_1, \ldots, x_N)\): the items generated;
+%	\item
+%	\(\pi=(\pi_1, \ldots, \pi_K)\): the expected proportions of the population belonging to each cluster;
+%	\item
+%	\(c=(c_1, \ldots, c_N)\): the allocation variable for each item;
+%	\item
+%	\(\theta=(\theta_1, \ldots, \theta_K)\): the parameters associated with each component; and
+%	\item
+%	\(\phi=(\phi_1,\ldots, \phi_P)\): the indicator variable of feature relevance.
+%\end{itemize}
 
-\begin{itemize}
-	\item
-	\(N\): the number of items generated;
-	\item
-	\(P\): the number of features in the dataset;
-	\item
-	\(P_n\): the number of irrelevant features used;
-	\item
-	\(K\): the true number of clusters present;
-	\item
-	\(X = (x_1, \ldots, x_N)\): the items generated;
-	\item
-	\(\pi=(\pi_1, \ldots, \pi_K)\): the expected proportions of the population belonging to each cluster;
-	\item
-	\(c=(c_1, \ldots, c_N)\): the allocation variable for each item;
-	\item
-	\(\theta=(\theta_1, \ldots, \theta_K)\): the parameters associated with each component; and
-	\item
-	\(\phi=(\phi_1,\ldots, \phi_P)\): the indicator variable of feature relevance.
-\end{itemize}
-
-The data generating model is a finite mixture model with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters:
-
+The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model is then, extending from equation \ref{eqn:jointMixModel} with the change that $K$ is now fixed,
 
 \begin{align*}
-p(x, c, \theta, \pi) &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
-&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
-& \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)
+p(X, c, \theta, \pi | K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+& \prod_{i=1}^N p (c_i | \pi, K) p(\pi|K) p(\theta|K)
+% &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
 \end{align*}
-
+with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant.
 
 In the simulation study described here, the model is a mixture of \emph{Gaussian} distribution and thus \(\theta_{kp}=(\mu_{kp}, \sigma^2_{kp})\). The prior distributions used on the mixture parameters are
 

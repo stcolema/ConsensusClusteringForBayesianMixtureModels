@@ -126,19 +126,9 @@ Ensembles of learners are often better at representing modes within parameters t
 %\subsubsection{Consensus clustering of Bayesian mixture models}
 We extend consensus clustering to Bayesian mixture models. We show via simulation that ensembles consisting of short chains are sufficient to uncover meaningful structure in a number of scenarios including some within which a Gibbs sampler becomes trapped in individual modes for any reasonable length of runtime. The chains are both short and independent, thus their individual runtime is far shorter than the chains traditionally used for Bayesian inference and may also be run in parallel. This means that consensus clustering of Bayesian mixture models offers significant reductions in runtime without sacrifices in performance. As the ensemble can describe multiple modes, the uncertainty present in the consensus matrix can be more representative of the data than the individual modes captured by any single chain.
 
- We then apply our algorithm to the multiple dataset setting and the extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We show on three datasets from the original MDI paper that Consensus clustering performs similarly to Bayesian inference of this model, and then using more modern, larger data that Consensus clustering enables implementation of such models in previously difficult scenarios. 
+ We then apply our algorithm to the multiple dataset setting and the extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We show on three datasets from the original MDI paper that Consensus clustering performs similarly to Bayesian inference of this model, and then using more modern, larger data that Consensus clustering enables implementation of such models in scenarios where the problem of long runtimes and poor mixing previously discouraged this. 
 
 %\enlargethispage{12pt}
-
-\section{Approach}
-
-Equation~(\ref{eq:01}) Text Text Text Text Text Text  Text Text
-Text Text Text Text Text Text Text Text Text Text Text Text Text.
-Figure~2\vphantom{\ref{fig:02}} shows that the above method  Text
-Text Text Text  Text Text Text Text Text Text  Text Text.
-\citealp{Boffelli03} might want to know about text text text text
-.....
-
 
 \begin{methods}
 \section{Methods}
@@ -339,7 +329,7 @@ Data is generated using algorithm \ref{algorithm:simulationGeneration}.
 		\tcc{Mean centre and scale the data}
 		$X \leftarrow Normalise(X)$
 	}
-	\caption{Data generation for a mixture of Gaussian with independent features.}
+	\caption{Data generation for a mixture of Gaussian with independent features. This algorithm is implemented in the \texttt{generateSimulationDataset} function from the \texttt{mdiHelpR} R package.}
 \end{algorithm}
 
 %
@@ -353,46 +343,6 @@ Data is generated using algorithm \ref{algorithm:simulationGeneration}.
 %	\label{fig:genData}
 %\end{sidewaysfigure}
 
-We test different scenarios that change various parameters in this model. The scenarios tested and there defining parameters are shown in table \ref{table:scenarioTable}. In this case the number of relevant features (\(P_s\)) is $\sum_p \phi_p$, and $P_n = P - P_s$.
-
-
-\begin{table}[ht]
-	\centering
-	\caption{Parameters defining the simulation scenarios as used in generating data and labels. Results for the \emph{Simple 2D}, the first \emph{Small N, large P} and final \emph{Irrelevant features} scenarios are shown in this report, please see the supplementary material for additional results.}
-	\begin{tabular}{l|ccccccc}
-		\toprule
-		\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta_{\mu}$ & $\sigma^2$ & $\pi$\\
-		\hline 
-		Simple 2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
-		%		\hline
-		No structure & 100 & 0 & 2 & 1 & 0.0 & 1 & 1 \\
-		%		\hline
-		Base Case & 200 & 20 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 3 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
-		%		\hline
-		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 5 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Irrelevant features & 200 & 20 & 10 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Irrelevant features & 200 & 20 & 20 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Irrelevant features & 200 & 20 & 100 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Varying proportions & 200 & 20 & 0 & 5 & 1.0 & 1 & $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\
-		Varying proportions & 200 & 20 & 0 & 5 & 0.4 & 1 &  $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\ %(0.5, 0.25, 0.125, 0.0675, 0.0675)\\
-		%		\hline
-		Small N, large P & 50 & 500 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
-		%	\\
-		%	\hline
-		%	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
-		\\
-		\bottomrule
-	\end{tabular}
-	\label{table:scenarioTable}
-\end{table}%
 
 %	\begin{sidewaysfigure}
 %		\centering
@@ -450,25 +400,75 @@ The Frobenius Norm will provide some information if the above matrices correspon
 The runtime of each MCMC chain is calculated using the terminal command \texttt{time}, measured in milliseconds.
 
 \subsection{Bayesian model convergence}
-Within chain Geweke
-Across chain
+To assess within-chain convergence of our Bayesian inference we use the Geweke statistic \cite{geweke1991evaluating}. Of the chains that appear to behave properly we then asses across chain convergence using $\hat{R}$ \cite{gelman1992inference} and the recent extension provided by \citealp{vats2018revisiting}. 
+
+If a chain has reached its stationary distribution the Geweke statistic is expected to be normally distributed. Normality is tested for using a Shapiro-Wilks test \cite{shapiro1965analysis}.
+
+The Vats and Knudson extension of $\hat{R}$ is a summary statistic for the entire chain; this is the primary indicator of failure for convergence, but a visualisation of the original $\hat{R}$ diagnostic is also plotted.
+
+\end{methods}
 
 \section{Examples}
-We compare consensus clustering of Bayesian mixture models to a traditional inference using several long chains of 1 million iterations (thinning to every thousandth) and an maximum-likelihood estimator as implement in the R package \texttt{mclust} \citealp{mclust2016scrucca}. These are compared within a range of simulations,
 
+\subsection{Simulations}
+
+We compare consensus clustering of Bayesian mixture models to a traditional inference using several long chains of 1 million iterations (thinning to every thousandth) and an maximum-likelihood estimator as implement in the R package \texttt{mclust} \citealp{mclust2016scrucca}. These are compared within a range of simulations described in table \ref{table:scenarioTable}. In this article we describe the results of three of these in more detail with the remainder described in the supplementary material.
+
+We test different scenarios that change various parameters in this model. The scenarios tested and there defining parameters are shown in table \ref{table:scenarioTable}. In this case the number of relevant features (\(P_s\)) is $\sum_p \phi_p$, and $P_n = P - P_s$.
+
+
+\begin{table}[ht]
+	\centering
+	\caption{Parameters defining the simulation scenarios as used in generating data and labels. Results for the \emph{Simple 2D}, the first \emph{Small N, large P} and final \emph{Irrelevant features} scenarios are shown in this report, please see the supplementary material for additional results. The number of relevant features (\(P_s\)) is $\sum_p \phi_p$, and $P_n = P - P_s$.}
+	\begin{tabular}{l|ccccccc}
+		\toprule
+		\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta_{\mu}$ & $\sigma^2$ & $\pi$\\
+		\midrule
+		Simple 2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
+		%		\hline
+		No structure & 100 & 0 & 2 & 1 & 0.0 & 1 & 1 \\
+		%		\hline
+		Base Case & 200 & 20 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 3 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
+		%		\hline
+		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 5 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Irrelevant features & 200 & 20 & 10 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Irrelevant features & 200 & 20 & 20 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Irrelevant features & 200 & 20 & 100 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Varying proportions & 200 & 20 & 0 & 5 & 1.0 & 1 & $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\
+		Varying proportions & 200 & 20 & 0 & 5 & 0.4 & 1 &  $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\ %(0.5, 0.25, 0.125, 0.0675, 0.0675)\\
+		%		\hline
+		Small N, large P & 50 & 500 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+		%		\hline
+		Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
+		%	\\
+		%	\hline
+		%	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
+		\\
+		\botrule
+	\end{tabular}
+	\label{table:scenarioTable}
+\end{table}%
+
+The examples included in this article are
 \begin{itemize}
 	\item a low-dimensional dataset,
 	\item a wide dataset representative of the \emph{small $N$, large $P$} paradigm prevalent in genetics, and
 	\item a dataset with a large number of irrelevant features.
 \end{itemize}
-The first of these is expected to be the setting where \texttt{mclust} and the individual long chains behave well. In the other simulations increasing dimensionality means that mixing problems can emerge and the chains become liable to being trapped in individual modes. Within each simulation 100 datasets are generated following algorithm \ref{algorithm:simulationGeneration}. To each of these the following are run:
+The first of these is expected to be the setting where \texttt{mclust} and the individual long chains behave well. In the other simulations increasing dimensionality means that mixing problems can emerge and the chains become liable to being trapped in individual modes. Within each simulation 100 datasets are generated following algorithm \ref{algorithm:simulationGeneration}. To each of these datasets 
 
 \begin{itemize}
-	\item \texttt{mclust} for a range of possible $K$,
-	\item 10 chains of 1 million iterations, thinning to every thousandth sampel for the overfitted Bayesian mixture model, and
-	\item a variety of consensus clustering ensembles defined by inputs of $S$ chains and $R$ iterations within each chain (see algorithm \ref{algorithm:CCforBayesianMixtures}) with $S \in \{1, 10, 30, 50, 100\}$ and $R \in \{1, 10, 100, 1000, 10000\}$.
+	\item \texttt{mclust} (for a range of possible $K$),
+	\item 10 chains of 1 million iterations, thinning to every thousandth sample for the overfitted Bayesian mixture model, and
+	\item a variety of consensus clustering ensembles defined by inputs of $S$ chains and $R$ iterations within each chain (see algorithm \ref{algorithm:CCforBayesianMixtures}) with $S \in \{1, 10, 30, 50, 100\}$ and $R \in \{1, 10, 100, 1000, 10000\}$,
 \end{itemize}
-
+are applied.
 
 %\begin{sidewaysfigure}
 %	\centering
@@ -489,81 +489,64 @@ The first of these is expected to be the setting where \texttt{mclust} and the i
 
 \section*{Results}
 \subsection{Simulations}
-In the 2D dataset \texttt{mclust} outperforms the Bayesian inference and consensus clustering in terms of the point estimate of the generating structure. 
+A summary of the results for a selection of the simulation scenarios are shown in table \ref{table:meanARISims} and figure \ref{fig:simResults}. In the strong signal scenarios (i.e. noise free and clearly distinguishable generating clusters), \texttt{mclust} performs very well, correctly identifying the true structure However, a large number of irrelevant features completely erodes the ability of \texttt{mclust} to uncover meaningful structure. The pooled samples from multiple long chains performs consistently very well. This is not surprising as the pooling effect means that any multi-modality present in the data does not present any degree of problem. In this case the pooled samples, themselves a consensus of 10 models, acts as an upper bound on the more realistic implementations of consensus clustering. Consensus clustering does consistently uncover structure in the data. With sufficiently large ensembles and chain depth, consensus clustering is close to the pooled Bayesian samples in predictive performance. In terms of the Frobenius norm, many of the consensus clustering results have significant overlap with the pooled long chains.
 
-\begin{itemize}
-	\item Simple example - Mclust and Bayesian win! We see MCMC exploring well. 
-	\item Small N large P, problems for Bayesian. Separate modes represented in CM, so consensus is finding sensible modes
-	\item Irrelevant 100, many modes, Mclust collapse, similar to above.
-	\item Real data \vspace*{1pt}
-\end{itemize}
-
-Multiple dataset
-\begin{itemize}
-	\item MDI yeast - pretty identical
-	\item Full yeast - Bayesian fails, consensus succeeds
-	\item Cancer - hmmmmmm	\vspace*{1pt}
-\end{itemize}
-
-\begin{itemize}
-\item for bulleted list, use itemize
-\item for bulleted list, use itemize
-\item for bulleted list, use itemize\vspace*{1pt}
-\end{itemize}
-
-
-Figure~2\vphantom{\ref{fig:02}} shows that the above method 
-\citealp{Boffelli03} 
-
-
-
-\subsection{This is subheading}
-
-
-\subsubsection{This is subsubheading}
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text
-Text Text  Text Text Text Text Text Text.
-Figure~2\vphantom{\ref{fig:02}} shows that the above method  Text
-Text Text Text  Text Text Text Text Text Text  Text Text.
-\citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text  Text Text Text Text Text Text Text
-Text Text  Text Text Text Text Text Text.
-Figure~2\vphantom{\ref{fig:02}} shows that the above method  Text
-Text Text Text  Text Text Text Text Text Text  Text Text.
-\citealp{Boffelli03} might want to know about  text text text text
-Text Text Text Text Text Text Text Text Text Text Text Text Text
-Text Text  Text Text Text Text Text Text.
-Figure~2\vphantom{\ref{fig:02}} shows that the above method  Text
-Text Text Text  Text Text Text Text Text Text  Text Text.
-\citealp{Boffelli03} might want to know about  text text text text
-
-
-\enlargethispage{6pt}
-
-
-Text Text Text Text Text Text  Text Text Text Text Text Text Text
-Text Text  Text Text Text Text Text Text.
-
-\begin{table}[!t]
-\processtable{This is table caption\label{Tab:01}} {\begin{tabular}{@{}llll@{}}\toprule head1 &
-head2 & head3 & head4\\\midrule
-row1 & row1 & row1 & row1\\
-row2 & row2 & row2 & row2\\
-row3 & row3 & row3 & row3\\
-row4 & row4 & row4 & row4\\\botrule
-\end{tabular}}{This is a footnote}
+\begin{table}[ht]
+	\centering
+	\caption{Mean ARI for 100 datasets within three simulation scenarios between the generating labels and the predicted clustering for a subset of methods. Consensus ($r, s$) indicates consensus clustering using the $r^{th}$ sample from $s$ chains.}
+	\begin{tabular}{l|rrr}
+		\toprule
+		\textbf{Model} & Simple 2D & Small $N$, large $P$ & Irrelevant features 100 \\
+		\midrule
+		Bayesian (Pooled) &  0.669 & 				0.999 &         0.946\\
+		Maximum likelihood (Mclust) & 0.970 &       1.000 &         0.000\\
+		Consensus (100, 50) & 0.517 &          		0.999 &			0.873\\
+		Consensus (10000, 100) & 0.570 &            0.999 &			0.944\\
+		Consensus (10, 10) & 0.362 &	            0.997 &         0.385\\
+		\botrule
+	\end{tabular}
+	\label{table:meanARISims}
 \end{table}
 
-\end{methods}
+\begin{sidewaysfigure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.6]{./Images/Simulations/simulation_model_performance.png}
+	\caption{Model performance in a subset of simulation scenarios. }
+	\label{fig:simResults}
+\end{sidewaysfigure}
 
-\begin{figure}[!tpb]%figure1
-\fboxsep=0pt\colorbox{gray}{\begin{minipage}[t]{235pt} \vbox to 100pt{\vfill\hbox to
-235pt{\hfill\fontsize{24pt}{24pt}\selectfont FPO\hfill}\vfill}
-\end{minipage}}
-%\centerline{\includegraphics{fig01.eps}}
-\caption{Caption, caption.}\label{fig:01}
-\end{figure}
+\begin{sidewaysfigure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.2]{./Images/Simulations/small_n_large_p_base/PSMs/BayesianSimulation2PSMs.png}
+	\caption{PSMs for 8 chains that pass within chain convergence test. Rows and columns are ordered by a hierarchical clustering applied to the matrix in the bottom right. Annotations are the generating labels. The top row of PSMs are all in a common mode where Cluster 3 does not merge instead remaining as singletons. In the bottom row the first, second and fourth matrices correctly cluster all 5 clusters. The third matrix uncovers a different mode where Cluster 5 does not merge. The matrices appear binary, suggesting no diversity in the partitions being sampled.}
+	\label{fig:simSmallNLargePPSMs}
+\end{sidewaysfigure}
+Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becoming trapped in different modes and failing to explore a common partition space. 
+
+
+%In the 2D dataset \texttt{mclust} outperforms the Bayesian inference and consensus clustering in terms of the point estimate of the generating structure. 
+
+%\begin{itemize}
+%	\item Simple example - Mclust and Bayesian win! We see MCMC exploring well. 
+%	\item Small N large P, problems for Bayesian. Separate modes represented in CM, so consensus is finding sensible modes
+%	\item Irrelevant 100, many modes, Mclust collapse, similar to above.
+%	\item Real data \vspace*{1pt}
+%\end{itemize}
+%
+%Multiple dataset
+%\begin{itemize}
+%	\item MDI yeast - pretty identical
+%	\item Full yeast - Bayesian fails, consensus succeeds
+%	\item Cancer - hmmmmmm	\vspace*{1pt}
+%\end{itemize}
+%
+%\begin{figure}[!tpb]%figure1
+%\fboxsep=0pt\colorbox{gray}{\begin{minipage}[t]{235pt} \vbox to 100pt{\vfill\hbox to
+%235pt{\hfill\fontsize{24pt}{24pt}\selectfont FPO\hfill}\vfill}
+%\end{minipage}}
+%%\centerline{\includegraphics{fig01.eps}}
+%\caption{Caption, caption.}\label{fig:01}
+%\end{figure}
 
 %\begin{figure}[!tpb]%figure2
 %%\centerline{\includegraphics{fig02.eps}}
@@ -571,12 +554,14 @@ row4 & row4 & row4 & row4\\\botrule
 %\end{figure}
 
 
-\subsection{Test1}
+%\subsection{Test1}
 
 
 \section{Discussion}
 
+In this article, we have extended Consensus clustering to Bayesian mixture models. This overcomes the problem of mixing for MCMC based clustering methods and also improves the speed at which an analysis can be performed. The proposed method has demonstrated good performance on simulation studies, having similar ability to uncover structure as more traditional approaches. It has better ability to represent several modes in the data than individual chains and is significantly faster, while retaining the ability to infer $K$, the number of occupied components present. 
 
+We expect that our method will be useful to researchers analysing high-dimensional data where the runtime of MCMC methods becomes too onerous and multi-modality is more likely to be present.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

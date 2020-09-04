@@ -56,7 +56,7 @@ p1 <- my_df %>%
 
 p1
 
-ggsave(paste0(save_dir, "model_performance_prediction.png"), width = 20, height = 16)
+ggsave(paste0(save_dir, "simulation_model_prediction.png"), width = 10, height = 10, plot = p1)
 
 
 p2 <- my_df %>% 
@@ -72,7 +72,7 @@ p2 <- my_df %>%
 
 p2
 
-ggsave(paste0(save_dir, "model_performance_uncertainty.png"), width = 20, height = 16)
+ggsave(paste0(save_dir, "simulation_model_uncertainty.png"), width = 10, height = 10, plot = p2)
 
 p3 <- p1 / p2 +
   plot_annotation(

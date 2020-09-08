@@ -55,7 +55,7 @@ The act of identifying such groups is referred to as “cluster analysis”. Tra
 %\subsection{Why Bayesian models?}
 In many analyses or decision making processes, understanding how certain the clustering is van be vital. For example, in clustering patients there might be individuals with almost equal probability of being allocated between a number of clusters. Knowing which individuals have uncertain membership could strongly influence decisions about treatment. However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles (\citealp{medvedovic2002bayesian}), cell types in flow cytometry (\citealp{chan2008statistical, hejblum2019sequential}) or scRNAseq experiments (\citealp{prabhakaran2016dirichlet}), and predicting protein localisation (\citealp{crook2018bayesian}).
 
-Furthermore, one might believe that the number of clusters present might itself be uncertain, that it is a random variable that should be inferred from the data. Bayesian mixture models can treat $K$ in this way, thereby incorporating uncertainty about $K$ into the the allocation uncertainty and reducing some of the subjectivity of choosing $K$. In this way the number of components and the component parameters are modelled jointly, in contrast with many clustering methods. Furthermore, if there is a prior belief about $K$, this may be included due to the Bayesian nature of the model. 
+One might believe that the number of occupied clusters present, $K$, is a random variable that should be inferred from the data. Bayesian mixture models can treat $K$ in this way, thereby incorporating uncertainty about $K$ into the the allocation uncertainty and reducing some of the subjectivity of choosing $K$. The most common models for are the mixture of finite mixtures (\citealp{miller2018mixture}, frequently implemented using Reversible Jump MCMC moves via \citealp{richardson1997bayesian}), the Dirichlet process (\citealp{ferguson1973bayesian, neal2000markov}) or the overfitted mixture model (\citealp{van2015overfitting}). In these models the number of components and the component parameters are modelled jointly, in contrast with many clustering methods. Furthermore, if there is a prior information about $K$, this may be included due to the Bayesian nature of the model. 
 
 We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
 \begin{align}
@@ -229,13 +229,13 @@ We use the \texttt{maxpear} function \cite{fritsch2009improved} from the R packa
 %	\(\phi=(\phi_1,\ldots, \phi_P)\): the indicator variable of feature relevance.
 %\end{itemize}
 
-The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model is then, extending from equation \ref{eqn:jointMixModel}, % with the change that $K$ is now fixed,
+The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model has a fixed number of clusters chosen by us and is thus, extending from equation \ref{eqn:jointMixModel},
 \begin{align*}
-p(X, c, \theta, \pi, K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
-& \prod_{i=1}^N p (c_i | \pi, K) p(\pi| K) p(\theta|K)p(K)
+p(X, c, \theta, \pi| K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+& \prod_{i=1}^N p (c_i | \pi, K) p(\pi| K) p(\theta|K)
 % &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
 \end{align*}
-with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant.
+with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant. A description of the algorithm implementing this is given in algorithm \ref{algorithm:simulationGeneration}.
 
 In the simulation study described here, the model is a mixture of \emph{Gaussian} distribution and thus \(\theta_{kp}=(\mu_{kp}, \sigma^2_{kp})\). The prior distributions used on the mixture parameters are
 \begin{align}
@@ -245,7 +245,7 @@ The conditional independences and the priors used are shown in the directed acyc
 
 \begin{figure}
 	\centering
-	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.6, auto,>=latex']
+	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.4, auto,>=latex']
 		\tikzstyle{main}=[circle, minimum size = 10mm, thick, draw =black!80, node distance = 15mm]
 		\tikzstyle{connect}=[-latex, thick]
 		\tikzstyle{box}=[rectangle, draw=black!100]
@@ -253,6 +253,7 @@ The conditional independences and the priors used are shown in the directed acyc
 		\node[main, rectangle] (kappa) {$1$};
 		\node[main, rectangle] (xi) [left =of kappa] {$0$ };
 		\node[main, rectangle] (alpha) [left =of xi] {$1$ };
+%		\node[main] (k) [above =of alpha] {$K$};
 		\node[main, rectangle] (alpha2) [right =of kappa] {$2$ };
 		\node[main, rectangle] (beta) [right =of alpha2] {$2$ };
 		\node[main] (pi) [below =of alpha] {$\pi_k$ };
@@ -267,8 +268,8 @@ The conditional independences and the priors used are shown in the directed acyc
 		\node[rectangle, inner sep=-0.5mm, fit= (mu) (sigma),label=below right:$P$, xshift=26mm, yshift=-2mm] {};
 		\node[rectangle, inner sep=4.8mm, draw=black! 100, fit= (mu) (sigma)] {};
 		\path 
-		%(k) edge [connect, bend right=30] (pi)
-		%(k) edge [connect, bend left=10] (c_i)
+%		(k) edge [connect, bend right=30] (pi)
+%		(k) edge [connect, bend left=30] (c_i)
 		%(k) edge [connect, bend left=30] (mu)
 		%(k) edge [connect] (sigma)
 		(alpha) edge [connect] (pi)
@@ -288,7 +289,7 @@ The conditional independences and the priors used are shown in the directed acyc
 	\label{fig:simpleMixNormals}
 \end{figure}
 
-Data is generated using algorithm \ref{algorithm:simulationGeneration}.
+%Data is generated using algorithm \ref{algorithm:simulationGeneration}.
 
 %Within my generated datasets, there is a vector of means:
 %
@@ -429,11 +430,11 @@ The Frobenius Norm will provide some information if the above matrices correspon
 The runtime of each MCMC chain is calculated using the terminal command \texttt{time}, measured in milliseconds.
 
 \subsection{Bayesian model convergence}
-To assess within-chain convergence of our Bayesian inference we use the Geweke statistic \cite{geweke1991evaluating}. Of the chains that appear to behave properly we then asses across chain convergence using $\hat{R}$ \cite{gelman1992inference} and the recent extension provided by \citealp{vats2018revisiting}. 
+To assess within-chain convergence of our Bayesian inference we use the Geweke $Z$-score statistic (\citealp{geweke1991evaluating}). Of the chains that appear to behave properly we then asses across-chain convergence using $\hat{R}$ (\citealp{gelman1992inference}) and the recent extension provided by \citealp{vats2018revisiting}. 
 
-If a chain has reached its stationary distribution the Geweke statistic is expected to be normally distributed. Normality is tested for using a Shapiro-Wilks test \cite{shapiro1965analysis}.
+If a chain has reached its stationary distribution the Geweke statistic is expected to be normally distributed. Normality is tested for using a Shapiro-Wilks test (\citealp{shapiro1965analysis}). If a chain fails this test (i.e. the associated $p$-value is less than 0.05), we assume that is has not achieved stationarity and is excluded from the remainder of the analysis.
 
-The Vats and Knudson extension of $\hat{R}$ is a summary statistic for the entire chain; this is the primary indicator of failure for convergence, but a visualisation of the original $\hat{R}$ diagnostic is also considered.
+The Vats and Knudson extension of $\hat{R}$ is a summary statistic for the entire chain; this is the primary indicator of failure for convergence, but a visualisation of the original $\hat{R}$ diagnostic is also considered. 
 
 \end{methods}
 
@@ -441,10 +442,16 @@ The Vats and Knudson extension of $\hat{R}$ is a summary statistic for the entir
 
 \subsection{Simulations}
 
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.6]{./Images/Simulations/Data.png}
+	\caption{Example of generated datasets. The low-dimensional dataset should enable proper mixing of chains in the MCMC and is less likely to have a local mode that traps \texttt{mclsut}. The small $N$, large $P$ case has clear structure (observable by eye). This is intended to highlight the problems of poor mixing due to high dimensions even when the generating labels are quite identifiable. In the irrelevant features case the structure is clear in the relevant features (on the lefthand side of this heatmap). This setting is intended to test how sensitive each approach is to noise.}
+	\label{fig:genData}
+\end{figure}
+
 We compare consensus clustering of Bayesian mixture models to a traditional inference using several long chains of 1 million iterations (thinning to every thousandth) and an maximum-likelihood estimator as implement in the R package \texttt{mclust} \citealp{mclust2016scrucca}. These are compared within a range of simulations described in table \ref{table:scenarioTable}. In this article we describe the results of three of these in more detail with the remainder described in the supplementary material.
 
 We test different scenarios that change various parameters in this model. The scenarios tested and there defining parameters are shown in table \ref{table:scenarioTable}. In this case the number of relevant features (\(P_s\)) is $\sum_p \phi_p$, and $P_n = P - P_s$.
-
 
 \begin{table}[ht]
 	\centering
@@ -504,13 +511,6 @@ are applied. In theory we would expect the Bayesian chains to explore a common p
 \end{itemize}
 each of the modes tends to have large overlap with all others. This means that the clustering inferred from the PSM created from the samples pooled across all stationary chains will represent the most popular mode and the ARI will not be unduly inflated. The Frobenius norm between the PSM and the true coclustering will be less representative of a single chain as more modes will be represented and therefore greater uncertainty than any single chain. This is inline with our previous assertion that the Frobenius statistic is more an indicator that should be used along with visual assessment of examples of the PSMs and CMs from a simulation rather than sufficiently informative in and of itself.
 
-%\begin{sidewaysfigure}
-%	\centering
-%	\includegraphics[scale=0.6]{./Images/Simulations/Data.png}
-%	\caption{Example of generated datasets.}
-%	\label{fig:genData}
-%\end{sidewaysfigure}
-
 
 
 %Multiple dataset
@@ -545,14 +545,13 @@ A summary of the results for a selection of the simulation scenarios are shown i
 	\label{table:meanARISims}
 \end{table}
 It can be seen from table \ref{table:meanARISims} and figures \ref{fig:simResults} that 
-\newpage
+
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.5]{./Images/Simulations/simulation_model_prediction.png}
 	\caption{Model performance in a subset of simulation scenarios. }
 	\label{fig:simResults}
 \end{figure}
-\newpage 
 
 \begin{figure} %[!tpb]
 	\centering

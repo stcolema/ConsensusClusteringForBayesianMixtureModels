@@ -53,17 +53,15 @@ Clustering data is about maximising the quantity of relevant data for each indiv
 The act of identifying such groups is referred to as “cluster analysis”. Traditional methods such as $k$-means clustering \citep{lloyd1982least, forgy1965cluster} or hierarchical clustering condition upon a user inputted choice of $K$, the number of occupied clusters present. Normally different choices of $K$ are compared under some metric such as silhouette or based upon the within-cluster sum of squared errors as a function of $K$. There exists an alternative school of clustering, model-based clustering, which embeds the cluster analysis within a formal, statistical framework. This means that choice of $K$ is a model selection problem with all the associated literature. 
 
 %\subsection{Why Bayesian models?}
-In many analyses or decision making processes, understanding how certain the clustering is van be vital. For example, in clustering patients there might be individuals with almost equal probability of being allocated between a number of clusters. Knowing which individuals have uncertain membership could strongly influence decisions about treatment. However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions.
+In many analyses or decision making processes, understanding how certain the clustering is van be vital. For example, in clustering patients there might be individuals with almost equal probability of being allocated between a number of clusters. Knowing which individuals have uncertain membership could strongly influence decisions about treatment. However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles (\citealp{medvedovic2002bayesian}), cell types in flow cytometry (\citealp{chan2008statistical, hejblum2019sequential}) or scRNAseq experiments (\citealp{prabhakaran2016dirichlet}), and predicting protein localisation (\citealp{crook2018bayesian}).
 
 Furthermore, one might believe that the number of clusters present might itself be uncertain, that it is a random variable that should be inferred from the data. Bayesian mixture models can treat $K$ in this way, thereby incorporating uncertainty about $K$ into the the allocation uncertainty and reducing some of the subjectivity of choosing $K$. In this way the number of components and the component parameters are modelled jointly, in contrast with many clustering methods. Furthermore, if there is a prior belief about $K$, this may be included due to the Bayesian nature of the model. 
 
 We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
-
 \begin{align}
 x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
 \end{align}
-where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. Here $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
-
+where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$. $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
 \begin{equation}
 	\label{eqn:mixModel}
 	\begin{array}{r@{}l l}
@@ -72,11 +70,10 @@ where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. H
 	\end{array}
 \end{equation}
 The joint model can then be written
-
 \begin{align}
 	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
 \end{align}
-In our case $f(\cdot| \theta)$ is the probability density function of a Gaussian distribution and $\theta=(\mu, \sigma^2)$. A common assumption is that the density of each feature is independent, with the $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
+An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
 
 \begin{align}
 	p(X, c, \theta, \pi, K) &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K) p(K).  \label{eqn:jointMixModel}
@@ -169,6 +166,8 @@ We extend consensus clustering to Bayesian mixture models. We show via simulatio
 \subsection{Consensus clustering for Bayesian mixture models}
 We extend CC to use Bayesian mixture models as the underlying model. This offers the ability to include a prior distribution on parameters and inference of the number of occupied clusters present, maintaining two of the key attractions of Bayesian model-based clustering while losing the asymptotic guarantees of Bayesian inference. In this case the algorithm is simplified as it is not necessary to try a range of possible clusters present. Furthermore, the dataset is not perturbed as described in algorithm \ref{algorithm:CC} for two reasons. First, the overfit mixture can capture individuals in singletons and thus is more robust to outliers than $k$-means. Secondly, the MCMC method driving each model offers diversity of partitions when combined with different initialisations. The method is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
 
+%We investigate the performance of this method for various choices of the key parameters, the number of learners used, $S$, and the length of the chains within each learner, $R$. We compare these to popular mixture model based methods such as \texttt{mclust}, a maximum-likelihood estimator that used hierarchical clustering to initialise the clusters, and an overfitted mixture model as inferred under the Bayesian paradigm.
+
 \begin{algorithm} \label{algorithm:CCforBayesianMixtures}
 	\KwData{\(X=(x_1, \ldots, x_N)\)}
 	\KwIn{A Bayesian mixture model with membership vector \(c=(c_1, \ldots, c_N)\)\\
@@ -204,7 +203,7 @@ We extend CC to use Bayesian mixture models as the underlying model. This offers
 
 
 \subsection{Predicting a clustering from CMs}
-We use the \texttt{maxpear} function \cite{fritsch2009improved} from the R package \texttt{mcclust} \cite{fritsch2012mcclust} to infer a point clustering from CMs. This function was designed to perform inference upon the posterior similarity matrix (\textbf{PSM}) from the samples of a single long chain (this is analogous to a CM, except the partitions are all drawn from a single Markov chain), predicting a clustering that has maximum posterior expected adjusted Rand index \cite{hubert1985comparing} with the true clustering. In the context of the CM, the function does not have this interpretation. However, the method produces a kind of ``sample average clustering" based upon all sampled partitions. This appears a sensible method for predicting a point clustering from the CM, averaging over each learner in the ensemble.
+We use the \texttt{maxpear} function \cite{fritsch2009improved} from the R package \texttt{mcclust} \cite{fritsch2012mcclust} to infer a point clustering from CMs. This function was designed to perform inference upon the posterior similarity matrix (\textbf{PSM}) from the samples of a single long chain (this is analogous to a CM, except the partitions are all drawn from a single Markov chain), predicting a clustering that has maximum posterior expected adjusted Rand index \cite{hubert1985comparing} with the true clustering. In the context of the CM, the function does not have this interpretation. However, the method produces a kind of ``sample average clustering" based upon all sampled partitions. We believe this is a sensible method for predicting a point clustering from the CM, effectively averaging over each learner in the ensemble.
 
 \subsection{Data generating mechanism}
 %We use the notation:
@@ -230,17 +229,15 @@ We use the \texttt{maxpear} function \cite{fritsch2009improved} from the R packa
 %	\(\phi=(\phi_1,\ldots, \phi_P)\): the indicator variable of feature relevance.
 %\end{itemize}
 
-The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model is then, extending from equation \ref{eqn:jointMixModel} with the change that $K$ is now fixed,
-
+The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model is then, extending from equation \ref{eqn:jointMixModel}, % with the change that $K$ is now fixed,
 \begin{align*}
-p(X, c, \theta, \pi | K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
-& \prod_{i=1}^N p (c_i | \pi, K) p(\pi|K) p(\theta|K)
+p(X, c, \theta, \pi, K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+& \prod_{i=1}^N p (c_i | \pi, K) p(\pi| K) p(\theta|K)p(K)
 % &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
 \end{align*}
 with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant.
 
 In the simulation study described here, the model is a mixture of \emph{Gaussian} distribution and thus \(\theta_{kp}=(\mu_{kp}, \sigma^2_{kp})\). The prior distributions used on the mixture parameters are
-
 \begin{align}
 	\pi \sim \textrm{Dirichlet}(\alpha, \ldots, \alpha), \hspace{0.5cm} \mu_{kp} \sim \mathcal{N}(\xi, \kappa), \hspace{0.5cm} \sigma^2 \sim \Gamma^{-1}(a, b). \nonumber
 \end{align}
@@ -456,34 +453,34 @@ We test different scenarios that change various parameters in this model. The sc
 		\toprule
 		\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta_{\mu}$ & $\sigma^2$ & $\pi$\\
 		\midrule
-		Simple 2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
+		2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
 		%		\hline
-		No structure & 100 & 0 & 2 & 1 & 0.0 & 1 & 1 \\
-		%		\hline
-		Base Case & 200 & 20 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 3 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
-		%		\hline
-		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 5 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Irrelevant features & 200 & 20 & 10 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
-		Irrelevant features & 200 & 20 & 20 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
-		%		\hline
+%		No structure & 100 & 0 & 2 & 1 & 0.0 & 1 & 1 \\
+%		%		\hline
+%		Base Case & 200 & 20 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+%		%		\hline
+%		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 3 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
+%		%		\hline
+%		Standard deviation & 200 & 20 & 0 & 5 & 1.0 & 5 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+%		%		\hline
+%		Irrelevant features & 200 & 20 & 10 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+%		%		\hline
+%		Irrelevant features & 200 & 20 & 20 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+%		%		\hline
 		Irrelevant features & 200 & 20 & 100 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 		%		\hline
-		Varying proportions & 200 & 20 & 0 & 5 & 1.0 & 1 & $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\
-		Varying proportions & 200 & 20 & 0 & 5 & 0.4 & 1 &  $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\ %(0.5, 0.25, 0.125, 0.0675, 0.0675)\\
-		%		\hline
+%		Varying proportions & 200 & 20 & 0 & 5 & 1.0 & 1 & $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\
+%		Varying proportions & 200 & 20 & 0 & 5 & 0.4 & 1 &  $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\ %(0.5, 0.25, 0.125, 0.0675, 0.0675)\\
+%		%		\hline
 		Small N, large P & 50 & 500 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 		%		\hline
-		Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
+%		Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
 		%	\\
 		%	\hline
-		%	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
-		\\
+%		\\
 		\botrule
 	\end{tabular}
+	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
 	\label{table:scenarioTable}
 \end{table}%
 
@@ -500,7 +497,12 @@ The first of these is expected to be the setting where \texttt{mclust} and the i
 	\item 10 chains of 1 million iterations, thinning to every thousandth sample for the overfitted Bayesian mixture model, and
 	\item a variety of consensus clustering ensembles defined by inputs of $S$ chains and $R$ iterations within each chain (see algorithm \ref{algorithm:CCforBayesianMixtures}) with $S \in \{1, 10, 30, 50, 100\}$ and $R \in \{1, 10, 100, 1000, 10000\}$,
 \end{itemize}
-are applied.
+are applied. In theory we would expect the Bayesian chains to explore a common posterior distribution, but the practice sees chains become trapped in distinct modes in different scenarios. We believe that the mode within which the greatest number of chains become trapped would be that which is used to perform the inference in a real application (and longer chains did not solve the problem). As part of a pipeline where such analyses have to happen $12 \times 100 = 1,200$ times, we pool the Bayesian samples into a single PSM as manually assessing which mode is dominant. As visual inspection of the PSMs indicates that the disagreement between modes tends to be one of 
+\begin{itemize}
+	\item several clusters are merged or
+	\item a cluster is represented by two or more components,
+\end{itemize}
+each of the modes tends to have large overlap with all others. This means that the clustering inferred from the PSM created from the samples pooled across all stationary chains will represent the most popular mode and the ARI will not be unduly inflated. The Frobenius norm between the PSM and the true coclustering will be less representative of a single chain as more modes will be represented and therefore greater uncertainty than any single chain. This is inline with our previous assertion that the Frobenius statistic is more an indicator that should be used along with visual assessment of examples of the PSMs and CMs from a simulation rather than sufficiently informative in and of itself.
 
 %\begin{sidewaysfigure}
 %	\centering
@@ -519,42 +521,48 @@ are applied.
 %\end{itemize}
 
 
-\section*{Results}
+\section{Results}
 \subsection{Simulations}
 A summary of the results for a selection of the simulation scenarios are shown in table \ref{table:meanARISims} and figure \ref{fig:simResults}. In the strong signal scenarios (i.e. noise free and clearly distinguishable generating clusters), \texttt{mclust} performs very well, correctly identifying the true structure However, a large number of irrelevant features completely erodes the ability of \texttt{mclust} to uncover meaningful structure. The pooled samples from multiple long chains performs consistently very well. This is not surprising as the pooling effect means that any multi-modality present in the data does not present any degree of problem. In this case the pooled samples, themselves a consensus of 10 models, acts as an upper bound on the more realistic implementations of consensus clustering. Consensus clustering does consistently uncover structure in the data. With sufficiently large ensembles and chain depth, consensus clustering is close to the pooled Bayesian samples in predictive performance. In terms of the Frobenius norm, many of the consensus clustering results have significant overlap with the pooled long chains.
 
 \begin{table}[ht]
 	\centering
-	\caption{Mean ARI for 100 datasets within three simulation scenarios between the generating labels and the predicted clustering for a subset of methods. Consensus ($r, s$) indicates consensus clustering using the $r^{th}$ sample from $s$ chains.}
+	\caption{Mean ARI for 100 datasets within three simulation scenarios between the generating labels and the predicted clustering for a subset of methods. CC($r, s$) indicates consensus clustering using the $r^{th}$ sample from $s$ chains.}
 	\begin{tabular}{l|rrr}
 		\toprule
-		\textbf{Model} & Simple 2D & Small $N$, large $P$ & Irrelevant features 100 \\
+		\textbf{Model} & 2D & Small $N$, large $P$ & Irrelevant features \\
 		\midrule
+		Mclust & 0.970 &       1.000 &         0.000\\
 		Bayesian (Pooled) &  0.669 & 				0.999 &         0.946\\
-		Maximum likelihood (Mclust) & 0.970 &       1.000 &         0.000\\
-		Consensus (100, 50) & 0.517 &          		0.999 &			0.873\\
-		Consensus (10000, 100) & 0.570 &            0.999 &			0.944\\
-		Consensus (10, 10) & 0.362 &	            0.997 &         0.385\\
+		CC(10, 10) & 0.362 &	            0.997 &         0.385\\
+		CC(100, 10) & 0.844 &			    0.346 &         0.999\\
+		CC(100, 50) & 0.873 &			    0.517 &         0.999\\
+		CC(100, 100) & 0.879 &  			0.576 &         0.999\\
+		CC(10000, 10) & 0.348 &             0.999 &			0.935\\
+		CC(10000, 100) & 0.570 &            0.999 &			0.944\\
 		\botrule
 	\end{tabular}
 	\label{table:meanARISims}
 \end{table}
-
+It can be seen from table \ref{table:meanARISims} and figures \ref{fig:simResults} that 
 \newpage
-\begin{sidewaysfigure} %[!tpb]
+\begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.6]{./Images/Simulations/simulation_model_performance.png}
+	\includegraphics[scale=0.5]{./Images/Simulations/simulation_model_prediction.png}
 	\caption{Model performance in a subset of simulation scenarios. }
 	\label{fig:simResults}
-\end{sidewaysfigure}
+\end{figure}
 \newpage 
 
-\begin{sidewaysfigure} %[!tpb]
+\begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.2]{./Images/Simulations/small_n_large_p_base/PSMs/BayesianSimulation2PSMs.png}
-	\caption{PSMs for 8 chains that pass within chain convergence test. Rows and columns are ordered by a hierarchical clustering applied to the matrix in the bottom right. Annotations are the generating labels. The top row of PSMs are all in a common mode where Cluster 3 does not merge instead remaining as singletons. In the bottom row the first, second and fourth matrices correctly cluster all 5 clusters. The third matrix uncovers a different mode where Cluster 5 does not merge. The matrices appear binary, suggesting no diversity in the partitions being sampled.}
+	\includegraphics[scale=0.5]{./Images/Simulations/small_n_large_p_base/comp_psms_cm.png}	
+%PSMs/BayesianSimulation2PSMs.png}
+%	\caption{PSMs for 8 chains that pass within chain convergence test. Rows and columns are ordered by a hierarchical clustering applied to the matrix in the bottom right. Annotations are the generating labels. The top row of PSMs are all in a common mode where Cluster 3 does not merge instead remaining as singletons. In the bottom row the first, second and fourth matrices correctly cluster all 5 clusters. The third matrix uncovers a different mode where Cluster 5 does not merge. The matrices appear binary, suggesting no diversity in the partitions being sampled.}
+	\caption{In the first row the PSM of the pooled Bayesian samples is compared to the CM for CC(100, 50), with a common ordering of rows and columns in both heatmaps. There is very little difference between these two objects. In the next two rows the PSMs constructed from 6 of the long chains that passed the stationarity test are displated. Three different modes emerge across the different chains.}
 	\label{fig:simSmallNLargePPSMs}
-\end{sidewaysfigure}
+\end{figure}
+
 Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becoming trapped in different modes and failing to explore a common partition space. 
 
 
@@ -596,6 +604,8 @@ Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becomi
 In this article, we have extended Consensus clustering to Bayesian mixture models. This overcomes the problem of mixing for MCMC based clustering methods and also improves the speed at which an analysis can be performed. The proposed method has demonstrated good performance on simulation studies, having similar ability to uncover structure as more traditional approaches. It has better ability to represent several modes in the data than individual chains and is significantly faster, while retaining the ability to infer $K$, the number of occupied components present. 
 
 We expect that our method will be useful to researchers analysing high-dimensional data where the runtime of MCMC methods becomes too onerous and multi-modality is more likely to be present.
+
+Could the early stopping of the MCMC algorithm be a form of regularisation, making the model more robust to misspecification? In line with early stopping from Deep Learning (see \citealp{morgan1990generalization}), regularisation and misspecification idea from \cite{miller2018robust, cai2020finite}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

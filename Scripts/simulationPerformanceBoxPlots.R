@@ -5,7 +5,14 @@ library(mdiHelpR)
 library(magrittr)
 library(patchwork)
 
-setMyTheme()
+setMyTheme(axis.text.y=element_text(hjust=0.0, size = 10.5),
+           axis.text.x=element_text(angle=30, size = 10.5),
+           # axis.title.y=element_blank(),
+           # axis.title.x=element_blank(),
+           plot.title = element_text(size = 18, face = "bold"),
+           plot.subtitle = element_text(size = 14),
+           strip.text.x = element_text(size = 10.5)
+           )
 
 scenarios <- list.dirs("./Data", recursive = F, full.names = F)
 data_files <- list.files("./Data", recursive = T, full.names = T)
@@ -24,7 +31,7 @@ models_of_interest <- c(
   "Consensus (10, 10)"
 )
 
-scenarios_pretty <- c("Irrelevant features 100", "Simple 2D", "Small N, large P")
+scenarios_pretty <- c("Irrelevant features", "2D", "Small N, large P")
 
 
 my_table <- matrix(0, nrow = length(models_of_interest), ncol = n_files) %>% 
@@ -37,6 +44,9 @@ for (i in 1:n_files) {
 }
 
 my_df <- do.call("rbind", analysis_data)
+
+my_df$Model <- my_df$Model %>% stringr::str_replace_all("Consensus ", "CC")
+my_df$Model[my_df$Model == "Maximum likelihood (Mclust)"] <- "Mclust"
 
 my_df$Scenario <- factor(my_df$Scenario, 
                          levels = scenarios_pretty[c(2, 3, 1)]
@@ -51,12 +61,19 @@ p1 <- my_df %>%
   geom_boxplot(colour = "black", fill = "#FDE725FF") +
   coord_flip() +
   facet_wrap(~Scenario) +
-  theme(axis.text.y=element_text(hjust=0.05)) +
+  theme(axis.text.y=element_text(hjust=0.0, size = 10.5),
+        axis.text.x=element_text(angle=30, size = 10.5),
+        axis.title.y=element_blank(),
+        # axis.title.x=element_blank(),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 10.5)
+        )+
   labs(title = "Predictive performance")
 
 p1
 
-ggsave(paste0(save_dir, "simulation_model_prediction.png"), width = 10, height = 10, plot = p1)
+ggsave(paste0(save_dir, "simulation_model_prediction.png"), width = 5.5, height = 5, plot = p1)
 
 
 p2 <- my_df %>% 

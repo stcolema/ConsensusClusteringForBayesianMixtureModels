@@ -15,8 +15,10 @@ analysis_data <- summary_data <- vector("list", n_files) %>%
 models_of_interest <- c(
   "Bayesian (Pooled)",
   "Maximum likelihood (Mclust)",
+  "Consensus (100, 10)",
   "Consensus (100, 50)",
-  "Consensus (10000, 100)",
+  "Consensus (100, 100)",
+  "Consensus (10000, 10)",
   "Consensus (10, 10)"
 )
 

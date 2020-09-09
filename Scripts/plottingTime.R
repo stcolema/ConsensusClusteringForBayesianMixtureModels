@@ -10,17 +10,18 @@ library(magrittr)
 library(ggplot2)
 library(dplyr)
 library(optparse)
+library(stringr)
 
 # Set plot theme
 mdiHelpR::setMyTheme()
 
-extractTime <- function(f, skip = 0){
+extractTime <- function(f, skip = 0) {
   .x <- tryCatch(read.table(f, skip = skip),
-                 error = function(s) NULL
+    error = function(s) NULL
   )
-  
+
   t <- NULL
-  
+
   # Split out the relevant information into a usable data shape; originally
   # in the format:
   #
@@ -32,21 +33,20 @@ extractTime <- function(f, skip = 0){
     time_split <- .x[, 2] %>%
       as.character() %>%
       strsplit("m")
-    
+
     t <- list()
-    
+
     for (j in 1:2) {
       time_split[[j]][2] <- time_split[[j]][2] %>%
         stringr::str_remove("s")
-      
+
       time_split[[j]] <- time_split[[j]] %>% as.numeric()
-      
+
       time_split[[j]][1] <- time_split[[j]][1] * 60
-      
+
       t[[j]] <- time_split[[j]] %>%
         sum()
     }
-    
   }
   t
 }
@@ -94,7 +94,7 @@ inputArguments <- function() {
 args <- inputArguments()
 
 # Pass these to objects within R
-gen_dir <- args$dir # 
+gen_dir <- args$dir #
 save_dir <- args$save_dir # "./Data/"
 scn <- args$scn # "no_structure"
 inferences <- args$models %>% # c("Bayesian", "Frequentist", "Consensus")
@@ -103,8 +103,9 @@ inferences <- args$models %>% # c("Bayesian", "Frequentist", "Consensus")
 
 gen_dir <- "C:/Users/stephen/Documents/PhD/Year_1/Consensus_inference/Consensus_inference_gen/Simulations/Time/"
 save_dir <- "./Data/"
+plt_dir <- "./Images/Simulations/"
 inferences <- c("Bayesian", "Frequentist", "Consensus")
-  
+
 N <- list("Bayesian" = 1000001, "Consensus" = c(1, 10, 100, 1000, 10001))
 # thin <- 1000
 K <- 50
@@ -128,35 +129,38 @@ time_df <- tibble(
 
 # scenarios <- list.dirs(gen_dir, recursive = F, full.names = F)
 
-scenarios <- c("base_case", 
-                    "irrelevant_features_10", 
-                    "irrelevant_features_20",
-                    "irrelevant_features_100",
-                    "large_standard_deviation_3",
-                    "large_standard_deviation_5",
-                    "no_structure",
-                    "simple_2d",
-                    "varying_proportions",
-                    "varying_proportions_small_dm" 
+scenarios <- c(
+  "base_case",
+  "irrelevant_features_10",
+  "irrelevant_features_20",
+  "irrelevant_features_100",
+  "large_standard_deviation_3",
+  "large_standard_deviation_5",
+  "no_structure",
+  "simple_2d",
+  "small_n_large_p_base",
+  "small_n_large_p_small_dm",
+  "varying_proportions",
+  "varying_proportions_small_dm"
 )
 
-for(scn in scenarios){ # c("no_structure", "simple_2d", "large_standard_deviation_5", "large_standard_deviation_3")){
-# Iterate over the types of inference
-for (inf in inferences) {
-  skip <- 0
-  
-  # The main directory for the given scneario adn inference
-  main_dir <- paste0(gen_dir, scn, "/", inf, "/")
-  
-  # Columns in file names
-  col_names <- c("Simulation", "R", "Seed")
-  
-  if (inf == "Frequentist") {
-    
-    # Skip the first 3 lines of the text file (Mclust print statement)
-    skip <- 3
-    
-    col_names <- "Simulation"
+for (scn in scenarios) { # c("no_structure", "simple_2d", "large_standard_deviation_5", "large_standard_deviation_3")){
+  # Iterate over the types of inference
+  for (inf in inferences) {
+    skip <- 0
+
+    # The main directory for the given scneario adn inference
+    main_dir <- paste0(gen_dir, scn, "/", inf, "/")
+
+    # Columns in file names
+    col_names <- c("Simulation", "R", "Seed")
+
+    if (inf == "Frequentist") {
+
+      # Skip the first 3 lines of the text file (Mclust print statement)
+      skip <- 3
+
+      col_names <- "Simulation"
     }
     # for (i in sims) {
     # # If inference is MLE treat differently as naming
@@ -165,15 +169,15 @@ for (inf in inferences) {
     # files <- paste("time_scn", scn, "sim", i, "model", inf, sep = "_") %>%
     #   paste0(main_dir, .) %>%
     #   paste0("{model_name}.txt")
-    # 
-    # 
+    #
+    #
     # # Read in the files, skipping the first 3 lines in the case of MLE as Mclust
     # # printed to the output file
     # for (f in files) {
     #   .x <- tryCatch(read.table(f, skip = skip),
     #     error = function(s) NULL
     #   )
-    # 
+    #
     #   # Split out the relevant information into a usable data shape; originally
     #   # in the format:
     #   #
@@ -185,21 +189,21 @@ for (inf in inferences) {
     #     time_split <- .x[, 2] %>%
     #       as.character() %>%
     #       strsplit("m")
-    # 
+    #
     #     t <- list()
-    # 
+    #
     #     for (j in 1:2) {
     #       time_split[[j]][2] <- time_split[[j]][2] %>%
     #         stringr::str_remove("s")
-    # 
+    #
     #       time_split[[j]] <- time_split[[j]] %>% as.numeric()
-    # 
+    #
     #       time_split[[j]][1] <- time_split[[j]][1] * 60
-    # 
+    #
     #       t[[j]] <- time_split[[j]] %>%
     #         sum()
     #     }
-    # 
+    #
     #     # Add the new entry to the full df
     #     # Use a tibble to avoid weird behaviour around characters that
     #     # data.frames default to
@@ -211,76 +215,76 @@ for (inf in inferences) {
     #       "R" = NA,
     #       "Scenario" = scn
     #     )
-    # 
+    #
     #     time_df <- rbind(time_df, new_entry)
     #   }
     # }
-    # } 
-    # } 
-  # else {
+    # }
+    # }
+    # else {
 
     files <- list.files(main_dir, pattern = ".txt$")
-    if(length(files) > 0){
-    file_details <- files %>%
-      str_replace_all(scn, "") %>% 
-      str_extract_all("_(\\d+)") 
+    if (length(files) > 0) {
+      file_details <- files %>%
+        str_replace_all(scn, "") %>%
+        str_extract_all("_(\\d+)")
 
-    
-    n_col <- length(file_details[[1]])
-    if(n_col == 4) col_names <- c("Simulation", "R", "Seed", "K")
-    
-    file_details <- file_details%>%
-      unlist() %>%
-      str_replace_all("_", "") %>%
-      as.numeric() %>% 
-      matrix(ncol = n_col, byrow = T) %>% 
-      set_colnames(col_names)
-    
-    if(inf == "Frequentist") file_details$R <- NA
-    
-    files <- paste0(main_dir, files)
-    n_files <- length(files)
-    
-    time_mat <- files %>% 
-      lapply(extractTime) %>% 
-      lapply(unlist)
-    
-    missing <- time_mat %>% 
-      lapply(function(x) length(x) == 0) %>% 
-      unlist()
-    
-    if(! all(missing)){
-    time_mat <- time_mat %>% 
-      unlist() %>% 
-      matrix(ncol = 2, byrow = T) %>% 
-      set_colnames(c("Real", "User"))
-    
-    if(sum( !missing) == 1){
-      .curr_time <- c(time_mat, file_details[! missing, 1:2]) %>% 
-        t() %>% 
-        as_tibble() %>% 
-        set_colnames(c("Real", "User", "Simulation", "R"))
-    } else{
-      .curr_time <- cbind(time_mat, file_details[! missing, 1:2]) %>% 
-        as_tibble()
-    }
-    
-    .curr_time$Inference <- inf
-    .curr_time$Scenario <- scn
-    
-    time_df <- rbind(time_df, .curr_time)
-    }
+
+      n_col <- length(file_details[[1]])
+      if (n_col == 4) col_names <- c("Simulation", "R", "Seed", "K")
+
+      file_details <- file_details %>%
+        unlist() %>%
+        str_replace_all("_", "") %>%
+        as.numeric() %>%
+        matrix(ncol = n_col, byrow = T) %>%
+        set_colnames(col_names)
+
+      if (inf == "Frequentist") file_details$R <- NA
+
+      files <- paste0(main_dir, files)
+      n_files <- length(files)
+
+      time_mat <- files %>%
+        lapply(extractTime) %>%
+        lapply(unlist)
+
+      missing <- time_mat %>%
+        lapply(function(x) length(x) == 0) %>%
+        unlist()
+
+      if (!all(missing)) {
+        time_mat <- time_mat %>%
+          unlist() %>%
+          matrix(ncol = 2, byrow = T) %>%
+          set_colnames(c("Real", "User"))
+
+        if (sum(!missing) == 1) {
+          .curr_time <- c(time_mat, file_details[!missing, 1:2]) %>%
+            t() %>%
+            as_tibble() %>%
+            set_colnames(c("Real", "User", "Simulation", "R"))
+        } else {
+          .curr_time <- cbind(time_mat, file_details[!missing, 1:2]) %>%
+            as_tibble()
+        }
+
+        .curr_time$Inference <- inf
+        .curr_time$Scenario <- scn
+
+        time_df <- rbind(time_df, .curr_time)
+      }
     }
     # # Iterate over the 100 simulations within the scenario
     # for (i in sims) {
     #   for (n in N[[inf]]) {
-    #     
+    #
     #     files <- paste("time_scn", scn, "sim", i, "model", inf, "N", n, "seed", seeds[[inf]], # "K", K,
     #       sep = "_"
     #     ) %>%
     #       paste0(main_dir, .) %>%
     #       paste0(".txt")
-    # 
+    #
     #     # # If inference is Frequentist (actually MLE) treat differently as naming
     #     # # convention broke
     #     # if (inf == "Frequentist") {
@@ -289,14 +293,14 @@ for (inf in inferences) {
     #     #     paste0(main_dir, .) %>%
     #     #     paste0("{model_name}.txt")
     #     # }
-    # 
+    #
     #     # Read in the files, skipping the first 3 lines in the case of MLE as Mclust
     #     # printed to the output file
     #     for (f in files) {
     #       .x <- tryCatch(read.table(f, skip = skip),
     #         error = function(s) NULL
     #       )
-    # 
+    #
     #       # Split out the relevant information into a usable data shape; originally
     #       # in the format:
     #       #
@@ -308,21 +312,21 @@ for (inf in inferences) {
     #         time_split <- .x[, 2] %>%
     #           as.character() %>%
     #           strsplit("m")
-    # 
+    #
     #         t <- list()
-    # 
+    #
     #         for (j in 1:2) {
     #           time_split[[j]][2] <- time_split[[j]][2] %>%
     #             stringr::str_remove("s")
-    # 
+    #
     #           time_split[[j]] <- time_split[[j]] %>% as.numeric()
-    # 
+    #
     #           time_split[[j]][1] <- time_split[[j]][1] * 60
-    # 
+    #
     #           t[[j]] <- time_split[[j]] %>%
     #             sum()
     #         }
-    # 
+    #
     #         # Add the new entry to the full df
     #         # Use a tibble to avoid weird behaviour around characters that
     #         # data.frames default to
@@ -334,13 +338,13 @@ for (inf in inferences) {
     #           "R" = n,
     #           "Scenario" = scn
     #         )
-    # 
+    #
     #         time_df <- rbind(time_df, new_entry)
     #       }
     #     }
     #   }
-    }
   }
+}
 # }
 # }
 
@@ -357,32 +361,75 @@ time_df$Inference[time_df$Inference == "Frequentist"] <- "Mclust"
 
 # ?geom_smooth()
 
+mdiHelpR::setMyTheme(axis.text.y=element_text(hjust=0.0, size = 10.5),
+           axis.text.x=element_text(angle=30, size = 10.5),
+           # axis.title.y=element_blank(),
+           # axis.title.x=element_blank(),
+           plot.title = element_text(size = 18, face = "bold"),
+           plot.subtitle = element_text(size = 14),
+           strip.text.x = element_text(size = 10.5)
+)
+
+scenarios <- c(
+  "base_case",
+  "irrelevant_features_10",
+  "irrelevant_features_20",
+  "irrelevant_features_100",
+  "large_standard_deviation_3",
+  "large_standard_deviation_5",
+  "no_structure",
+  "simple_2d",
+  "small_n_large_p_base",
+  "small_n_large_p_small_dm",
+  "varying_proportions",
+  "varying_proportions_small_dm"
+)
+
+dimensions <- c(20, 30, 40, 120, 20, 20, 2, 2, 500, 500, 20, 20)
+n_sim <- length(scenarios)
+
+time_df$Dimension <- 1
+
+for(i in 1:n_sim){
+  scn <- scenarios[i]
+  time_df$Dimension[time_df$Scenario == scn] <- dimensions[i]
+}
+
+time_df$Dimension <- as.factor(time_df$Dimension)
 
 # Plot the data
-p1 <- time_df %>% 
-  filter(Inference != "Mclust") %>% 
+p1 <- time_df %>%
+  filter(Inference != "Mclust", R > 1) %>%
   group_by(R) %>%
-  ggplot(aes(x = log(R, base = 10), y = log(User, base = 10), group = Scenario, colour = Scenario)) +
+  ggplot(aes(x = log(R, base = 10), y = log(User, base = 10), group = Dimension, colour = Dimension)) +
   geom_point() +
-  geom_smooth(method = lm, se = FALSE, mapping = aes(color = Scenario)) +
+  geom_smooth(method = lm, se = FALSE, mapping = aes(color = Dimension)) +
   # geom_boxplot(colour = "black", fill = "#FDE725FF") +
-  coord_flip() +
+  # coord_flip() +
   labs(
     title = "Time taken for MCMC iterations",
-    subtitle = "User time for each chain of each method",
+    # subtitle = "User time for each chain",
     x = expression(log[10](R)),
-    y = expression(log[10](t)) # ,
+    y = expression(log[10](t)),
+    colour = "P"
     # caption = "Times for different methods across simulations. \nConsensus is running a Gibbs sampler for 10,001 iterations, Bayesian for 1,000,001 (and is a factor of 10^2 slower)."
   ) +
-  scale_color_viridis_d()
+  scale_color_viridis_d() +
+  theme(axis.text.y=element_text(size = 10.5),
+        axis.text.x=element_text(size = 10.5),
+        # axis.title.y=element_blank(),
+        # axis.title.x=element_blank(),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 10.5)
+  )
 
 p1
 
 # Save the plot
-save_file <- paste0(save_dir, scn, "TimeComparison.png")
+save_file <- paste0(plt_dir, "TimeComparison.png")
 ggsave(save_file, plot = p1)
 
 # Save the data
-data_file <- paste0(save_dir, scn, "TimeComparisonData.csv")
+data_file <- paste0(save_dir, "TimeComparisonData.csv")
 write.csv(time_df, data_file)
-

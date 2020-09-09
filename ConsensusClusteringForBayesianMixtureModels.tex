@@ -241,53 +241,55 @@ In the simulation study described here, the model is a mixture of \emph{Gaussian
 \begin{align}
 	\pi \sim \textrm{Dirichlet}(\alpha, \ldots, \alpha), \hspace{0.5cm} \mu_{kp} \sim \mathcal{N}(\xi, \kappa), \hspace{0.5cm} \sigma^2 \sim \Gamma^{-1}(a, b). \nonumber
 \end{align}
-The conditional independences and the priors used are shown in the directed acyclic graph (\textbf{DAG}) in figure \ref{fig:simpleMixNormals}. The total number of occupied and empty components is set to $K_{max}=50$. This and the choice of priors are the defaults in the software provided by \cite{mason2016mdi}.
+%The conditional independences and the priors used are shown in the directed acyclic graph (\textbf{DAG}) in figure 1 in the supplementary materials.
+%\ref{fig:simpleMixNormals}. 
+The total number of occupied and empty components is set to $K_{max}=50$. This and the choice of priors are the defaults in the software provided by \cite{mason2016mdi}.
 
-\begin{figure}
-	\centering
-	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.4, auto,>=latex']
-		\tikzstyle{main}=[circle, minimum size = 10mm, thick, draw =black!80, node distance = 15mm]
-		\tikzstyle{connect}=[-latex, thick]
-		\tikzstyle{box}=[rectangle, draw=black!100]
-		%\node[main] (k) {$K$ };
-		\node[main, rectangle] (kappa) {$1$};
-		\node[main, rectangle] (xi) [left =of kappa] {$0$ };
-		\node[main, rectangle] (alpha) [left =of xi] {$1$ };
-%		\node[main] (k) [above =of alpha] {$K$};
-		\node[main, rectangle] (alpha2) [right =of kappa] {$2$ };
-		\node[main, rectangle] (beta) [right =of alpha2] {$2$ };
-		\node[main] (pi) [below =of alpha] {$\pi_k$ };
-		\node[main] (c_i) [below =of pi] {$c_i$};
-		\node[main] (mu) [below=of xi] {$\mu_{kp}$};		
-		\node[main] (sigma) [below =of alpha2] {$\sigma^2_{kp}$};
-		\node[main, fill = black!10] (x_i) [below =of mu] {$x_i$};
-     	\node[rectangle, inner sep=-0.5mm, fit= (c_i) (x_i),label=below right:$N$, xshift=13mm, yshift=-2mm] {};
-		\node[rectangle, inner sep=4.8mm,draw=black!100, fit= (c_i) (x_i)] {};
-		\node[rectangle, inner sep=-0.8mm, fit= (mu) (pi) (sigma),label=below right:$K$, xshift=43mm, yshift=-6mm] {};
-		\node[rectangle, inner sep=8.8mm, draw=black! 100, fit= (mu) (pi) (sigma)] {};
-		\node[rectangle, inner sep=-0.5mm, fit= (mu) (sigma),label=below right:$P$, xshift=26mm, yshift=-2mm] {};
-		\node[rectangle, inner sep=4.8mm, draw=black! 100, fit= (mu) (sigma)] {};
-		\path 
-%		(k) edge [connect, bend right=30] (pi)
-%		(k) edge [connect, bend left=30] (c_i)
-		%(k) edge [connect, bend left=30] (mu)
-		%(k) edge [connect] (sigma)
-		(alpha) edge [connect] (pi)
-		(pi) edge [connect] (c_i)
-		(alpha) edge [connect] (pi)
-		(c_i) edge [connect] (x_i)
-		(mu) edge [connect] (x_i)
-		(sigma) edge [connect] (x_i)
-		(xi) edge [connect] (mu)
-		(kappa) edge [connect] (mu)
-		(alpha2) edge [connect] (sigma)
-		(beta) edge [connect] (sigma)
-		%(k) edge[connect, bend right=30] (x_i)
-		;
-	\end{tikzpicture}
-	\caption{Directed acyclic graph for the Bayesian mixture of Gaussians used.}
-	\label{fig:simpleMixNormals}
-\end{figure}
+%\begin{figure}
+%	\centering
+%	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.4, auto,>=latex']
+%		\tikzstyle{main}=[circle, minimum size = 10mm, thick, draw =black!80, node distance = 15mm]
+%		\tikzstyle{connect}=[-latex, thick]
+%		\tikzstyle{box}=[rectangle, draw=black!100]
+%		%\node[main] (k) {$K$ };
+%		\node[main, rectangle] (kappa) {$1$};
+%		\node[main, rectangle] (xi) [left =of kappa] {$0$ };
+%		\node[main, rectangle] (alpha) [left =of xi] {$1$ };
+%%		\node[main] (k) [above =of alpha] {$K$};
+%		\node[main, rectangle] (alpha2) [right =of kappa] {$2$ };
+%		\node[main, rectangle] (beta) [right =of alpha2] {$2$ };
+%		\node[main] (pi) [below =of alpha] {$\pi_k$ };
+%		\node[main] (c_i) [below =of pi] {$c_i$};
+%		\node[main] (mu) [below=of xi] {$\mu_{kp}$};		
+%		\node[main] (sigma) [below =of alpha2] {$\sigma^2_{kp}$};
+%		\node[main, fill = black!10] (x_i) [below =of mu] {$x_i$};
+%     	\node[rectangle, inner sep=-0.5mm, fit= (c_i) (x_i),label=below right:$N$, xshift=13mm, yshift=-2mm] {};
+%		\node[rectangle, inner sep=4.8mm,draw=black!100, fit= (c_i) (x_i)] {};
+%		\node[rectangle, inner sep=-0.8mm, fit= (mu) (pi) (sigma),label=below right:$K$, xshift=43mm, yshift=-6mm] {};
+%		\node[rectangle, inner sep=8.8mm, draw=black! 100, fit= (mu) (pi) (sigma)] {};
+%		\node[rectangle, inner sep=-0.5mm, fit= (mu) (sigma),label=below right:$P$, xshift=26mm, yshift=-2mm] {};
+%		\node[rectangle, inner sep=4.8mm, draw=black! 100, fit= (mu) (sigma)] {};
+%		\path 
+%%		(k) edge [connect, bend right=30] (pi)
+%%		(k) edge [connect, bend left=30] (c_i)
+%		%(k) edge [connect, bend left=30] (mu)
+%		%(k) edge [connect] (sigma)
+%		(alpha) edge [connect] (pi)
+%		(pi) edge [connect] (c_i)
+%		(alpha) edge [connect] (pi)
+%		(c_i) edge [connect] (x_i)
+%		(mu) edge [connect] (x_i)
+%		(sigma) edge [connect] (x_i)
+%		(xi) edge [connect] (mu)
+%		(kappa) edge [connect] (mu)
+%		(alpha2) edge [connect] (sigma)
+%		(beta) edge [connect] (sigma)
+%		%(k) edge[connect, bend right=30] (x_i)
+%		;
+%	\end{tikzpicture}
+%	\caption{Directed acyclic graph for the Bayesian mixture of Gaussians used.}
+%	\label{fig:simpleMixNormals}
+%\end{figure}
 
 %Data is generated using algorithm \ref{algorithm:simulationGeneration}.
 
@@ -310,57 +312,57 @@ The conditional independences and the priors used are shown in the directed acyc
 %Thus \(\Delta \mu\) may be used as a defining parameter for the scenario rather than \(\mu\).
 
 
-\begin{algorithm} \label{algorithm:simulationGeneration}
-%	\KwData{\(X=(x_1, \ldots, x_N)\)}
-	\KwIn{
-%		A random seed $s$\\
-		Distance between means \(\Delta_{\mu}\)\\
-		A common standard deviation \(\sigma^2\)\\
-		A number of clusters \(K\)\\
-		The number of items to generate in total \(N\)\\
-		The number of features to generate in total \(P\)\\
-		An indicator vector of feature relevance \(\phi = (\phi_1, \ldots, \phi_P)\)\\
-		The expected proportion of items in each cluster \(\pi=(\pi_1, \ldots, \pi_K)\)\\
-		A method for sampling \(x\) times from the array \(y\), with weights \(\pi\): \emph{Sample}\((y, x)\)\\
-		A method for permuting a vector \(x\): \emph{Permute}\((x)\)\\
-		A method for generating a value from a univariate Gaussian distribution with mean \(\mu\) and standard deviation \(\sigma^2\): \emph{Gaussian}\((\mu, \sigma^2)\)\\
-	}
-	\KwOut{A dataset, $X$ \\ The generating cluster labels $c=(c_1, \ldots, c_N)$}
-	%	\KwResult{how to write algorithm with \LaTeX2e }
-	\Begin{
-%		\tcc{Set the random seed defining the sampling and permuting}
-%		$set.seed(s)$\;
-		\tcc{initialise the empty data matrix}
-		$X \leftarrow 0_{N \times P}$\;
-		\tcc{create a matrix of \(K\) means}
-		$\mu \leftarrow (\Delta_{\mu}, \ldots, K\Delta_{\mu})$\;
-		\tcc{generate the allocation vector}
-		\(c \leftarrow\) \emph{Sample}\((1:K, N, \pi)\)\;
-		
-		$\mathbf{M} \leftarrow \mathbf{0}_{N \times N}$\;
-		\For{$p = 1$ \KwTo $P$}{
-			\tcc{Test if the feature is relevant, if relevant generate data from a mixture of univariate Gaussians, otherwise draw all items from the same distribution}
-			\If{$\phi_p = 1$}{
-			
-%				\tcc{Permute the means associated with each cluster within the current feature to create independent features}
-				$\nu \leftarrow$ \emph{Permute}$(\mu)$\;
-	
-				\For{$n = 1$ \KwTo $N$}{
-%					\tcc{Generate data defined by the original label}
-					\(X(n, p) \leftarrow\) \emph{Gaussian}\((\nu_{c_n}, \sigma^2)\)
-				}
-			}
-		 \If{$\phi_p = 0$}{
-				\For{$n = 1$ \KwTo $N$}{
-					\(X(n, p) \leftarrow\) \emph{Gaussian}\((0, \sigma^2)\)
-				}
-			}
-		}
-		\tcc{Mean centre and scale the data}
-		$X \leftarrow Normalise(X)$
-	}
-	\caption{Data generation for a mixture of Gaussian with independent features. This algorithm is implemented in the \texttt{generateSimulationDataset} function from the \texttt{mdiHelpR} R package.}
-\end{algorithm}
+%\begin{algorithm} \label{algorithm:simulationGeneration}
+%%	\KwData{\(X=(x_1, \ldots, x_N)\)}
+%	\KwIn{
+%%		A random seed $s$\\
+%		Distance between means \(\Delta_{\mu}\)\\
+%		A common standard deviation \(\sigma^2\)\\
+%		A number of clusters \(K\)\\
+%		The number of items to generate in total \(N\)\\
+%		The number of features to generate in total \(P\)\\
+%		An indicator vector of feature relevance \(\phi = (\phi_1, \ldots, \phi_P)\)\\
+%		The expected proportion of items in each cluster \(\pi=(\pi_1, \ldots, \pi_K)\)\\
+%		A method for sampling \(x\) times from the array \(y\), with weights \(\pi\): \emph{Sample}\((y, x)\)\\
+%		A method for permuting a vector \(x\): \emph{Permute}\((x)\)\\
+%		A method for generating a value from a univariate Gaussian distribution with mean \(\mu\) and standard deviation \(\sigma^2\): \emph{Gaussian}\((\mu, \sigma^2)\)\\
+%	}
+%	\KwOut{A dataset, $X$ \\ The generating cluster labels $c=(c_1, \ldots, c_N)$}
+%	%	\KwResult{how to write algorithm with \LaTeX2e }
+%	\Begin{
+%%		\tcc{Set the random seed defining the sampling and permuting}
+%%		$set.seed(s)$\;
+%		\tcc{initialise the empty data matrix}
+%		$X \leftarrow 0_{N \times P}$\;
+%		\tcc{create a matrix of \(K\) means}
+%		$\mu \leftarrow (\Delta_{\mu}, \ldots, K\Delta_{\mu})$\;
+%		\tcc{generate the allocation vector}
+%		\(c \leftarrow\) \emph{Sample}\((1:K, N, \pi)\)\;
+%		
+%		$\mathbf{M} \leftarrow \mathbf{0}_{N \times N}$\;
+%		\For{$p = 1$ \KwTo $P$}{
+%			\tcc{Test if the feature is relevant, if relevant generate data from a mixture of univariate Gaussians, otherwise draw all items from the same distribution}
+%			\If{$\phi_p = 1$}{
+%			
+%%				\tcc{Permute the means associated with each cluster within the current feature to create independent features}
+%				$\nu \leftarrow$ \emph{Permute}$(\mu)$\;
+%	
+%				\For{$n = 1$ \KwTo $N$}{
+%%					\tcc{Generate data defined by the original label}
+%					\(X(n, p) \leftarrow\) \emph{Gaussian}\((\nu_{c_n}, \sigma^2)\)
+%				}
+%			}
+%		 \If{$\phi_p = 0$}{
+%				\For{$n = 1$ \KwTo $N$}{
+%					\(X(n, p) \leftarrow\) \emph{Gaussian}\((0, \sigma^2)\)
+%				}
+%			}
+%		}
+%		\tcc{Mean centre and scale the data}
+%		$X \leftarrow Normalise(X)$
+%	}
+%	\caption{Data generation for a mixture of Gaussian with independent features. This algorithm is implemented in the \texttt{generateSimulationDataset} function from the \texttt{mdiHelpR} R package.}
+%\end{algorithm}
 
 %
 %\hypertarget{study-design}{%
@@ -418,7 +420,9 @@ The conditional independences and the priors used are shown in the directed acyc
 
 \subsection{Performance quantification}
 
-We use the Adjusted Rand Index as our metric for the quality of the point clustering inferred by each method, comparing this estimate with the generating labels produced by algorithm \ref{algorithm:simulationGeneration}. This is a measure of ``predictive performance'', the ability of the methods to infer a single partition that and its similarity to the truth. We also attempt to summarise the uncertainty quantification from each by computing the Frobenius Norm between the true coclustering matrix and the 
+We use the Adjusted Rand Index as our metric for the quality of the point clustering inferred by each method, comparing this estimate with the generating labels produced by algorithm 1 in the supplementary materials.
+% \ref{algorithm:simulationGeneration}. 
+This is a measure of ``predictive performance'', the ability of the methods to infer a single partition that and its similarity to the truth. We also attempt to summarise the uncertainty quantification from each by computing the Frobenius Norm between the true coclustering matrix and the 
 
 \begin{itemize}
 	\item consensus matrix for consensus clustering,
@@ -523,7 +527,7 @@ each of the modes tends to have large overlap with all others. This means that t
 
 \section{Results}
 \subsection{Simulations}
-A summary of the results for a selection of the simulation scenarios are shown in table \ref{table:meanARISims} and figure \ref{fig:simResults}. In the strong signal scenarios (i.e. noise free and clearly distinguishable generating clusters), \texttt{mclust} performs very well, correctly identifying the true structure However, a large number of irrelevant features completely erodes the ability of \texttt{mclust} to uncover meaningful structure. The pooled samples from multiple long chains performs consistently very well. This is not surprising as the pooling effect means that any multi-modality present in the data does not present any degree of problem. In this case the pooled samples, themselves a consensus of 10 models, acts as an upper bound on the more realistic implementations of consensus clustering. Consensus clustering does consistently uncover structure in the data. With sufficiently large ensembles and chain depth, consensus clustering is close to the pooled Bayesian samples in predictive performance. In terms of the Frobenius norm, many of the consensus clustering results have significant overlap with the pooled long chains.
+A summary of the results for a selection of the simulation scenarios are shown in table \ref{table:meanARISims} and figure \ref{fig:simResults}. In the strong signal scenarios (i.e. noise free and clearly distinguishable generating clusters), \texttt{mclust} performs very well, correctly identifying the true structure However, a large number of irrelevant features completely erodes the ability of \texttt{mclust} to uncover meaningful structure. The pooled samples from multiple long chains performs consistently very well. This is not surprising as the pooling effect means that any multi-modality present in the data does not present any degree of problem. In this case the pooled samples, themselves a consensus of 10 models, acts as an upper bound on the more practical implementations of consensus clustering. Consensus clustering does consistently uncover structure in the data. With sufficiently large ensembles and chain depth, consensus clustering is close to the pooled Bayesian samples in predictive performance. In terms of the Frobenius norm, many of the consensus clustering results have significant overlap with the pooled long chains.
 
 \begin{table}[ht]
 	\centering
@@ -558,12 +562,20 @@ It can be seen from table \ref{table:meanARISims} and figures \ref{fig:simResult
 	\includegraphics[scale=0.5]{./Images/Simulations/small_n_large_p_base/comp_psms_cm.png}	
 %PSMs/BayesianSimulation2PSMs.png}
 %	\caption{PSMs for 8 chains that pass within chain convergence test. Rows and columns are ordered by a hierarchical clustering applied to the matrix in the bottom right. Annotations are the generating labels. The top row of PSMs are all in a common mode where Cluster 3 does not merge instead remaining as singletons. In the bottom row the first, second and fourth matrices correctly cluster all 5 clusters. The third matrix uncovers a different mode where Cluster 5 does not merge. The matrices appear binary, suggesting no diversity in the partitions being sampled.}
-	\caption{In the first row the PSM of the pooled Bayesian samples is compared to the CM for CC(100, 50), with a common ordering of rows and columns in both heatmaps. There is very little difference between these two objects. In the next two rows the PSMs constructed from 6 of the long chains that passed the stationarity test are displated. Three different modes emerge across the different chains.}
+	\caption{In the first row the PSM of the pooled Bayesian samples is compared to the CM for CC(100, 50), with a common ordering of rows and columns in both heatmaps. There is very little difference between these two objects. In the next two rows the PSMs constructed from 6 of the long chains that passed the stationarity test are displayed. Three different modes emerge across the different chains.}
 	\label{fig:simSmallNLargePPSMs}
 \end{figure}
 
-Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becoming trapped in different modes and failing to explore a common partition space. 
+Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becoming trapped in different modes and failing to explore a common partition space. In the simulations shown here the overlap between the modes and signal in the data is clear enough that one can pick the true clustering structure and select the chain that best represents this, but in other
 
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.5]{./Images/Simulations/TimeComparison.png}	
+	\caption{The time taken for different numbers of iterations of MCMC moves. The relationship between chain length, $R$, and the time taken is linear, with a change of intercept for different dimensions.}
+	\label{fig:timeMCMC}
+\end{figure}
+
+Figure \ref{fig:timeMCMC} reveals the gains in computation runtime achieved by consensus clustering when a parallel environment is available. If a single iteration requires $t$ seconds, running 100 chains of length 100 using 8 cores takes $1,300t$ compared to 5 chains of 10,000 iterations taking $10,000t$. 
 
 %In the 2D dataset \texttt{mclust} outperforms the Bayesian inference and consensus clustering in terms of the point estimate of the generating structure. 
 

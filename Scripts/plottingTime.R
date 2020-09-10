@@ -417,18 +417,20 @@ p1 <- time_df %>%
   scale_color_viridis_d() +
   theme(axis.text.y=element_text(size = 10.5),
         axis.text.x=element_text(size = 10.5),
-        # axis.title.y=element_blank(),
-        # axis.title.x=element_blank(),
+        axis.title.y=element_text(size = 10.5),
+        axis.title.x=element_text(size = 10.5),
         plot.title = element_text(size = 18, face = "bold"),
         plot.subtitle = element_text(size = 14),
-        strip.text.x = element_text(size = 10.5)
+        strip.text.x = element_text(size = 10.5),
+        legend.text = element_text(size = 10.5)
   )
+# + theme(legend.position = "bottom")
 
 p1
 
 # Save the plot
 save_file <- paste0(plt_dir, "TimeComparison.png")
-ggsave(save_file, plot = p1)
+ggsave(save_file, plot = p1, height = 5.5, width = 5)
 
 # Save the data
 data_file <- paste0(save_dir, "TimeComparisonData.csv")

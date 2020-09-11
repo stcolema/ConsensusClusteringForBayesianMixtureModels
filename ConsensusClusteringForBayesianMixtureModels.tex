@@ -82,6 +82,15 @@ An assumption that is frequently used is that the density of each feature is ind
 %	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
 \end{align}
 
+Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. This is captured by the different prior on the allocation
+\begin{align}
+	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{i=1}^{L-1}\prod_{j=i+1}^L(1 + \phi_{ij} \mathbb{I}(c_{ni} = c_{nj}))
+	\label{eqn:mdiPrior}
+\end{align}
+for $L$ datasets and $n = 1,\ldots, N$. $\phi_{ij}$ is the parameter defined by the correlation of the clusterings for the $i^{th}$ and $j^{th}$ datasets. As this increases more mass is placed on the common partition for $i$ and $j$. Conversely, as $\phi_{ij}\to 0$ we have independent mixture models. In this way the correlation of the clustering between each pair of datasets controls how information is shared across each clustering, with more correlated datasets influencing each other and uncorrelated datasets remaining independent.
+
+
+
 %\begin{align}
 %	
 %	&p(c_i = k) = \pi_k&  \textrm{for $k = 1,\ldots,K$,} \nonumber\\
@@ -115,7 +124,7 @@ An assumption that is frequently used is that the density of each feature is ind
 %\end{itemize}
 
 %\subsection{Problem}
-Bayesian inference of mixture models is normally performed using Markov-chain Monte Carlo (MCMC) methods. However, MCMC methods in general are known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This means that there is a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
+Bayesian inference of mixture models and their extensions is normally performed using Markov-chain Monte Carlo (MCMC) methods. However, MCMC methods in general are known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This means that there is a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
 
 
 %with the collapsed Gibbs sampler \cite{liu1994collapsed} being particularly prominent for mixture models as it enables integrating over nuisance parameters. An example of this is marginalising out the covariance matrix in a mixture of Gaussian models. This quantity is often the cause of singularities in the likelihood surface that cause the inference to fail, a common issue for MLE inference of mixture models.
@@ -516,6 +525,14 @@ In theory we would expect the Bayesian chains to explore a common posterior dist
 \end{itemize}
 each of the modes tends to have large overlap with all others. This means that the clustering inferred from the PSM created from the samples pooled across all stationary chains will represent the most popular mode and the ARI will not be unduly inflated. The Frobenius norm between the PSM and the true coclustering will be less representative of a single chain as more modes will be represented and therefore greater uncertainty than any single chain. This is inline with our previous assertion that the Frobenius statistic is more an indicator that should be used along with visual assessment of examples of the PSMs and CMs from a simulation rather than sufficiently informative in and of itself.
 
+\subsection{Yeast data}
+We analyse the 551 yeast genes considered in the original MDI paper \citep{kirk2012bayesian} in an integrative setting. This consists of three datasets
+\begin{itemize}
+	\item  ChIP data from \cite{harbison2004transcriptional},
+	\item binary PPI data obtained from BioGRID \citep{stark2006biogrid} and 
+	\item a gene expression time course dataset from \cite{granovskaia2010high}.
+\end{itemize}
+The clustering in these datasets is modelled using MDI. We use 5 chains of 625,000 iterations (the number of iterations performed in 36 hours on the slowest chain) and consensus clustering of 100 chains of 500 iterations. The ChIP and PPI data are modelled using mixtures of multinomial distributions and the time course data by a mixture of Gaussian processes \citep[with dataset density choice following the original paper by ][]{kirk2012bayesian}.
 
 
 %Multiple dataset
@@ -610,6 +627,23 @@ Figure \ref{fig:timeMCMC} reveals the gains in computation runtime achieved by c
 
 %\subsection{Test1}
 
+\subsection{Yeast}
+
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.5]{./Images/Yeast/CMs.png}	
+	\caption{The chain length, $R$, and ensemble size $S$, were decided by comparing the consensus matrices for different values of $(R, S)$. Here we show an example for the time course data where $R=100$ in the top row and $R=500$ in the second, and $S=50$ in the first column and $S=100$ in the second. These matrices appear identical, so we stop increasing the chain length or ensemble size.}
+	\label{fig:yeastCMs}
+\end{figure}
+
+
+We find GO terms.
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics{./Images/Yeast/GOoverRepresentation.png}	
+	\caption{.}
+	\label{fig:yeastGO}
+\end{figure}
 
 \section{Discussion}
 

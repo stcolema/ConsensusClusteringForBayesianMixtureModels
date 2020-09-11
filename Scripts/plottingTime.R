@@ -410,7 +410,7 @@ p1 <- time_df %>%
     title = "Time taken for MCMC iterations",
     # subtitle = "User time for each chain",
     x = expression(log[10](R)),
-    y = expression(log[10](t)),
+    y = expression(log[10](s)),
     colour = "P"
     # caption = "Times for different methods across simulations. \nConsensus is running a Gibbs sampler for 10,001 iterations, Bayesian for 1,000,001 (and is a factor of 10^2 slower)."
   ) +

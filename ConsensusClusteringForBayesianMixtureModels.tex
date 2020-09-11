@@ -635,14 +635,19 @@ Figure \ref{fig:timeMCMC} reveals the gains in computation runtime achieved by c
 	\caption{The chain length, $R$, and ensemble size $S$, were decided by comparing the consensus matrices for different values of $(R, S)$. Here we show an example for the time course data where $R=100$ in the top row and $R=500$ in the second, and $S=50$ in the first column and $S=100$ in the second. These matrices appear identical, so we stop increasing the chain length or ensemble size.}
 	\label{fig:yeastCMs}
 \end{figure}
-
-
-We find GO terms.
+We performed a Gene Ontology (GO) enrichment analysis of our inferred clusters using the \texttt{Bioconductor} packages \texttt{biomaRt} \citep{durinck2005biomart, durinck2009mapping} and \texttt{clusterProfiler} \citep{yu2012clusterProfiler}. The long chains 
 \begin{figure} %[!tpb]
 	\centering
-	\includegraphics{./Images/Yeast/GOoverRepresentation.png}	
-	\caption{.}
+	\includegraphics[scale = 0.6]{./Images/Yeast/GOoverRepresentation.png}	
+	\caption{GO term over representation in the clusters using the \emph{molecular function} ontology.}
 	\label{fig:yeastGO}
+\end{figure}
+
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.5]{./Images/Yeast/GOoverRepresentationBayesChains.png}
+	\caption{The enriched GO terms disagree across chains.}
+	\label{fig:yeastGOchains}
 \end{figure}
 
 \section{Discussion}

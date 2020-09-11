@@ -589,7 +589,7 @@ Figure \ref{fig:simSmallNLargePPSMs} shows an example of different chains becomi
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.5]{./Images/Simulations/TimeComparison.png}	
-	\caption{The time taken for different numbers of iterations of MCMC moves. The relationship between chain length, $R$, and the time taken is linear, with a change of intercept for different dimensions.}
+	\caption{The time taken for different numbers of iterations of MCMC moves in $\log(s)$. The relationship between chain length, $R$, and the time taken is linear, with a change of intercept for different dimensions.}
 	\label{fig:timeMCMC}
 \end{figure}
 
@@ -635,18 +635,19 @@ Figure \ref{fig:timeMCMC} reveals the gains in computation runtime achieved by c
 	\caption{The chain length, $R$, and ensemble size $S$, were decided by comparing the consensus matrices for different values of $(R, S)$. Here we show an example for the time course data where $R=100$ in the top row and $R=500$ in the second, and $S=50$ in the first column and $S=100$ in the second. These matrices appear identical, so we stop increasing the chain length or ensemble size.}
 	\label{fig:yeastCMs}
 \end{figure}
-We performed a Gene Ontology (GO) enrichment analysis of our inferred clusters using the \texttt{Bioconductor} packages \texttt{biomaRt} \citep{durinck2005biomart, durinck2009mapping} and \texttt{clusterProfiler} \citep{yu2012clusterProfiler}. The long chains 
-\begin{figure} %[!tpb]
-	\centering
-	\includegraphics[scale = 0.6]{./Images/Yeast/GOoverRepresentation.png}	
-	\caption{GO term over representation in the clusters using the \emph{molecular function} ontology.}
-	\label{fig:yeastGO}
-\end{figure}
+We focus on the analysis of the clustering inferred for the time course data, this being the richest dataset (Is there a good way to say / argue this? or should the additional datasets be in the supplementary data anyway?).  
+We performed a Gene Ontology (GO) enrichment analysis of our inferred clusters using the \texttt{Bioconductor} packages \texttt{biomaRt} \citep{durinck2005biomart, durinck2009mapping} and \texttt{clusterProfiler} \citep{yu2012clusterProfiler}. The long chains disagree with each other, with each chain having some unique GO terms. Chain 1 appears to be furthest removed from the other 3, with a larger number of terms not found in the other chains associated with some clusters, and also missing some terms common to the other 3. Consensus clustering finds clusters enriched for all the terms common to the long chains as well as finding several clsuters associated with terms not found by any chain. 
+%\begin{figure} %[!tpb]
+%	\centering
+%	\includegraphics[scale = 0.6]{./Images/Yeast/GOoverRepresentation.png}	
+%	\caption{GO term over representation in the clusters using the \emph{molecular function} ontology.}
+%	\label{fig:yeastGO}
+%\end{figure}
 
 \begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.5]{./Images/Yeast/GOoverRepresentationBayesChains.png}
-	\caption{The enriched GO terms disagree across chains.}
+	\includegraphics[scale=0.3]{./Images/Yeast/GOoverRepresentation.png}
+	\caption{GO term over representation in the clusters using the \emph{molecular function} ontology. The enriched GO terms disagree across long chains. Consensus clustering finds many of the same functions, with some new functions added. The predicted clustering does lose some of the GO terms not present in all modes.}
 	\label{fig:yeastGOchains}
 \end{figure}
 

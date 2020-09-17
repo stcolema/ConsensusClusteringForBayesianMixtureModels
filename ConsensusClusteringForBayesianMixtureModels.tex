@@ -45,15 +45,20 @@ online.}
 \section{Introduction}
 
 %\subsection{Why cluster?}
-From defining a taxonomy of disease to creating molecular sets, grouping items can help us to understand and make decisions about complex biological problems. For example, clustering patients based upon disease characteristics and personal omics data allows the reaction and progression of individuals within a cluster to inform treatment decisions about other members of the same group. In another setting, defining gene regulatory networks can provide valuable insights into the causal mechanisms driving molecular products and may be used in diagnosis or for drug targets \citep{emmert2014gene}. 
+From defining a taxonomy of disease to creating molecular sets, grouping items can help us to understand and make decisions using complex biological data. For example, clustering patients based upon disease characteristics and personal omics data may allow the identification of more homogeneous subgroups, enabling stratified medicine approaches.
+%allows the reaction and progression of individuals within a cluster to inform treatment decisions about other members of the same group. 
 
-Clustering data is about maximising the quantity of relevant data for each individual within a specific analysis, reducing from the complexity of the entire set without contracting to the individual level. The clustering approximates complex variation within the dataset, enabling local downstream analysis and decisions upon each group rather than at the global level. 
+%In another setting, defining gene regulatory networks can provide valuable insights into the causal mechanisms driving molecular products and may be used in diagnosis or for drug targets \citep{emmert2014gene}. 
+
+%Clustering data is about maximising the quantity of relevant data for each individual within a specific analysis, reducing from the complexity of the entire set without contracting to the individual level. The clustering approximates complex variation within the dataset, enabling local downstream analysis and decisions upon each group rather than at the global level. 
 
 %\subsection{Why model-based clustering?}
-The act of identifying such groups is referred to as “cluster analysis”. Traditional methods such as $k$-means clustering \citep{lloyd1982least, forgy1965cluster} or hierarchical clustering condition upon a user inputted choice of $K$, the number of occupied clusters present. Normally different choices of $K$ are compared under some metric such as silhouette or based upon the within-cluster sum of squared errors as a function of $K$. There exists an alternative school of clustering, model-based clustering, which embeds the cluster analysis within a formal, statistical framework. This means that choice of $K$ is a model selection problem with all the associated literature. 
+The act of identifying such groups is referred to as “cluster analysis”. Traditional methods such as $k$-means clustering \citep{lloyd1982least, forgy1965cluster} or hierarchical clustering condition upon a user inputted choice of $K$, the number of occupied clusters present. Normally different choices of $K$ are compared under some metric such as silhouette or based upon the within-cluster sum of squared errors as a function of $K$. There exists an alternative school of clustering, model-based clustering, which embeds the cluster analysis within a formal, statistical framework. This means that choice of $K$ is a model selection problem with all the associated tools. 
 
 %\subsection{Why Bayesian models?}
-In many analyses or decision making processes, understanding how certain the clustering is van be vital. For example, in clustering patients there might be individuals with almost equal probability of being allocated between a number of clusters. Knowing which individuals have uncertain membership could strongly influence decisions about treatment. However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles \citep{medvedovic2002bayesian}, cell types in flow cytometry \citep{chan2008statistical, hejblum2019sequential} or scRNAseq experiments \citep{prabhakaran2016dirichlet}, and predicting protein localisation \citep{crook2018bayesian}.
+In many analyses or decision making processes, understanding how certain the clustering can be of interest. Returning to the stratified medicine example of clustering patients, there might be individuals with almost equal probability of being allocated between a number of clusters which might influence decisions made.
+%Knowing which individuals have uncertain membership could strongly influence decisions about treatment. 
+However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles \citep{medvedovic2002bayesian}, cell types in flow cytometry \citep{chan2008statistical, hejblum2019sequential} or scRNAseq experiments \citep{prabhakaran2016dirichlet}, and predicting protein localisation \citep{crook2018bayesian}.
 
 One might believe that the number of occupied clusters present, $K$, is a random variable that should be inferred from the data. Bayesian mixture models can treat $K$ in this way, thereby incorporating uncertainty about $K$ into the the allocation uncertainty and reducing some of the subjectivity of choosing $K$. The most common models for are the mixture of finite mixtures (\citealp{miller2018mixture}, frequently implemented using Reversible Jump MCMC moves via \citealp{richardson1997bayesian}), the Dirichlet process \citep{ferguson1973bayesian, neal2000markov} or the overfitted mixture model \citep{van2015overfitting}. In these models the number of components and the component parameters are modelled jointly, in contrast with many clustering methods. Furthermore, if there is a prior information about $K$, this may be included due to the Bayesian nature of the model. 
 
@@ -76,7 +81,7 @@ The joint model can then be written
 An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
 
 \begin{align}
-	p(X, c, \theta, \pi, K) &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K) p(K).  \label{eqn:jointMixModel}
+	p(X, c, \theta, \pi, K) &=  p(\pi | K) p(\theta | K) p(K) \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) p (c_i | \pi, K).  \label{eqn:jointMixModel}
 %	\\
 %	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
 %	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
@@ -124,7 +129,7 @@ for $L$ datasets and $n = 1,\ldots, N$. $\phi_{ij}$ is the parameter defined by 
 %\end{itemize}
 
 %\subsection{Problem}
-Bayesian inference of mixture models and their extensions is normally performed using Markov-chain Monte Carlo (MCMC) methods. However, MCMC methods in general are known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This means that there is a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
+Bayesian inference for mixture models and their extensions is normally performed using Markov-chain Monte Carlo (MCMC). However, MCMC is known to display problematic behaviour in high-dimensions \citep{robert2018accelerating, yao2020stacking, chandra2020bayesian}. One of these problems is the difficulty in exploring a range of modes in the posterior distribution of the clustering. This leads to a lack of convergence across chains and the distribution in any single chain is highly concentrated upon a very small number (often one) possible clustering(s). Another problem that emerges in large or high-dimensional datasets is that individual iterations of the MCMC sampler become slow and a long chain can become infeasible.
 
 
 %with the collapsed Gibbs sampler \cite{liu1994collapsed} being particularly prominent for mixture models as it enables integrating over nuisance parameters. An example of this is marginalising out the covariance matrix in a mixture of Gaussian models. This quantity is often the cause of singularities in the likelihood surface that cause the inference to fail, a common issue for MLE inference of mixture models.
@@ -133,7 +138,7 @@ Bayesian inference of mixture models and their extensions is normally performed 
 
 %\subsection{Solution}
 %\subsubsection{Ensembles}
-An alternative approach to clustering is through the use of ensembles of models. Ensembles are often better at representing modes within parameters than the individual learners \citep{ghaemi2011review}. Ensembles also offer reductions in computational runtime because most ensemble methods enable use of a parallel environment to improve computation speed \citep{ghaemi2009survey}. Consensus clustering \citep{monti2003consensus} is an ensemble method for cluster analysis, previously implemented using $k$-means clustering in the R package \texttt{ConsensusClusterPlus} \citep{wilkerson2010consensusclusterplus}. This flavour of consensus clustering has been applied to cancer subtyping \citep{lehmann2011identification, verhaak2010integrated} and identifying subclones in single cell analysis \citep{kiselev2017sc3}. Consensus clustering applies $R$ independent runs of the clustering algorithm to peturbed versions of the dataset and combines the $R$ final partitions in a \emph{Consensus matrix} (CM) to infer a final clustering. The consensus matrix is a symmetric matrix with the $(i, j)^{th}$ entry being the proportions of model runs for which the $i^{th}$ and $j^{th}$ items are clustered together. For a single partition the \emph{coclustering matrix} represents this information, being a binary matrix with the $(i, j)^{th}$ entry indicating if items $i$ and $j$ are allocated to the same cluster.
+An alternative approach to clustering is through the use of ensembles of models. Ensembles are often better able to explore the full parameter space than any individual learner in its composition, thus describing more modes within parameters than the individual learners \citep{ghaemi2011review}. Ensembles also offer reductions in computational runtime because most ensemble methods enable use of a parallel environment to improve computation speed \citep{ghaemi2009survey}. Consensus clustering \citep{monti2003consensus} is an ensemble method for cluster analysis, previously implemented using $k$-means clustering in the R package \texttt{ConsensusClusterPlus} \citep{wilkerson2010consensusclusterplus}. This flavour of consensus clustering has been applied to cancer subtyping \citep{lehmann2011identification, verhaak2010integrated} and identifying subclones in single cell analysis \citep{kiselev2017sc3}. Consensus clustering applies $R$ independent runs of the clustering algorithm to peturbed versions of the dataset and combines the $R$ final partitions in a \emph{Consensus matrix} (CM) to infer a final clustering. The consensus matrix is a symmetric matrix with the $(i, j)^{th}$ entry being the proportions of model runs for which the $i^{th}$ and $j^{th}$ items are clustered together. For a single partition the \emph{coclustering matrix} represents this information, being a binary matrix with the $(i, j)^{th}$ entry indicating if items $i$ and $j$ are allocated to the same cluster.
 
 
 %definition CM
@@ -163,9 +168,9 @@ An alternative approach to clustering is through the use of ensembles of models.
 \end{algorithm}
 
 %\subsubsection{Consensus clustering of Bayesian mixture models}
-We extend consensus clustering to Bayesian mixture models. We show via simulation that ensembles consisting of short chains are sufficient to uncover meaningful structure in a number of scenarios including some within which a Gibbs sampler becomes trapped in individual modes for any reasonable length of runtime. The chains are both short and independent, thus their individual runtime is far shorter than the chains traditionally used for Bayesian inference and may also be run in parallel. This means that consensus clustering of Bayesian mixture models offers significant reductions in runtime without sacrifices in performance. As the ensemble can describe multiple modes, the uncertainty present in the consensus matrix can be more representative of the data than the individual modes captured by any single chain.
+We adapt consensus clustering to Bayesian mixture models. We show via simulation that ensembles consisting of short chains are sufficient to uncover meaningful structure in a number of scenarios including some within which a Gibbs sampler becomes trapped in individual modes for any reasonable length of runtime. The chains are both short and independent, thus their individual runtime is far shorter than the chains traditionally used for Bayesian inference and may also be run in parallel. This means that consensus clustering of Bayesian mixture models offers significant reductions in runtime without sacrifices in performance. As the ensemble can describe multiple modes, the uncertainty present in the consensus matrix can be more representative of the data than the individual modes captured by any single chain.
 
- We then apply our algorithm to the multiple dataset setting and the extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We show on three datasets from the original MDI paper that Consensus clustering performs similarly to Bayesian inference of this model, and then using more modern, larger data that Consensus clustering enables implementation of such models in scenarios where the problem of long runtimes and poor mixing previously discouraged this. 
+ We apply our algorithm to the multiple dataset setting and the extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We show on three datasets from the original MDI paper that Consensus clustering performs similarly to Bayesian inference of this model, and then using more modern, larger data that Consensus clustering enables implementation of such models in scenarios where the problem of long runtimes and poor mixing previously discouraged this. 
 
 %\enlargethispage{12pt}
 
@@ -173,7 +178,9 @@ We extend consensus clustering to Bayesian mixture models. We show via simulatio
 \section{Methods}
 
 \subsection{Consensus clustering for Bayesian mixture models}
-We extend CC to use Bayesian mixture models as the underlying model. This offers the ability to include a prior distribution on parameters and inference of the number of occupied clusters present, maintaining two of the key attractions of Bayesian model-based clustering while losing the asymptotic guarantees of Bayesian inference. In this case the algorithm is simplified as it is not necessary to try a range of possible clusters present. Furthermore, the dataset is not perturbed as described in algorithm \ref{algorithm:CC} for two reasons. First, the overfit mixture can capture individuals in singletons and thus is more robust to outliers than $k$-means. Secondly, the MCMC method driving each model offers diversity of partitions when combined with different initialisations. The method is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
+We apply CC to use Bayesian mixture models as the underlying model. This offers the ability to include a prior distribution on parameters and inference of the number of occupied clusters present, maintaining two of the key attractions of Bayesian model-based clustering while losing the asymptotic guarantees of Bayesian inference. In this case the dataset is not perturbed.
+%as described in algorithm \ref{algorithm:CC} for two reasons. First, the overfit mixture can capture individuals in singletons and thus is more robust to outliers than $k$-means. Secondly, 
+The MCMC method driving each model offers diversity of partitions when combined with different initialisations. The method is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
 
 %We investigate the performance of this method for various choices of the key parameters, the number of learners used, $S$, and the length of the chains within each learner, $R$. We compare these to popular mixture model based methods such as \texttt{mclust}, a maximum-likelihood estimator that used hierarchical clustering to initialise the clusters, and an overfitted mixture model as inferred under the Bayesian paradigm.
 
@@ -212,7 +219,7 @@ We extend CC to use Bayesian mixture models as the underlying model. This offers
 
 
 \subsection{Predicting a clustering from CMs}
-We use the \texttt{maxpear} function \citep{fritsch2009improved} from the R package \texttt{mcclust} \citep{fritsch2012mcclust} to infer a point clustering from CMs. This function was designed to perform inference upon the posterior similarity matrix (\textbf{PSM}) from the samples of a single long chain (this is analogous to a CM, except the partitions are all drawn from a single Markov chain), predicting a clustering that has maximum posterior expected adjusted Rand index \citep[\textbf{ARI},][]{hubert1985comparing} with the true clustering. In the context of the CM, the function does not have this interpretation. However, the method produces a kind of ``average clustering" based upon all sampled partitions. We believe this is a sensible method for predicting a point clustering from the CM, effectively averaging over each learner in the ensemble.
+We use the \texttt{maxpear} function \citep{fritsch2009improved} from the R package \texttt{mcclust} \citep{fritsch2012mcclust} to infer a point clustering from CMs. This function was designed to perform inference upon the posterior similarity matrix (\textbf{PSM}) from the samples of a single long chain (this is analogous to a CM, except the partitions are all drawn from a single Markov chain), predicting a clustering that has maximum posterior expected adjusted Rand index \citep[\textbf{ARI},][]{hubert1985comparing} with the true clustering. In the context of the CM, the function does not have this interpretation. However, the method produces a kind of ``average clustering" based upon all sampled partitions, effectively averaging over each learner in the ensemble.
 
 \subsection{Data generating mechanism}
 %We use the notation:
@@ -238,21 +245,24 @@ We use the \texttt{maxpear} function \citep{fritsch2009improved} from the R pack
 %	\(\phi=(\phi_1,\ldots, \phi_P)\): the indicator variable of feature relevance.
 %\end{itemize}
 
-The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. The generating model has a fixed number of clusters chosen by us and is thus, extending from equation \ref{eqn:jointMixModel},
+The data generating model is a finite mixture model (as per equation \ref{eqn:mixModel}) with independent features. Within this model there exist ``irrelevant features'' \citep{law2003feature} that have global parameters rather than component specific parameters. Extending from equation \ref{eqn:jointMixModel}, the generating model is
+%The generating model has a fixed number of clusters chosen by us and is thus, extending from equation \ref{eqn:jointMixModel},
 \begin{align*}
-p(X, c, \theta, \pi| K) &= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
-& \prod_{i=1}^N p (c_i | \pi, K) p(\pi| K) p(\theta|K)
+p(X, c, \theta, \pi| K) &= p(K) p(\pi| K) p(\theta|K) \prod_{i=1}^N p (c_i | \pi, K)  \times \\
+  & \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p}
 % &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
 \end{align*}
-with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant. A description of the algorithm implementing this is given in algorithm \ref{algorithm:simulationGeneration}.
+with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant. 
+%A description of the algorithm implementing this is given in algorithm \ref{algorithm:simulationGeneration}.
 
+\subsection{Model implementation}
 In the simulation study described here, the model is a mixture of \emph{Gaussian} distributions and thus \(\theta_{kp}=(\mu_{kp}, \sigma^2_{kp})\). The prior distributions used on the mixture parameters are
 \begin{align}
 	\pi \sim \textrm{Dirichlet}(\alpha, \ldots, \alpha), \hspace{0.5cm} \mu_{kp} \sim \mathcal{N}(\xi, \kappa), \hspace{0.5cm} \sigma^2 \sim \Gamma^{-1}(a, b). \nonumber
 \end{align}
 %The conditional independences and the priors used are shown in the directed acyclic graph (\textbf{DAG}) in figure 1 in the supplementary materials.
 %\ref{fig:simpleMixNormals}. 
-The total number of occupied and empty components is set to $K_{max}=50$. This and the choice of priors are the defaults in the software provided by \cite{mason2016mdi}.
+The total number of occupied and empty components is set to $K_{max}=50$. This and the choice of priors are the defaults in the implementation of Bayesian mixture models provided by \cite{mason2016mdi}.
 
 %\begin{figure}
 %	\centering

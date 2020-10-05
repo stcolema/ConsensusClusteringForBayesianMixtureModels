@@ -290,6 +290,40 @@ p_geweke <- geweke_df %>%
   scale_color_viridis_d()
 p_geweke
 
+geweke_df %>%
+  filter(Seed %in% c(2, 3, 5, 6, 7, 8, 10)) %>% 
+  ggplot(aes(x = Start_iteration, y = Geweke_statistic, color = Seed)) +
+  geom_line() +
+  facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
+  ggplot2::geom_hline(yintercept = c_limit, linetype = "dashed", color = "grey") +
+  ggplot2::geom_hline(yintercept = -c_limit, linetype = "dashed", color = "grey") +
+  # ggplot2::ylim(-y_limit, y_limit) +
+  ggplot2::labs(
+    x = "First iteration in segment",
+    y = "Geweke's convergence dianostic",
+    title = "Within chain convergence"
+  ) +
+  scale_color_viridis_d()
+
+p_geweke_reduced <- geweke_df %>%
+  filter(Seed %in% c(2, 3, 5, 7, 8, 10)) %>% 
+  ggplot(aes(x = Start_iteration, y = Geweke_statistic, color = Seed)) +
+  geom_line() +
+  facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
+  ggplot2::geom_hline(yintercept = c_limit, linetype = "dashed", color = "grey") +
+  ggplot2::geom_hline(yintercept = -c_limit, linetype = "dashed", color = "grey") +
+  # ggplot2::ylim(-y_limit, y_limit) +
+  ggplot2::labs(
+    x = "First iteration in segment",
+    y = "Geweke's convergence dianostic",
+    title = "Within chain convergence"
+  ) +
+  scale_color_viridis_d()
+
+chains_to_keep <- c(2, 3, 5, 7, 8, 10)
+
+mcmc_lst <- mcmc_lst[chains_to_keep]
+
 # Gelman-Rubin values for each parameter
 p_gelman <- gelmanPlot(mcmc_lst) +
   facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) 
@@ -317,6 +351,21 @@ p_geweke +
   )
 
 ggsave("./Images/Yeast/gewekePlot.png",
+       height = 4, width = 6)
+
+p_geweke_reduced +
+  theme( strip.text = element_text( size = 12, face = "bold" )) +
+  theme(axis.text.y=element_text(size = 10.5),
+        axis.text.x=element_text(size = 10.5),
+        axis.title.y=element_text(size = 10.5),
+        axis.title.x=element_text(size = 10.5),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 10.5),
+        legend.text = element_text(size = 10.5)
+  )
+
+ggsave("./Images/Yeast/gewekePlotReduced.png",
        height = 4, width = 6)
 
 p_gelman +
@@ -363,7 +412,6 @@ ggsave("./Images/Yeast/timecourseClustering.png",
        height = 12, width = 14)
 
 # == NEw =================
-
 
 # Time series of the time course data separated out into predicted clusters
 
@@ -417,6 +465,9 @@ for (i in curr_inds) {
 }
 
 # Compare PSMs for the different chains
+# Reduce to OK chains
+alloc_data_reduced <- alloc_data[alloc_data$Seed %in% chains_to_keep, ]
+n_kept <- length(chains_to_keep)
 
 # The labels of the variables
 chain_labels <- paste0("Chain ", 1:n_chains) %>% set_names(1:n_chains)
@@ -425,12 +476,13 @@ chain_labels <- paste0("Chain ", 1:n_chains) %>% set_names(1:n_chains)
 for (dataset in datasets) {
   
   # The indices and CMs of the tibble corresponding to the current dataset
-  curr_inds <- which(alloc_data$Dataset == dataset)
-  curr_psms <- alloc_data$PSM[curr_inds]
+  curr_inds <- which(alloc_data_reduced$Dataset == dataset)
+  curr_psms <- alloc_data_reduced$PSM[curr_inds]
+  chains <- alloc_data_reduced$Seed[curr_inds]
   
   # Find the order for the rows and oclumns of the consensus matrices based on
   # the largest & deepest ensemble (here Consensus(1001, 1000))
-  row_order <- findOrder(curr_psms[[n_chains]])
+  row_order <- findOrder(curr_psms[[n_kept]])
   
   # Set up the re-ordered items (this will be used to align the data when in
   # long format)
@@ -438,7 +490,7 @@ for (dataset in datasets) {
   
   # Iterate over the different ensembles converting the consensus matrics to
   # long format and prepare them for ggplot
-  for (i in 1:n_chains) {
+  for (i in 1:n_kept) {
     .psm <- curr_psms[[i]]
     
     .df <- .psm[row_order, row_order] %>%
@@ -455,7 +507,7 @@ for (dataset in datasets) {
       mutate(
         X = match(Gene_i, item_order),
         Y = match(Gene_j, item_order),
-        Chain = i
+        Chain = chains[i]
       )
     
     # Bind the data frames together
@@ -503,8 +555,8 @@ for (dataset in datasets) {
     )
   
   # Save!
-  ggsave(paste0(save_dir, dataset, "PSMcomparison.png"),
-         plot = p_cm,
+  ggsave(paste0(save_dir, dataset, "PSMcomparisonReduced.png"),
+         plot = p_psm,
          height = 14,
          width = 12
   )

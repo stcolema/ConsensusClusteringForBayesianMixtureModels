@@ -1,0 +1,60 @@
+\documentclass[]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage[]{algorithm2e}
+
+\usepackage{booktabs}
+\usepackage{rotating}
+
+%%% for dags
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{fit,positioning, backgrounds}
+
+%%% BibTex packages (url for website references)
+\usepackage[english]{babel}
+\usepackage[round]{natbib}
+
+%opening
+\title{Consensus clustering for Bayesian mixture models: Supplementary materials}
+\author{Stephen Coleman, Paul DW Kirk\, and Chris Wallace}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Yeast data}
+
+The "Yeast data" consists of three \emph{S. cerevisiae} datasets with gene products associated with a common set of 551 genes present. The datasets are:
+\begin{itemize}
+	\item microarray profiles of RNA expression from \cite{granovskaia2010high} a cell cycle dataset that comprises measurements taken at 41 time points (note: this is referred to as the \textbf{Timecourse} dataset in this paper),
+	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}, and
+	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}.
+\end{itemize}
+The datasets were reduced to 551 items by considering only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles with no missing data in the PPI and ChIP-chip data, following the same steps as the original MDI paper \citep{kirk2012bayesian}. The datasets were modelled using a base measure of a Gaussian process in the Timecourse dataset and Multinomial distributions in the ChIP-chip and PPI datasets.
+
+\subsection{Consensus clustering analysis}
+An ensemble of depth $R=501$ and size $S=100$ was initially attempted. The consensus matrices for this ensemble was compared to those for the combinations of $R = (101, 501)$, $S=(50, 100)$ in the three datasets. This was deemed not sufficiently stable and thus a deeper and broader ensemble was considered.
+
+
+
+\subsection{Bayesian analysis}
+10 chains were run for 36 hours, resulting in 676,000 iterations per chain, thinned to every thousandth sample, resulting in 676 samples per chain. These chains were investigated for 
+\begin{itemize}
+	\item within-chain stationarity using the Geweke Z-statistics, and
+	\item across-chain convergence using the Gelman-Rubin shrinkage coefficient ($\hat{R}$) and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$}][]{vats2018revisiting}
+%	(\emph{stable $\hat{R}$}, \cite{vats2018revisiting}).
+\end{itemize}
+
+%\bibliographystyle{natbib}
+\bibliographystyle{plainnat}
+\bibliography{consensusClusteringAnalysis}  
+
+\end{document}

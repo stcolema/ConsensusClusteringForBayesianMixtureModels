@@ -35,6 +35,8 @@ library(GOSemSim)
 library(mdiHelpR)
 library(pheatmap)
 
+# Pipe and associated functions
+library(magrittr)
 
 # === Functions ================================================================
 
@@ -228,83 +230,39 @@ breaks <- defineBreaks(col_pal, lb = 0)
 # random seed
 set.seed(1)
 
-# Find directory
-platform <- .Platform
+# Original data modelled
+data_dir <- "./Data/Yeast/Original_data/"
+datasets <- c("Timecourse", "ChIP-chip", "PPI")
+data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
+orig_data <- data_files %>%
+  lapply(read.csv, row.names = 1) %>%
+  set_names(datasets)
 
-linux <- T
-if (platform$OS.type[1] == "windows") {
-  linux <- F
-}
+# The number of items in each dataset
+N <- nrow(orig_data[[1]])
 
-if (linux) {
-  phd_dir <- "/mnt/c/Users/stephen/Documents/PhD/"
-} else {
-  phd_dir <- "C:/Users/stephen/Documents/PhD/"
-}
+# The number of datasets
+L <- length(datasets)
 
-# Read in analysed data
-data_dir <- paste0(phd_dir, "Year_1/Consensus_inference/Consensus_inference_gen/Data/YeastData/")
+# Genes present
+gene_names <- row.names(orig_data[[1]])
 
-harbison_data <- read.csv(paste0(
-  data_dir,
-  "harbison_ppi_marina_multinomial.csv"
-),
-row.names = 1
-)
+# Cluster analysis tibbles
+tib_dir <- "./Data/Yeast/"
+tib_files <- list.files(tib_dir, pattern = "AllocTibble.rds$")
+tib_details <- stringr::str_match(tib_files, "(\\S*)Alloc")
+tibbles <- list.files(tib_dir, pattern = "AllocTibble.rds$", full.names = T) %>%
+  lapply(readRDS)
 
-timecourse_data <- read.csv(paste0(
-  data_dir,
-  "marina_ppi_harbison.csv"
-),
-row.names = 1
-)
+n_tibbles <- length(tibbles)
 
-ppi_data <- read.csv(paste0(
-  data_dir,
-  "ppi_marina_harbisonreduced2.csv"
-),
-row.names = 1
-)
+names(tibbles) <- tib_details[, 2]
 
-N <- nrow(harbison_data)
-
-# Directory to work within
-home_dir <- paste0(phd_dir, "Year_1/Consensus_inference/Consensus_inference_gen/Analysis/MDI_yeast_dataset/CMDLineMDI/")
-
-all_dirs <- list.dirs(home_dir, recursive = F)
-
-bayesian_dirs <- all_dirs[grep(all_dirs, pattern = "*BayesianYeastN*")]
-
-cc_dir <- "ConsensusClustering/"
-cc_ver <- "R500S100/"
-
-tib_name <- "/compare_tibble.rds"
-
-# bayes_tf <- paste0(home_dir, bayes_dir, tib_name)
-bayes_tf <- paste0(bayesian_dirs, tib_name)
-cc_tf <- paste0(home_dir, cc_dir, cc_ver, tib_name)
-
-# bayes_tf_2 <- paste0(home_dir, bayes_dir_2, tib_name)
-# bayes_tf_3 <- paste0(home_dir, bayes_dir_3, tib_name)
-# bayes_tf_4 <- paste0(home_dir, bayes_dir_4, tib_name)
+# GO ontologies to investigate
+ontologies <- c("MF", "BP", "CC", "ALL")
 
 # Save results
 go_dir <- "Go_enrichment"
-
-# save_dir <- paste0(c(paste0(home_dir, bayes_dir), paste0(home_dir, cc_dir, cc_ver)), go_dir)
-#
-# for (d in save_dir) {
-#   dir.create(d)
-# }
-
-
-# Read in tibble containing PSM, predicted clustering, etc.
-cc_tib <- readRDS(cc_tf)
-bayes_tibs <- lapply(bayes_tf, readRDS)
-
-datasets <- cc_tib$dataset
-dataset_names <- c("Timecourse", "ChIP-ChIP", "PPI")
-ontologies <- c("MF", "BP", "CC", "ALL")
 
 # === Yeast data ===============================================================
 
@@ -324,14 +282,14 @@ load(paste0(getwd(), "/geneTable.rda"))
 
 
 # Genes present in the dataset
-genes_in_dataset <- match(row.names(timecourse_data), geneTable$Locus)
+genes_in_dataset <- match(gene_names, geneTable$Locus)
 
 # Missing from database
 missing <- which(is.na(genes_in_dataset))
 
 if (length(missing) > 0) {
   cat("\nGene(s) present in analysed data not present in database. Missing:\n")
-  cat(row.names(timecourse_data)[missing], "\n\n")
+  cat(gene_names[missing], "\n\n")
 }
 
 # The values used in filter the biomaRt goMap
@@ -378,7 +336,7 @@ gomap <- getBM(
     "description"
   ),
   filters = "ensembl_gene_id",
-  values = row.names(timecourse_data),
+  values = gene_names,
   # attributes = c(attributes_to_use, "entrezgene_id"),
   # filters = "entrezgene_id",
   # values = eg[match(row.names(timecourse_data), geneTable$Locus)],
@@ -390,31 +348,106 @@ bgoMap <- buildGOmap(gomap)
 
 
 # head(geneTable)
-genes_present <- geneTable$GeneID[match(row.names(timecourse_data), geneTable$Locus)]
-
+genes_present <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
 # === Dataset choice ===========================================================
 
-for (dataset_used in datasets) {
-  curr_ind <- match(dataset_used, datasets)
-  dataset_name <- dataset_names[curr_ind]
+my_data <- NULL
 
-  save_dir <- paste0("./Images/Yeast/", dataset_name, "/")
+for (dataset in datasets) {
+  save_dir <- paste0("./Images/Yeast/", dataset, "/")
   dir.create(save_dir)
 
-  # ont <- "ALL"
+  drop_na <- gene_names[missing]
+  universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
   for (ont in ontologies) {
+    for (i in 1:n_tibbles) {
 
-    # === Consensus clustering =====================================================
+      # Select the tibble
+      .tib <- tibbles[[i]]
 
-    cc_cl <- mcclust::maxpear(cc_tib$similarity_matrix[[curr_ind]], max.k = 250)$cl
+      # Indices for analyses matching the dataset
+      curr_ind <- which(.tib$Dataset == dataset)
 
-    labels_present <- unique(cc_cl)
-    n_labels <- length(labels_present)
+      # Meta data
+      method <- "Consensus clustering"
+      if (names(tibbles)[i] == "Bayes") {
+        curr_ind <- which(.tib$Dataset == dataset & .tib$Use_chain)
+        method <- "Bayesian"
+      }
 
-    drop_na <- row.names(timecourse_data)[missing]
-    universe <- geneTable$GeneID[match(row.names(timecourse_data), geneTable$Locus)]
+      n_ind <- length(curr_ind)
+
+      # === Consensus clustering =====================================================
+
+      cluster_comp <- .tib[curr_ind, ]$Cl %>%
+        lapply(doClusterComparison,
+          orig_data[[dataset]],
+          geneTable,
+          universe,
+          ont = ont,
+          drop_na = drop_na
+        )
+
+      # cc_p <- lapply(cc_tib, function(x) {
+      #   cl <- mcclust::maxpear(x$similarity_matrix[[curr_ind]], max.k = 250)$cl
+      #   p <- doClusterComparison(cl, orig_data[[dataset_name]], geneTable, universe,
+      #                            ont = ont,
+      #                            drop_na = drop_na
+      #   )
+      #   p
+      # })
+
+      for (j in 1:n_ind) {
+        if (names(tibbles)[i] == "Bayes") {
+          chain_num <- .tib$Seed[curr_ind][j]
+          r <- .tib$R[curr_ind][j]
+          subtitle <- paste0("Enrichment across clusters, chain ", chain_num)
+          save_name <- paste0(save_dir, dataset_name, "goEnrichmentAllClustersBayes", chain_num, ".png")
+          s <- NA
+        } else {
+          r <- .tib$R[curr_ind][j]
+          s <- .tib$S[curr_ind][j]
+          subtitle <- paste0("Enrichment across clusters, Consensus(", r, ",", s, ")")
+          save_name <- paste0(save_dir, dataset_name, "goEnrichmentAllClustersCCR", r, "S", s, ".png")
+          chain_num <- NA
+        }
+
+        p_curr <- cluster_comp[[j]] +
+          labs(
+            x = "Predicted cluster",
+            y = "GO description",
+            title = dataset,
+            subtitle = subtitle
+          ) +
+          scale_color_viridis_c(direction = -1)
+
+        # ggsave(save_name, p_curr, width = 14, height = 10)
+
+
+        curr_data <- cluster_comp[[j]]$data
+        curr_data$Inference <- method
+        curr_data$R <- r
+        curr_data$S <- s
+        curr_data$Chain <- chain_num
+        curr_data$Dataset <- dataset
+        curr_data$Ontology <- ont
+
+        if (method == "Bayesian") {
+          curr_data$Model <- paste0("Bayesian: chain ", chain_num)
+        } else {
+          curr_data$Model <- paste0("CC(", r, ",", s, ")")
+        }
+
+        if (is.null(my_data)) {
+          my_data <- curr_data
+        } else {
+          my_data <- rbind(my_data, curr_data)
+        }
+      }
+    }
+
     # ego <- goOverRep(cc_cl, timecourse_data, geneTable, universe = universe,
     #                  drop_na = drop_na, ont = ont, save_dir = NULL)
 
@@ -423,67 +456,72 @@ for (dataset_used in datasets) {
 
 
     # Compare all clusters in a single plot
-    p1 <- doClusterComparison(cc_cl, timecourse_data, geneTable, universe,
-      ont = ont,
-      drop_na = drop_na
-    )
-    p1 +
-      labs(
-        x = "Predicted cluster (consensus clustering)",
-        y = "GO description",
-        title = dataset_name,
-        subtitle = "Enrichment across clusters"
-      ) +
-      scale_color_viridis_c(direction = -1)
-
-    # ggsave(paste0(save_dir, "/goEnrichmentAllClustersCC.png"), p1, width = 14, height = 10)
-
+    # p1 <- doClusterComparison(cc_cl, timecourse_data, geneTable, universe,
+    #   ont = ont,
+    #   drop_na = drop_na
+    # )
+    # p1 +
+    #   labs(
+    #     x = "Predicted cluster (consensus clustering)",
+    #     y = "GO description",
+    #     title = dataset_name,
+    #     subtitle = "Enrichment across clusters"
+    #   ) +
+    #   scale_color_viridis_c(direction = -1)
+    #
+    # # ggsave(paste0(save_dir, "/goEnrichmentAllClustersCC.png"), p1, width = 14, height = 10)
+    #
 
     # === Bayesian inference =======================================================
 
-    bayes_p <- lapply(bayes_tibs, function(x) {
-      cl <- x$pred_allocation[[curr_ind]]
-      p <- doClusterComparison(cl, timecourse_data, geneTable, universe,
-        ont = ont,
-        drop_na = drop_na
-      )
-      p
-    })
+    # bayes_p <- lapply(bayes_tibs, function(x) {
+    #   cl <- x$pred_allocation[[curr_ind]]
+    #   p <- doClusterComparison(cl, orig_data[[dataset_name]], geneTable, universe,
+    #     ont = ont,
+    #     drop_na = drop_na
+    #   )
+    #   p
+    # })
+    #
+    # for (i in 1:10) {
+    #   curr_data <- bayes_p[[i]]$data
+    #   curr_data$Inference <- "Bayesian"
+    #   curr_data$Chain <- i
+    #   curr_data$Model <- paste0("Bayesian: chain ", i)
+    #
+    #   if (i == 1) {
+    #     bayes_data <- curr_data
+    #   } else {
+    #     bayes_data <- rbind(bayes_data, curr_data)
+    #   }
+    # }
+    #
+    # # === Comparison ===============================================================
+    #
+    # # cc_data <- p1$data
+    # # cc_data$Inference <- "Consensus clustering"
+    # cc_data$Chain <- NA
+    # # cc_data$Model <- "Consensus Clustering"
+    #
+    # bayes_data$R <- 676000
+    # bayes_data$S <- 676
+    #
+    # # Bind the data
+    # new_plt_data <- rbind(cc_data, bayes_data)
 
-    for (i in 1:10) {
-      curr_data <- bayes_p[[i]]$data
-      curr_data$Inference <- "Bayesian"
-      curr_data$Chain <- i
-      curr_data$Model <- paste0("Bayesian: chain ", i)
-
-      if (i == 1) {
-        bayes_data <- curr_data
-      } else {
-        bayes_data <- rbind(bayes_data, curr_data)
-      }
-    }
-
-    # === Comparison ===============================================================
-
-    cc_data <- p1$data
-    cc_data$Inference <- "Consensus clustering"
-    cc_data$Chain <- NA
-    cc_data$Model <- "Consensus Clustering"
-
-    # Bind the data
-    new_plt_data <- rbind(cc_data, bayes_data)
-    new_plt_data$Cluster_plt <- stringr::str_extract(new_plt_data$Cluster_str, "\\d+") %>% as.numeric()
-    new_plt_data$Model <- factor(new_plt_data$Model, levels = unique(new_plt_data$Model))
-    new_plt_data$Ontology <- ont
+    my_data$Cluster_plt <- stringr::str_extract(my_data$Cluster_str, "\\d+") %>% as.numeric()
+    my_data$Model <- factor(my_data$Model, levels = unique(my_data$Model))
+    my_data$Ontology <- ont
 
     # Plot
-    p_comp <- new_plt_data %>%
+    p_comp <- my_data %>%
+      filter(Dataset == dataset, Ontology == ont) %>%
       ggplot(aes(x = Cluster_plt, y = Description, color = log(p.adjust), size = Count)) +
       geom_point() +
       facet_wrap(~Model) +
       scale_color_viridis_c(direction = -1) +
       labs(
-        title = paste0(dataset_name, ": GO set over-representation (", ont, ")"),
+        title = paste0(dataset, ": GO set over-representation (", ont, ")"),
         # subtitle = "Across chains",
         x = "Cluster index",
         colour = "Log adjusted p-value"
@@ -500,46 +538,46 @@ for (dataset_used in datasets) {
       facet_wrap(~Model, nrow = 2) # +
 
     # xlim(1, 55)
-    p_comp
+    # p_comp
 
     p_comp_2 <- p_comp$data %>%
-      group_by(Description, Model) %>% 
-      mutate(Number_cluster = as.character(n())) %>% 
+      group_by(Description, Model) %>%
+      mutate(Number_cluster = as.character(n())) %>%
       ggplot(aes(x = Description, y = Model)) +
-      geom_point(aes(colour = log(p.adjust), size = Count)) + #, position = position_stack(reverse = TRUE)) +
+      geom_point(aes(colour = log(p.adjust), size = Count)) + # , position = position_stack(reverse = TRUE)) +
       geom_text(aes(label = Number_cluster), position = position_nudge(y = -0.3)) +
       # geom_jitter(width = 0, height = 0.4, seed = 1) +
       scale_color_viridis_c(direction = -1) +
       labs(
-        title = paste0(dataset_name, ": GO set over-representation (", ont, ")"),
+        title = paste0(dataset, ": GO set over-representation (", ont, ")"),
         # subtitle = "Across chains",
         # x = "Descr",
         colour = "Log adjusted p-value"
       ) +
       theme(
         axis.text.y = element_text(hjust = 0.0, size = 8),
-        axis.text.x = element_text(angle = 30, size = 8, vjust = 1, hjust=1),
+        axis.text.x = element_text(angle = 30, size = 8, vjust = 1, hjust = 1),
         axis.title.y = element_blank(),
         # axis.title.x=element_blank(),
         plot.title = element_text(size = 18, face = "bold"),
         plot.subtitle = element_text(size = 14),
         strip.text.x = element_text(size = 9)
       )
-    
-    
-    ggsave(paste0(save_dir, "GOoverRepresentationComparison", ont, ".png"),
+
+
+    ggsave(paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".png"),
       p_comp,
       width = 14,
       height = 14
     )
-    
-    ggsave(paste0(save_dir, "GOoverRepresentationComparison", ont, "Alt.png"),
-           p_comp_2,
-           width = 14,
-           height = 8
+
+    ggsave(paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, "Alt.png"),
+      p_comp_2,
+      width = 14,
+      height = 8
     )
 
-    write.csv(p_comp$data, paste0(save_dir, "GOoverRepresentationComparison", ont, ".csv"))
+    write.csv(p_comp$data, paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".csv"))
 
     # p1 <- new_plt_data %>%
     #   filter(Chain %in% c(1:5, NA)) %>%
@@ -591,3 +629,5 @@ for (dataset_used in datasets) {
     #   plot_layout(guides = 'collect')
   }
 }
+
+write.csv(my_data, "./Data/Yeast/AllGOoverRepresentationComparison.csv")

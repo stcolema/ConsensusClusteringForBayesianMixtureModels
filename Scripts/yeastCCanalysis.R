@@ -250,6 +250,8 @@ saveRDS(continuous_data, file = "./Data/Yeast/CCContParamsTibble.rds")
 
 # === Visualisation ============================================================
 
+# === Time series ==============================================================
+
 # Time series of the time course data separated out into predicted clusters
 
 # Facet labels for continuous variables
@@ -269,8 +271,9 @@ for (i in curr_inds) {
   s <- alloc_data$S[i]
 
   plt_data_transformed <- plt_data %>%
-    mutate(Cluster = alloc_data$Cl[[i]]) %>%
-    pivot_longer(cols = -c(Gene, Cluster), values_to = "Expression") %>%
+    mutate(Cluster = alloc_data$Cl[[i]])  %>% 
+    add_count(Cluster) %>%
+    pivot_longer(cols = -c(Gene, Cluster, n), values_to = "Expression") %>%
     mutate(Time = stringr::str_extract(name, "[:digit:]+"))
 
   # Plot time series by cluster
@@ -299,7 +302,37 @@ for (i in curr_inds) {
     height = 12,
     width = 14
   )
+  
+  # Plot time series by cluster
+  p_time_series_no_singletons <- plt_data_transformed %>%
+    filter(n > 1) %>% 
+    ggplot(aes(x = as.numeric(Time), y = Expression, group = Gene)) +
+    geom_line(alpha = 0.3) +
+    facet_wrap(~Cluster) +
+    labs(
+      title = dataset,
+      subtitle = paste0("Clustering predicted by CC(", r, ",", s, ")"),
+      x = "Time"
+    ) +
+    theme(
+      axis.text.y = element_text(size = 10.5),
+      axis.text.x = element_text(size = 10.5),
+      axis.title.y = element_text(size = 10.5),
+      axis.title.x = element_text(size = 10.5),
+      plot.title = element_text(size = 18, face = "bold"),
+      plot.subtitle = element_text(size = 14),
+      strip.text.x = element_text(size = 10.5),
+      legend.text = element_text(size = 10.5)
+    )
+  
+  ggsave(paste0(save_dir, dataset, "TimeSeriesClusterR", r, "S", s, "NoSingletons.png"),
+         plot = p_time_series_no_singletons,
+         height = 12,
+         width = 14
+  )
 }
+
+# === Consensus matrices =======================================================
 
 # Compare consensus matrices for the different ensembles
 
@@ -340,7 +373,7 @@ for (dataset in datasets) {
       # ensemble information
       mutate(
         X = match(Gene_i, item_order),
-        Y = match(Gene_j, item_order),
+        Y = N - match(Gene_j, item_order),
         R = ensembles$R[i],
         S = ensembles$S[i]
       )

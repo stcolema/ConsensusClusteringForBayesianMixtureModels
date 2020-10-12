@@ -1,5 +1,8 @@
 #!/usr/bin/Rscript
 
+# Analysis of the stability of the consensus clustering ensembles, visualisation
+# of CMs and predicted clusters in the timecourse data.
+
 # For similarity matrix
 library(mdiHelpR)
 
@@ -37,49 +40,6 @@ library(data.table)
 set.seed(1)
 setMyTheme()
 
-# === Functions ================================================================
-
-gewekeDF <- function(x,
-                     frac_1 = 0.1,
-                     frac_2 = 0.5,
-                     n_bins = 20,
-                     p_value_threshold = 0.05) {
-  # The preferred object type for interacting with coda functions
-  x <- coda::as.mcmc.list(x)
-
-  # The vector of start iterations to calculate the Geweke statistic for
-  start_iter_vec <- floor(seq(
-    from = stats::start(x),
-    to = (stats::start(x) + stats::end(x)) / 2,
-    length = n_bins
-  ))
-
-  # The matrix that will hold the Geweke stat
-  geweke_mat <- matrix(nrow = length(start_iter_vec), ncol = coda::nvar(x), dimnames = list(start_iter_vec, coda::varnames(x)))
-
-  for (n in 1:length(start_iter_vec)) {
-    curr_geweke_diag <- coda::geweke.diag(stats::window(x, start = start_iter_vec[n]),
-      frac1 = frac_1,
-      frac2 = frac_2
-    )
-
-    geweke_mat[n, ] <- curr_geweke_diag[[1]]$z
-  }
-
-  # The 1.96 threshold for 0.05 significance on a standard normal distribution
-  c_limit <- stats::qnorm(1 - p_value_threshold / 2)
-
-  # The variables to gather when moving from wide to long data (these are our
-  # parameters)
-  vars_to_gather <- coda::varnames(x)
-
-  # The data.frame we will plot (transform to long data to use the ggplot2
-  # framework)
-  geweke_df <- data.frame(Start_iteration = start_iter_vec) %>%
-    cbind(geweke_mat) %>%
-    tidyr::gather_("Parameter", "Geweke_statistic", vars_to_gather)
-}
-
 # === Read in data =============================================================
 
 # Original data modelled
@@ -108,52 +68,75 @@ n_phis <- L * (L - 1) / 2
 n_cont_parameters <- L + L * (L - 1) / 2
 
 # Directory for MDI output for Consensus clustering
-orig_output_dir <- "./Data/Yeast/MDIoutput/ConsensusClustering/"
-out_files <- list.files(orig_output_dir) %>%
-  str_sort(numeric = T)
+orig_output_dir <- c(
+  "./Data/Yeast/MDIoutput/ConsensusClustering/",
+  "./Data/Yeast/MDIoutput/ConsensusClusteringR10001/"
+)
 
-n_files <- length(out_files)
+out_files <- orig_output_dir %>%
+  lapply(list.files) %>%
+  lapply(str_sort, numeric = T)
+
+n_analyses <- length(out_files)
+
+n_files <- out_files %>%
+  lapply(length)
 
 # The thinning factor (will be needed for correctly extracting the rth sample
 # from the output .csv)
-thin <- out_files[1] %>%
-  str_match("T([:digit:]+)") %>%
-  magrittr::extract2(1, 2) %>%
-  as.numeric()
+thin <- out_files %>%
+  lapply(function(x) {
+    thin <- x %>%
+      magrittr::extract(1) %>%
+      str_match("T([:digit:]+)") %>%
+      magrittr::extract(1, 2) %>%
+      as.numeric()
+    thin
+  })
+thin
 
 # The ensemble parameters of interest
-R <- c(0, 1, 5, 10) * 100 + 1
-S <- c(1, c(1, 5, 10) * 100)
+# R <- list(c(0, 1, 5, 10) * 100 + 1, c(2:10) * 1000 + 1)
+# S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
+
+R <- list(c(0, 1, 5) * 100 + 1, c(1, 5, 10) * 1000 + 1)
+S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
 
 # The ensembles available
-ensembles <- expand.grid(S, R) %>%
-  set_colnames(c("S", "R"))
+ensembles <- list()
+for (i in 1:n_analyses) {
+  ensembles[[i]] <- expand.grid(S[[i]], R[[i]]) %>%
+    set_colnames(c("S", "R"))
+}
 
-n_ensembles <- nrow(ensembles)
+n_ensembles <- ensembles %>%
+  lapply(nrow)
 
 # Put the samples from MDI into a matrix for each ensemble of interest
 cc_samples <- list()
 ensemble_ind <- 0
 
 # Iterate over chain length
-for (r in R) {
+for (i in 1:n_analyses) {
+  for (r in R[[i]]) {
 
-  # The row index in the output corresponding to the chain depth of interest
-  row_ind <- floor(r / thin + 1)
-  sample_matrix <- matrix(0, max(S), n_cont_parameters + L * N)
+    # The row index in the output corresponding to the chain depth of interest
+    row_ind <- floor(r / thin[[i]] + 1)
+    sample_matrix <- matrix(0, max(S[[i]]), n_cont_parameters + L * N)
 
-  for (s in 1:n_files) {
-    .x <- fread(paste0(orig_output_dir, out_files[s]), nrows = row_ind)
+    for (s in 1:min(n_files[[i]], max(S[[i]]))) {
+      .x <- fread(paste0(orig_output_dir[i], out_files[[i]][s]), nrows = row_ind)
 
-    if (s == 1) {
-      colnames(sample_matrix) <- colnames(.x)
-    }
+      if (s == 1) {
+        colnames(sample_matrix) <- colnames(.x)
+      }
 
-    sample_matrix[s, ] <- round(as.matrix(.x[row_ind, ], nrow = 1))
+      sample_matrix[s, ] <- round(as.matrix(.x[row_ind, ], nrow = 1))
 
-    if (s %in% S) {
-      ensemble_ind <- ensemble_ind + 1
-      cc_samples[[ensemble_ind]] <- sample_matrix[1:s, , drop = F]
+      if (s %in% S[[i]]) {
+        ensemble_ind <- ensemble_ind + 1
+        cc_samples[[ensemble_ind]] <- sample_matrix[1:s, , drop = F]
+      }
     }
   }
 }
@@ -166,7 +149,7 @@ if (any(s_used != ensembles$S)) {
   stop("Something is wrong with the ensemble list.")
 }
 
-if (ensemble_ind != n_ensembles) {
+if (ensemble_ind != do.call(sum, n_ensembles)) {
   stop("Something is mismatched between the number of ensembles observed and expected.")
 }
 
@@ -202,6 +185,9 @@ alloc_data <- .alloc_tib <- tibble(
   CM = list(),
   Cl = list()
 )
+
+ensembles <- do.call(rbind, ensembles)
+n_ensembles <- nrow(ensembles)
 
 for (i in 1:n_ensembles) {
 
@@ -271,7 +257,7 @@ for (i in curr_inds) {
   s <- alloc_data$S[i]
 
   plt_data_transformed <- plt_data %>%
-    mutate(Cluster = alloc_data$Cl[[i]])  %>% 
+    mutate(Cluster = alloc_data$Cl[[i]]) %>%
     add_count(Cluster) %>%
     pivot_longer(cols = -c(Gene, Cluster, n), values_to = "Expression") %>%
     mutate(Time = stringr::str_extract(name, "[:digit:]+"))
@@ -302,10 +288,10 @@ for (i in curr_inds) {
     height = 12,
     width = 14
   )
-  
+
   # Plot time series by cluster
   p_time_series_no_singletons <- plt_data_transformed %>%
-    filter(n > 1) %>% 
+    filter(n > 1) %>%
     ggplot(aes(x = as.numeric(Time), y = Expression, group = Gene)) +
     geom_line(alpha = 0.3) +
     facet_wrap(~Cluster) +
@@ -324,11 +310,11 @@ for (i in curr_inds) {
       strip.text.x = element_text(size = 10.5),
       legend.text = element_text(size = 10.5)
     )
-  
+
   ggsave(paste0(save_dir, dataset, "TimeSeriesClusterR", r, "S", s, "NoSingletons.png"),
-         plot = p_time_series_no_singletons,
-         height = 12,
-         width = 14
+    plot = p_time_series_no_singletons,
+    height = 12,
+    width = 14
   )
 }
 
@@ -337,8 +323,8 @@ for (i in curr_inds) {
 # Compare consensus matrices for the different ensembles
 
 # The labels of the variables
-R_labels <- paste0("R = ", R) %>% set_names(R)
-S_labels <- paste0("S = ", S) %>% set_names(S)
+R_labels <- paste0("R = ", unlist(R)) %>% set_names(unlist(R))
+S_labels <- paste0("S = ", unlist(S)) %>% set_names(unlist(S))
 
 # Iterate over each dataset and save a grid of heatmaps
 for (dataset in datasets) {
@@ -385,16 +371,16 @@ for (dataset in datasets) {
       cm_plt <- rbind(cm_plt, .df)
     }
   }
-  
+
   # Add a dataset label
   cm_plt$Dataset <- dataset
-  
-  if(dataset == datasets[[1]]){
+
+  if (dataset == datasets[[1]]) {
     cm_plt_data_all <- cm_plt
-  } else{
+  } else {
     cm_plt_data_all <- rbind(cm_plt_data_all, cm_plt)
   }
-  
+
   # Plot a grid of consensus matrices where column number is increasing the
   # number of samples used and row number corresponds to a value of chain depth
   p_cm <- cm_plt %>%
@@ -433,28 +419,105 @@ for (dataset in datasets) {
   )
 }
 
-cm_plt %>%
-  filter(R %in% c(101, 501), S %in% c(100, 500)) %>% 
-  ggplot(aes(X, Y, fill = Prop)) +
-  geom_tile() +
-  # facet_wrap(~Dataset)+
-  facet_grid(
-    rows = vars(R),
-    cols = vars(S),
-    labeller = labeller(R = R_labels, S = S_labels)
-  ) +
-  scale_fill_gradient(low = "white", high = "#146EB4") +
+supp_plts <- list()
+for (l in 1:L) {
+  dataset <- datasets[l]
+  supp_plts[[l]] <- p <- cm_plt_data_all %>%
+    filter(
+      R %in% c(1001, 5001, 10001),
+      S %in% c(100, 500, 1000),
+      Dataset == dataset
+    ) %>%
+    ggplot(aes(X, Y, fill = Prop)) +
+    geom_tile() +
+    # facet_wrap(~Dataset)+
+    facet_grid(
+      rows = vars(R),
+      cols = vars(S),
+      labeller = labeller(R = R_labels, S = S_labels)
+    ) +
+    scale_fill_gradient(low = "white", high = "#146EB4") +
+    labs(
+      title = dataset,
+      subtitle = "Consensus matrices",
+      x = "Gene",
+      y = "Gene",
+      fill = "Coclustering\nproportion"
+    ) +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid = element_blank(),
+      axis.title.y = element_text(size = 10.5),
+      axis.title.x = element_text(size = 10.5),
+      plot.title = element_text(size = 18, face = "bold"),
+      plot.subtitle = element_text(size = 14),
+      strip.text.x = element_text(size = 10.5),
+      legend.text = element_text(size = 10.5)
+    )
+
+  ggsave(paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "CMcomparison.png"),
+    plot = p,
+    height = 8,
+    width = 7
+  )
+}
+
+# === Density plots ============================================================
+
+plt_params <- list(
+  R = c(1001, 5001, 10001),
+  S = c(100, 500, 1000)
+)
+
+plt_ensembles <- expand.grid(plt_params$R, plt_params$S) %>%
+  set_colnames(c("R", "S"))
+n_plts <- nrow(plt_ensembles)
+
+# PLace continuous parameters in a single data.frame suitable for gglot2
+for (i in 1:n_plts) {
+  .ind <- which(continuous_data$R == plt_ensembles$R[i] & continuous_data$S == plt_ensembles$S[i])
+
+  if (length(.ind) > 1) {
+    stop("Too many ensembles match criteria, check tibble for oddities.")
+  }
+
+  .curr_data <- continuous_data$Samples[[.ind]] %>%
+    as.data.frame() %>%
+    pivot_longer(cols = everything(), names_to = "Parameter")
+
+  .curr_data$R <- continuous_data$R[[.ind]]
+  .curr_data$S <- continuous_data$S[[.ind]]
+
+  if (i == 1) {
+    cont_plt_data <- .curr_data
+  } else {
+    cont_plt_data <- rbind(cont_plt_data, .curr_data)
+  }
+}
+cont_plt_data$Model <- paste0("CC(", cont_plt_data$R, ", ", cont_plt_data$S, ")")
+
+# Facet labels for continuous variables
+param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", c(12, 13, 23), "]"))
+names(param_labels) <- colnames(continuous_data$Samples[[n_ensembles]])
+
+
+p_param_density <- cont_plt_data %>%
+  # filter(Model == "CC(10001, 1000)") %>%
+  ggplot(aes(x = value, fill = Model)) +
+  geom_density(alpha = 0.2) +
+  facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
   labs(
-    title = dataset,
-    subtitle = "Consensus matrices",
-    x = "Gene",
-    y = "Gene",
-    fill = "Coclustering\nproportion"
+    title = "Parameter density",
+    x = "Value",
+    y = "Density"
   ) +
+  scale_fill_viridis_d()
+
+p_param_density +
   theme(
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    panel.grid = element_blank(),
+    axis.text.y = element_text(size = 10.5),
+    axis.text.x = element_text(size = 10.5),
     axis.title.y = element_text(size = 10.5),
     axis.title.x = element_text(size = 10.5),
     plot.title = element_text(size = 18, face = "bold"),

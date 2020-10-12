@@ -1,3 +1,6 @@
+
+# Visualise the generated data for the simulations
+
 library(mdiHelpR)
 library(ggplot2)
 library(magrittr)

@@ -1,5 +1,9 @@
 #!/usr/bin/Rscript
 
+# Investigate convergence for the Bayesian chains for the Yeast datasets. 
+# Visualise the distributions of the continuous parameters, posterior similarity
+# matrices and time series for the predicted clustering in the timecourse data.
+
 # For similarity matrix
 library(mdiHelpR)
 
@@ -444,7 +448,6 @@ continuous_data$Use_chain <- continuous_data$Seed %in% chains_to_keep
 # Save the tibbles
 saveRDS(alloc_data, file = "./Data/Yeast/BayesAllocTibble.rds")
 saveRDS(continuous_data, file = "./Data/Yeast/BayesContParamsTibble.rds")
-
 
 # == Parameter densities =======================================================
 

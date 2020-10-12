@@ -1,6 +1,7 @@
 #!/bin/Rscript
 
-# GO term over-representation
+# GO term over-representation in the predicted clusters for each dataset for 
+# the long chains and a number of ensembles.
 
 # === Packages =================================================================
 
@@ -259,19 +260,21 @@ n_tibbles <- length(tibbles)
 names(tibbles) <- tib_details[, 2]
 
 # GO ontologies to investigate
-ontologies <- c("MF", "BP", "CC", "ALL")
+ontologies <- c("MF", "BP", "CC")
 
 # Save results
 go_dir <- "Go_enrichment"
 
 # === Yeast data ===============================================================
 
-# Download and read in the Yeast genome
+# Download and read in the Yeast genome if it is not already saved
+if(! file.exists(paste0(getwd(), "/geneTable.rda"))){
 temp <- tempfile()
 download.file("https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/146/045/GCF_000146045.2_R64/GCF_000146045.2_R64_genomic.gff.gz", temp)
 x1 <- unz(temp, "GCF_000146045.2_R64_genomic.gff")
 Gff2GeneTable(temp)
 unlink(temp)
+}
 
 # The Gff2GeneTable function automatically saves to the working directory an
 # object called "geneTable.rda". Load this.
@@ -337,9 +340,6 @@ gomap <- getBM(
   ),
   filters = "ensembl_gene_id",
   values = gene_names,
-  # attributes = c(attributes_to_use, "entrezgene_id"),
-  # filters = "entrezgene_id",
-  # values = eg[match(row.names(timecourse_data), geneTable$Locus)],
   mart = yeast_ensemble
 )
 
@@ -353,6 +353,8 @@ genes_present <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 # === Dataset choice ===========================================================
 
 my_data <- NULL
+R_used <- c(501, 1001,5001,10001)
+S_used <- c(100, 500, 1000)
 
 for (dataset in datasets) {
   save_dir <- paste0("./Images/Yeast/", dataset, "/")
@@ -361,7 +363,8 @@ for (dataset in datasets) {
   drop_na <- gene_names[missing]
   universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
-  for (ont in ontologies) {
+  ontology <- "ALL"
+  # for (ont in ontologies) {
     for (i in 1:n_tibbles) {
 
       # Select the tibble
@@ -375,6 +378,8 @@ for (dataset in datasets) {
       if (names(tibbles)[i] == "Bayes") {
         curr_ind <- which(.tib$Dataset == dataset & .tib$Use_chain)
         method <- "Bayesian"
+      } else {
+        curr_ind <- which(.tib$Dataset == dataset & .tib$R %in% R_used & .tib$S %in% S_used)
       }
 
       n_ind <- length(curr_ind)
@@ -386,7 +391,7 @@ for (dataset in datasets) {
           orig_data[[dataset]],
           geneTable,
           universe,
-          ont = ont,
+          ont = ontology,
           drop_na = drop_na
         )
 
@@ -414,14 +419,14 @@ for (dataset in datasets) {
           chain_num <- NA
         }
 
-        p_curr <- cluster_comp[[j]] +
-          labs(
-            x = "Predicted cluster",
-            y = "GO description",
-            title = dataset,
-            subtitle = subtitle
-          ) +
-          scale_color_viridis_c(direction = -1)
+        # p_curr <- cluster_comp[[j]] +
+        #   labs(
+        #     x = "Predicted cluster",
+        #     y = "GO description",
+        #     title = dataset,
+        #     subtitle = subtitle
+        #   ) +
+        #   scale_color_viridis_c(direction = -1)
 
         # ggsave(save_name, p_curr, width = 14, height = 10)
 
@@ -432,7 +437,7 @@ for (dataset in datasets) {
         curr_data$S <- s
         curr_data$Chain <- chain_num
         curr_data$Dataset <- dataset
-        curr_data$Ontology <- ont
+        # curr_data$Ontology <- ont
 
         if (method == "Bayesian") {
           curr_data$Model <- paste0("Bayesian: chain ", chain_num)
@@ -440,6 +445,10 @@ for (dataset in datasets) {
           curr_data$Model <- paste0("CC(", r, ",", s, ")")
         }
 
+        curr_data$Cluster_plt <- stringr::str_extract(curr_data$Cluster_str, "\\d+") %>%
+          as.numeric()
+        # my_data$Model <- factor(my_data$Model, levels = unique(my_data$Model))
+        
         if (is.null(my_data)) {
           my_data <- curr_data
         } else {
@@ -509,13 +518,11 @@ for (dataset in datasets) {
     # # Bind the data
     # new_plt_data <- rbind(cc_data, bayes_data)
 
-    my_data$Cluster_plt <- stringr::str_extract(my_data$Cluster_str, "\\d+") %>% as.numeric()
-    my_data$Model <- factor(my_data$Model, levels = unique(my_data$Model))
-    my_data$Ontology <- ont
-
+  for(ont in ontologies){
+  
     # Plot
     p_comp <- my_data %>%
-      filter(Dataset == dataset, Ontology == ont) %>%
+      filter(Dataset == dataset, ONTOLOGY == ont) %>%
       ggplot(aes(x = Cluster_plt, y = Description, color = log(p.adjust), size = Count)) +
       geom_point() +
       facet_wrap(~Model) +
@@ -576,8 +583,8 @@ for (dataset in datasets) {
       width = 14,
       height = 8
     )
-
-    write.csv(p_comp$data, paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".csv"))
+    }
+    # write.csv(p_comp$data, paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".csv"))
 
     # p1 <- new_plt_data %>%
     #   filter(Chain %in% c(1:5, NA)) %>%
@@ -627,7 +634,8 @@ for (dataset in datasets) {
     #
     # p1 / p2  +
     #   plot_layout(guides = 'collect')
-  }
 }
+
+my_data$Model <- factor(my_data$Model, levels = unique(my_data$Model))
 
 write.csv(my_data, "./Data/Yeast/AllGOoverRepresentationComparison.csv")

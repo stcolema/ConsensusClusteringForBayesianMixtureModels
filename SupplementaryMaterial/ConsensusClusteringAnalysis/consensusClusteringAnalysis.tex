@@ -40,10 +40,10 @@ The "Yeast data" consists of three \emph{S. cerevisiae} datasets with gene produ
 \end{itemize}
 The datasets were reduced to 551 items by considering only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles with no missing data in the PPI and ChIP-chip data, following the same steps as the original MDI paper \citep{kirk2012bayesian}. The datasets were modelled using a base measure of a Gaussian process in the Timecourse dataset and Multinomial distributions in the ChIP-chip and PPI datasets.
 
-\subsection{Bayesian analysis}
+\subsection{Bayesian analysis} \label{sec:bayesianAnalysis}
 10 chains were run for 36 hours, resulting in 676,000 iterations per chain, thinned to every thousandth sample, resulting in 676 samples per chain. 
 
-\subsubsection{Convergence}
+\subsubsection{Convergence} \label{sec:bayesianConvergence}
 These chains were investigated for 
 \begin{itemize}
 	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
@@ -109,7 +109,7 @@ Investigating the Posterior similarity matrices (PSMs) we can see that the Timec
 	\label{fig:bayesDensities}
 \end{figure}
 
-\subsection{Consensus clustering analysis}
+\subsection{Consensus clustering analysis} \label{sec:consensusClustering}
 We investigate an ensemble of depth $R=1001$ and width $S=10000$. The consensus matrices for this ensemble was compared to those for the combinations of $R = (1, 101, 501, 1001, 5001, 10001)$, $S=(1, 100, 500, 1,000)$ in the three datasets. We use a heuristic to decide if the ensemble is sufficiently deep and wide to stop growing. For a given depth $r$ and width $s$, if there is no visible difference between the consensus matrices from the ensembles using $R=(a r, r)$, $S=(s, b s)$ (in our analysis we used $a=b=0.5$, but the smaller the choice of $a,b$ the more extreme the stopping criterion), then we consider the ensemble to have stabilised. This is inspired by the belief that a clustering method should produce stable results across similar datasets \citep{von2005towards, meinshausen2010stability}. We believe that if the method is still producing a partition that is visibly changing for additional chains and depth, than the random initialisation is influencing the result sufficiently that it is unlikely to be stable for similar datasets or reproducible for a random choice of seeds. An example of this logic can be seen in figures \ref{fig:chipchipCMs} and \ref{fig:ppiCMs} (and to a lesser degree in figure \ref{fig:timecourseCMs}). Here the decision to stop growing the ensemble is made as there is no apparent gain in increasing chain depth from $R=5001$ to $R=10001$, but it can be seen that a chain depth of $R=1001$ is insufficient as there is a marked difference in the consensus matrices for the PPI dataset particularly between $R=1001$ and $R=5001$. The number of chains appears required appears to have stabilised quickly, as there is no obvious change in increasing $S$ from 100.
 
 \begin{figure}
@@ -137,13 +137,20 @@ If we compare the distribution of sampled values for the $\phi$ parameters for t
 
 \begin{figure}
 	\centering
-	\includegraphics[scale=0.8]{../Images/Yeast/ComparisonDensities.png}
+	\includegraphics[scale=0.6]{../Images/Yeast/ComparisonDensities.png}
 	\caption{The sampled values for the $\phi$ parameters from the long chains, their pooled samples and the consensus using 1000 chains of depth 10,001. The long chains display a variety of behaviours. Across chains there is no clear consensus on the nature of the posterior distribution. The samples from any single chain are not particularly close to the behaviour of the pooled samples across all three parameters. It is the Consensus clustering that most approaches this pooled behaviour.}
 	\label{fig:densityComparison}
 \end{figure}
 
-\subsubsection{GO term over-representation}
-To validate our analysis we Gene Ontology (GO) term over-representation. We test if the predicted clusters have a higher concentration of specific GO terms than would be expected by chance, conditioning on the background set of the 551 yeast genes in the data. The \texttt{Bioconductor} packages \texttt{}
+\subsection{GO term over-representation} \label{sec:goTermOverRep}
+To validate our analysis we test if the predicted clusters have a higher concentration of specific  Gene Ontology (GO) terms than would be expected by chance, conditioning on the background set of the 551 yeast genes in the data. The \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org} were used. Clusters were predicted from the Posterior similarity matrices of the chains kept from section \ref{sec:bayesianConvergence} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$). The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random given the 550 possible genes. The false discovery rate of this test was controlled using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and significance threshold of 0.05 was used. The over-represented GO terms were then plotted to compare methods. The three different ontologies of "Molecular function" (\textbf{MF}), "Biological process" (\textbf{BP}) and "Cellular component" (\textbf{CC}) were all investigated.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.6]{../Images/Yeast/ComparisonDensities.png}
+	\caption{.}
+	\label{fig:yeastGOMF}
+\end{figure}
 
 
 

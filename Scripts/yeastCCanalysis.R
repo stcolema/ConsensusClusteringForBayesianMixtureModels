@@ -99,7 +99,7 @@ thin
 # R <- list(c(0, 1, 5, 10) * 100 + 1, c(2:10) * 1000 + 1)
 # S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
 
-R <- list(c(0, 1, 5) * 100 + 1, c(1, 5, 10) * 1000 + 1)
+R <- list(c(0, 1, 5) * 100 + 1, c(1, 5:10) * 1000 + 1)
 S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
 
 # The ensembles available
@@ -122,7 +122,7 @@ for (i in 1:n_analyses) {
 
     # The row index in the output corresponding to the chain depth of interest
     row_ind <- floor(r / thin[[i]] + 1)
-    sample_matrix <- matrix(0, max(S[[i]]), n_cont_parameters + L * N)
+    sample_matrix <- data.table(matrix(0, max(S[[i]]), n_cont_parameters + L * N))
 
     for (s in 1:min(n_files[[i]], max(S[[i]]))) {
       .x <- fread(paste0(orig_output_dir[i], out_files[[i]][s]), nrows = row_ind)
@@ -131,7 +131,7 @@ for (i in 1:n_analyses) {
         colnames(sample_matrix) <- colnames(.x)
       }
 
-      sample_matrix[s, ] <- round(as.matrix(.x[row_ind, ], nrow = 1))
+      sample_matrix[s, ] <- .x[row_ind, ]
 
       if (s %in% S[[i]]) {
         ensemble_ind <- ensemble_ind + 1
@@ -169,6 +169,9 @@ for (l in 1:L) {
 item_names <- colnames(sample_matrix)[dataset_samples[[1]]] %>%
   str_remove("Dataset1_")
 
+ensembles <- do.call(rbind, ensembles)
+n_ensembles <- nrow(ensembles)
+
 # Split out the samples into the continuous variables and the dataset specific
 # allocations
 continuous_data <- .cont_data <- tibble(
@@ -186,9 +189,6 @@ alloc_data <- .alloc_tib <- tibble(
   Cl = list()
 )
 
-ensembles <- do.call(rbind, ensembles)
-n_ensembles <- nrow(ensembles)
-
 for (i in 1:n_ensembles) {
 
   # MDI output
@@ -197,7 +197,7 @@ for (i in 1:n_ensembles) {
   # The phis and mass parameters
   continuous_data <- continuous_data %>%
     rbind(tibble(
-      Samples = list(.curr_data[, continuous_params_col_index]),
+      Samples = list(.curr_data[, ..continuous_params_col_index]),
       R = ensembles$R[i],
       S = ensembles$S[i]
     ))
@@ -206,7 +206,8 @@ for (i in 1:n_ensembles) {
   for (l in 1:L) {
 
     # Allocation samples
-    alloc <- .curr_data[, dataset_samples[[l]], drop = F]
+    alloc_cols <- colnames(.curr_data)[dataset_samples[[l]]]
+    alloc <- .curr_data[, ..alloc_cols]
 
     # Consensus matrix
     cm <- createSimilarityMat(as.matrix(alloc)) %>%
@@ -230,19 +231,134 @@ for (i in 1:n_ensembles) {
   }
 }
 
+# # Check out the behaviour of the merged samples for the CC
+# merged_tib <- tibble(
+#   Samples = list(),
+#   R = character(),
+#   S = integer(),
+#   Dataset = character(),
+#   CM = list(),
+#   Cl = list()
+# )
+# s_final <- 1000
+# r_merged <- c(5:10)*1000 + 1
+# 
+# # The phis and mass parameters
+# merged_cont_data <- continuous_data$Samples[which(continuous_data$R %in% r_merged & 
+#                                 continuous_data$S == s_final)] %>%
+#   unlist() %>% 
+#   matrix(byrow = T, ncol = n_cont_parameters) %>% 
+#   set_colnames(colnames(continuous_data$Samples[[1]]))
+# 
+# merged_cont_tib <- tibble(Samples = list(merged_cont_data), S = 1000* 6, R= "Merged")
+# 
+# for(dataset in datasets){
+# ensembles_merged <- which(alloc_data$R %in% r_merged & 
+#                             alloc_data$S == s_final &
+#                             alloc_data$Dataset == dataset)
+# 
+# merged_samples <- alloc_data[ensembles_merged, ]$Samples %>% 
+#   do.call(rbind, .)
+# 
+# merged_cm <- createSimilarityMat(as.matrix(merged_samples)) %>%
+#   set_rownames(item_names) %>%
+#   set_colnames(item_names)
+# 
+# # Predicted clustering (k is set to an arbitrarily large number)
+# cl <- mcclust::maxpear(merged_cm, max.k = 275)$cl
+# 
+# .alloc_tib <- tibble(
+#   Samples = list(merged_samples),
+#   R = "Merged",
+#   S = s_final * length(ensembles_merged),
+#   Dataset = datasets[[l]],
+#   CM = list(merged_cm),
+#   Cl = list(cl)
+# )
+# 
+# merged_tib <- rbind(merged_tib, .alloc_tib)
+# }
+
+# merged_tib$CM[[3]] %>% pheatmap()
+# library(mcclust)
+# comp_tib <- alloc_data[alloc_data$R == 10001 & alloc_data$S == 1000, ]
+# arandi(comp_tib$Cl[[1]], merged_tib$Cl[[1]])
+# arandi(comp_tib$Cl[[2]], merged_tib$Cl[[2]])
+# arandi(comp_tib$Cl[[3]], merged_tib$Cl[[3]])
+# 
+# for(l in 1:L){
+#   cl_dat <- data.frame(Cl = comp_tib$Cl[[l]],
+#                        Dataset = datasets[l],
+#                        R = comp_tib$R[l], 
+#                        S = comp_tib$S[l], 
+#                        Item = 1:N, 
+#                        Model = paste0("CC(", comp_tib$R[l], ",", comp_tib$S[l], ")")
+#                        )
+#   
+#   cl_dat_2 <- data.frame(Cl = merged_tib$Cl[[l]],
+#                          Dataset = datasets[l],
+#                          R = merged_tib$R[l],
+#                          S = merged_tib$S[l], 
+#                          Item = 1:N,
+#                          Model = "Merged")
+#   
+#   if(l == 1){
+#     cl_plt_data <- rbind(cl_dat, cl_dat_2)
+#   } else{
+#     cl_plt_data <- rbind(cl_plt_data, cl_dat, cl_dat_2)
+#   }
+#   
+# }
+# 
+# cl_plt_data %>% 
+#   ggplot(aes(x = Item, y = Cl, colour = Model)) +
+#   geom_point() +
+#   geom_jitter() +
+#   facet_wrap(~Dataset)
+# 
+# table(comp_tib$Cl[[1]])
+# table(merged_tib$Cl[[1]])
+# arandi(comp_tib$Cl[[2]], merged_tib$Cl[[2]])
+# arandi(comp_tib$Cl[[3]], merged_tib$Cl[[3]])
+# 
+# # Compare the consensus matrix for the 
+# p1 <- compareSimilarityMatricesAnnotated(comp_tib$CM[[1]], merged_tib$CM[[1]])
+# p1_alt <- compareSimilarityMatricesAnnotated(comp_tib$CM[[1]], merged_tib$CM[[1]], matrix_imposing_order = 2)
+# p2 <-compareSimilarityMatricesAnnotated(comp_tib$CM[[2]], merged_tib$CM[[2]])
+# p2_alt <-compareSimilarityMatricesAnnotated(comp_tib$CM[[2]], merged_tib$CM[[2]], matrix_imposing_order = 2)
+# p3 <-compareSimilarityMatricesAnnotated(comp_tib$CM[[3]], merged_tib$CM[[3]])
+# p3_alt <-compareSimilarityMatricesAnnotated(comp_tib$CM[[3]], merged_tib$CM[[3]], matrix_imposing_order = 2)
+# 
+# library(patchwork)
+# p1 / p1_alt
+# p2 / p2_alt
+# p3 / p3_alt
+#
+# 
+# rbind(alloc_data, merged_tib)
+# rbind(continuous_data, merged_cont_tib)
+
 # Save the tibbles
 saveRDS(alloc_data, file = "./Data/Yeast/CCAllocTibble.rds")
 saveRDS(continuous_data, file = "./Data/Yeast/CCContParamsTibble.rds")
 
 # === Visualisation ============================================================
 
-# === Time series ==============================================================
+plt_params <- list(
+  R = c(1001, 5001, 10001),
+  S = c(100, 500, 1000)
+)
 
-# Time series of the time course data separated out into predicted clusters
+plt_ensembles <- expand.grid(plt_params$R, plt_params$S) %>%
+  set_colnames(c("R", "S"))
 
 # Facet labels for continuous variables
 param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", 1:3, "]"))
 names(param_labels) <- colnames(continuous_data$Samples[[1]])
+
+# === Time series ==============================================================
+
+# Time series of the time course data separated out into predicted clusters
 
 # for(dataset in dataset_names){
 dataset <- "Timecourse"
@@ -465,13 +581,6 @@ for (l in 1:L) {
 
 # === Density plots ============================================================
 
-plt_params <- list(
-  R = c(1001, 5001, 10001),
-  S = c(100, 500, 1000)
-)
-
-plt_ensembles <- expand.grid(plt_params$R, plt_params$S) %>%
-  set_colnames(c("R", "S"))
 n_plts <- nrow(plt_ensembles)
 
 # PLace continuous parameters in a single data.frame suitable for gglot2

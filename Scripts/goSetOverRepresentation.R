@@ -350,6 +350,29 @@ bgoMap <- buildGOmap(gomap)
 # head(geneTable)
 genes_present <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
+# === Random partition =========================================================
+
+R_max <- max(tibbles$CC$R)
+S_max <- max(tibbles$CC$S)
+
+cc_tib <- tibbles$CC
+K_cc <- cc_tib$Cl[which(cc_tib$S == S_max & cc_tib$R == R_max)] %>% 
+  lapply(function(x){length(unique(x))}) %>% 
+  unlist() %>% 
+  set_names(datasets)
+
+rand_cl <- K_cc %>% lapply(function(k){
+  sample(1:k, size = N, replace = T)
+})
+
+drop_na <- gene_names[missing]
+universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
+
+rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]], geneTable, universe, ont = "ALL", drop_na = drop_na)
+rand_time_cl
+# Error in compareCluster(geneCluster = clustered_genes, fun = "enrichGO",  : 
+# No enrichment found in any of gene cluster, please check your input... 
+
 # === Dataset choice ===========================================================
 
 my_data <- NULL

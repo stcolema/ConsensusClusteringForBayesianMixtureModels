@@ -27,15 +27,37 @@
 \maketitle
 
 \begin{abstract}
-
+Description of models used and analyses performed.
 \end{abstract}
 
 %\section{Algorithms} \label{sec:algorithms}
 
 
 \section{The models} \label{sec:models}
-In the simulations (see section \ref{sec:simulations}) where individual datasets are modelled a \emph{Bayesian mixture model} is used. The densities that model each cluster are \emph{Gaussian}. The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixNormalsDAG}. In the multiple dataset case (the \emph{Yeast data}, see the analysis in section \ref{sec:yeast}), \emph{Multiple Dataset Integration} \citep{kirk2012bayesian} is used. The DAG for this model for three datasets is shown in figure \ref{fig:MDIDAG}.
-
+In the simulations (see section \ref{sec:simulations}) where individual datasets are modelled a \emph{Bayesian mixture model} is used. We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
+\begin{align}
+	x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
+\end{align}
+where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$. This is model used in the simulation study. $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
+\begin{equation}
+	\label{eqn:mixModel}
+	\begin{array}{r@{}l l}
+		p(c_n = k) = \pi_k&  &\textrm{for $k = 1,\ldots,K$,} \\
+		x_n | c_n \sim f(x_n | \theta_k)& &\textrm{independently for $n = 1,\ldots,N$.} 
+	\end{array}
+\end{equation}
+The joint model can then be written
+\begin{align}
+	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
+\end{align}
+An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
+\begin{align}
+	p(X, c, \theta, \pi, K) &=  p(\pi | K) p(\theta | K) p(K) \prod_{n=1}^N p(x_n | c_n, \theta_{c_n}) p (c_n | \pi, K).  \label{eqn:jointMixModel}
+	%	\\
+	%	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+	%	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
+\end{align}
+The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixNormalsDAG}. 
 \begin{figure}
 	\centering
 	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.4, auto,>=latex']
@@ -50,10 +72,10 @@ In the simulations (see section \ref{sec:simulations}) where individual datasets
 		\node[main, rectangle] (alpha2) [right =of kappa] {$2$ };
 		\node[main, rectangle] (beta) [right =of alpha2] {$2$ };
 		\node[main] (pi) [below =of alpha] {$\pi_k$ };
-		\node[main] (c_i) [below =of pi] {$c_i$};
+		\node[main] (c_i) [below =of pi] {$c_n$};
 		\node[main] (mu) [below=of xi] {$\mu_{kp}$};		
 		\node[main] (sigma) [below =of alpha2] {$\sigma^2_{kp}$};
-		\node[main, fill = black!10] (x_i) [below =of mu] {$x_i$};
+		\node[main, fill = black!10] (x_i) [below =of mu] {$x_n$};
 		\node[rectangle, inner sep=-0.5mm, fit= (c_i) (x_i),label=below right:$N$, xshift=13mm, yshift=-1mm] {};
 		\node[rectangle, inner sep=4.8mm,draw=black!100, fit= (c_i) (x_i)] {};
 		\node[rectangle, inner sep=-0.8mm, fit= (mu) (pi) (sigma),label=below right:$K$, xshift=43mm, yshift=-5mm] {};
@@ -81,7 +103,12 @@ In the simulations (see section \ref{sec:simulations}) where individual datasets
 	\caption{Directed acyclic graph for the mixture of Gaussians used.}
 	\label{fig:simpleMixNormalsDAG}
 \end{figure}
-
+Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. We use MDI to model the clustering structure of the Yeast datasets in section \ref{sec:yeast}. The modelling of the common information is described by the prior distribution on item allocation for $L$ datasets
+\begin{align}
+	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{l=1}^{L-1}\prod_{m=l+1}^L(1 + \phi_{lm} \mathbb{I}(c_{nl} = c_{nm})) \textrm{ for $n = 1,\ldots,N$.}
+	\label{eqn:mdiPrior}
+\end{align}
+$\phi_{lm}$ is the parameter defined by the correlation of the clusterings for the $l^{th}$ and $m^{th}$ datasets. As $\phi_{lm}$ increases more mass is placed on the common partition for these datasets. Conversely, in the limit $\phi_{lm}\to 0$ we have independent mixture models. In this way the correlation of the clustering between each pair of datasets controls how information is shared across each clustering, with more correlated datasets influencing each other and uncorrelated datasets remaining independent. The DAG for this model for three datasets is shown in figure \ref{fig:MDIDAG}.
 \begin{sidewaysfigure}
 	\centering
 	\begin{tikzpicture}[scale=.65, auto,>=latex']
@@ -93,15 +120,15 @@ In the simulations (see section \ref{sec:simulations}) where individual datasets
 	\node[main] (pi2) [right=of pi1] {$\gamma_{k2}$ };
 	\node[main] (pi3) [right=of pi2] {$\gamma_{k3}$ };
 	
-	\node[main] (ci1) [below=of pi1] {$c_{i1}$};
-	\node[main, node distance = 24mm] (ci2) [below=of pi2] {$c_{i2}$};
-	\node[main] (ci3) [below=of pi3] {$c_{i3}$};
+	\node[main] (ci1) [below=of pi1] {$c_{n1}$};
+	\node[main, node distance = 24mm] (ci2) [below=of pi2] {$c_{n2}$};
+	\node[main] (ci3) [below=of pi3] {$c_{n3}$};
 	
 	\node[main, node distance = 16mm] (a) [above=of pi2] {$\alpha_0$ };
 	
-	\node[main, fill = black!10] (xi2) [below=of ci2] {$x_{i2}$}; 
-	\node[main, fill = black!10] (xi1) [left=of xi2] {$x_{i1}$};
-	\node[main, fill = black!10] (xi3) [right=of xi2] {$x_{i3}$};
+	\node[main, fill = black!10] (xi2) [below=of ci2] {$x_{n2}$}; 
+	\node[main, fill = black!10] (xi1) [left=of xi2] {$x_{n1}$};
+	\node[main, fill = black!10] (xi3) [right=of xi2] {$x_{n3}$};
 	
 	\node[main]  at (-4, -6) (theta3) {$\theta_{k3}$}; 
 	\node[main] (theta2) [left=of theta3] {$\theta_{k2}$};
@@ -163,10 +190,8 @@ In the simulations (see section \ref{sec:simulations}) where individual datasets
 	\caption{Directed acyclic graph for the Multiple Dataset Integration model for $L=3$ datasets.}
 	\label{fig:MDIDAG}
 \end{sidewaysfigure}
-
 \section{Simulations} \label{sec:simulations}
 A number of scenarios are defined by the parameters that they use in generating individual simulations using algorithm \ref{algorithm:simulationGeneration}. These parameters are shown in table \ref{table:scenarioTable}.
-
 \begin{table}[ht]
 	\centering
 	% To place a caption above a table
@@ -199,13 +224,12 @@ A number of scenarios are defined by the parameters that they use in generating 
 	Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
 	\\
 	\hline
-
-
 	\end{tabular}
 	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
 	\label{table:scenarioTable}
 \end{table}%
 \begin{algorithm} \label{algorithm:simulationGeneration}
+	\TitleOfAlgo{Simulation generation}
 	%	\KwData{\(X=(x_1, \ldots, x_N)\)}
 	\KwIn{
 		%		A random seed $s$\\
@@ -268,7 +292,6 @@ Each scenario is seen as testing certain concepts or else specific characteristi
 \end{itemize}
 
 \subsection{Bayesian analysis} \label{sec:simBayesianAnalysis}
-
 For each simulation 10 chains of 1 million iterations were run, thinning to every thousandth sample. A burn-in of 10,000 iterations was then applied to the samples, leaving 990 samples per chain. These chains were investigated for 
 \begin{itemize}
 	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
@@ -379,7 +402,7 @@ Investigating the Posterior similarity matrices (PSMs) we can see that the Timec
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.5]{./Images/Yeast/PPIPSMcomparisonReduced.png}
-	\caption{These PSMs have very large disagreements between eachother. There is some common agreement in the square in the centre of each plot. However, the other sections (which consist of the most confident allocations) appear to completely fail to overlap. These sections appear to be approximately random in the partition defined.}
+	\caption{These PSMs have very large disagreements between eachother. There is some common agreement in the square in the centre of each plot. However, the other sections (which consist of the most confident allocations) appear to completely fail to overlap.}
 	\label{fig:ppiPSMs}
 \end{figure}
 
@@ -425,14 +448,28 @@ If we compare the distribution of sampled values for the $\phi$ parameters for t
 \end{figure}
 
 \subsection{GO term over-representation} \label{sec:goTermOverRep}
-To validate our analysis we test if the predicted clusters have a higher concentration of specific  Gene Ontology (GO) terms than would be expected by chance, conditioning on the background set of the 551 yeast genes in the data. The \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org} were used. Clusters were predicted from the Posterior similarity matrices of the chains kept from section \ref{sec:bayesianConvergence} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$). The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random given the 550 possible genes. The false discovery rate of this test was controlled using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and significance threshold of 0.05 was used. The over-represented GO terms were then plotted to compare methods. The three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) were all investigated.
+To validate our analysis we test if the predicted clusters have a higher concentration of specific  Gene Ontology (GO) terms than would be expected by chance, conditioning on the background set of the 551 yeast genes in the data. The \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org} were used. Clusters were predicted from the Posterior similarity matrices of the chains kept from section \ref{sec:yeastBayesianAnalysis} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$). The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random given the 550 possible genes. The false discovery rate of this test was controlled using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and significance threshold of 0.05 was used. The over-represented GO terms were then plotted to compare methods. The three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) were all investigated. The over-represented terms are displayed in figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC} respectively. It can be seen that the Consensus clustering finds very similar results to the long chains, finding any term that is over-represented in each chain and a number of terms unique to this analysis.
 
-\begin{figure}
+\begin{sidewaysfigure}
 	\centering
-	\includegraphics[scale=0.6]{./Images/Yeast/ComparisonDensities.png}
+	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompMF.png}
 	\caption{.}
 	\label{fig:yeastGOMF}
-\end{figure}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompBP.png}
+	\caption{.}
+	\label{fig:yeastGOBP}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompCC.png}
+	\caption{.}
+	\label{fig:yeastGOCC}
+\end{sidewaysfigure}
 
 \bibliographystyle{plainnat}
 \bibliography{suppMat}  

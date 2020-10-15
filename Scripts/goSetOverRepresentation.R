@@ -368,6 +368,30 @@ rand_cl <- K_cc %>% lapply(function(k){
 drop_na <- gene_names[missing]
 universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
+rand_go <- list()
+for(l in 1:L){
+rand_go[[l]] <- tryCatch(
+    {
+      doClusterComparison(rand_cl[[l]], orig_data[[l]], geneTable, universe, 
+                          ont = "ALL",
+                          drop_na = drop_na)
+    },
+    error=function(cond) {
+      message(paste("No enriched GO terms found."))
+      message(cond)
+      # Choose a return value in case of error
+      return(NA)
+    },
+    warning=function(cond) {
+      message(paste("Clusterign cause a warning?"))
+      message("Here's the original warning message:")
+      message(cond)
+      # Choose a return value in case of warning
+      return(NULL)
+    }
+  )    
+}
+
 rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]], geneTable, universe, ont = "ALL", drop_na = drop_na)
 rand_time_cl
 # Error in compareCluster(geneCluster = clustered_genes, fun = "enrichGO",  : 

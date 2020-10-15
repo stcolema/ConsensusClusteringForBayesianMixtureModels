@@ -4,6 +4,8 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 
+\newtheorem{definition}{Definition}
+
 \usepackage[]{algorithm2e}
 
 \usepackage{booktabs}
@@ -32,6 +34,18 @@ Description of models used and analyses performed.
 
 %\section{Algorithms} \label{sec:algorithms}
 
+\section{Definitions}
+\begin{definition}[Consensus matrix]
+	Given $S$ clusterings for a dataset of $N$ items, $c_s=(c_{s1}, \ldots, c_{sN})$, the \emph{Consensus matrix} is a $N \times N$ matrix where the $(i, j )^{th}$ entry records the proportions of clusterings for which items $i$ and $j$ are allocated the same label. More formally, it is the matrix $\mathbb{C}$ such that
+	\begin{align}
+		\mathbb{C}(i, j) = \frac{1}{S} \sum_{s=1}^S \mathbf{I}(c_{si} = c_{sj})
+	\end{align}
+	where $\mathbb{I}(\cdot)$ is the indicator function taking a value of 1 is the argument is true and 0 otherwise.
+\end{definition}
+
+\begin{definition}[Posterior similarity matrix]
+	A \emph{Consensus matrix} for which all the clusterings are generated from a converged Markov chain for some Bayesian clustering model. Sometimes abbreviated to \emph{PSM}.
+\end{definition}
 
 \section{The models} \label{sec:models}
 In the simulations (see section \ref{sec:simulations}) where individual datasets are modelled a \emph{Bayesian mixture model} is used. We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
@@ -198,7 +212,7 @@ A number of scenarios are defined by the parameters that they use in generating 
 %	\caption{Caption above table.}
 	\begin{tabular}{|l|ccccccc|}
 	\hline
-	\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta_{\mu}$ & $\sigma^2$ & $\pi$\\
+	\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta\mu$ & $\sigma^2$ & $\pi$\\
 	\hline 
 	2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
 	%		\hline
@@ -206,9 +220,9 @@ A number of scenarios are defined by the parameters that they use in generating 
 	%		\hline
 	Base Case & 200 & 20 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 	%		\hline
-	Large standard deviation & 200 & 20 & 0 & 5 & 1.0 & 3 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
+	Large standard deviation & 200 & 20 & 0 & 5 & 1.0 & 9 & $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
 	%		\hline
-	Large standard deviation & 200 & 20 & 0 & 5 & 1.0 & 5 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+	Large standard deviation & 200 & 20 & 0 & 5 & 1.0 & 25 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 	%		\hline
 	Irrelevant features & 200 & 20 & 10 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 	%		\hline
@@ -299,23 +313,44 @@ For each simulation 10 chains of 1 million iterations were run, thinning to ever
 \end{itemize}
 The Geweke convergence diagnostic is a standard Z-score; it compares the sample mean of two sets of samples (in this case buckets of samples from the first half of the samples to the sample mean of the entire second half of samples). It is calculated under the assumption that the two parts of the chain are asymptotically independent and if this assumption holds than the scores are expected to be standard normally distributed presenting evidence for within chain stationarity. If a chain's Geweke convergence diagnostic passed a Shapiro-Wilks test for normality \citep{shapiro1965analysis} (based upon a threshold of 0.05), it was considered to have achieved stationarity and to be included in the model performance analysis. 
 
-$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. It is their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} that is the final check of convergence.
+$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. It is their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} that is the final check of convergence. An example of the $\hat{R}$ series across the 100 simulations for a scenario where chains are well-behaved is shown in figure \ref{fig:simBaseCaseRhat}.
+
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.65]{./Images/Simulations/Convergence/base_caseConvergenceAcrossChains.png}
+	\caption{The $\hat{R}$ values for each simulation (in dotted grey), the median value and the interquartile range. One can see that $\hat{R}$ approaches 1.0. The "0\% of simulations failed to converge" is a statement based upon the low values of stable $\hat{R}$.}
+	\label{fig:simBaseCaseRhat}
+\end{figure}
 
 We focus upon stationarity of the continuous variables. This is as convergence of the allocation labels is difficult due to the label-switching problem. In our simulations, the only recorded continuous variable is the concentration parameter of the Dirichlet distribution for the component weights. 
 
 The samples from the ``stationary'' chains were pooled and a Posterior similarity matrix created. There are three possibilities to consider this decision under.
 \begin{itemize}
-	\item The chains are converged and agree upon the distribution sampled.
-	\item The chains are not in agreement upon the partition sampled, becoming trapped in different modes. However, a mode does dominate being the mode present in a majority of chains.
+	\item The chains are converged and agree upon the distribution sampled (see figure \ref{fig:simPSMsAgreeExample} for an example).
+	\item The chains are not in agreement upon the partition sampled, becoming trapped in different modes. However, a mode does dominate being the mode present in a majority of chains (see figure \ref{fig:simPSMsDisagreeExample} for an example of this behaviour).
 	\item The chains are not in agreement and no one mode dominates among chains.
 \end{itemize}
 In the first case pooling has no effect upon the predicted clustering compared to using any one chain. In the second case it feels natural that one would use the mode that dominates. Pooling the samples effectively does this for the predictive performance of the method as the mode with the greatest number of samples across the chains dominates, however the uncertainty for this mode is increased. In the third case the analysis is non-trivial and further thought, chains and samples would be required. Thankfully the generating process used means that only a small number of modes ever emerge in the PSMs and this case does not arise (based upon the simulations we investigated).
+
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.65]{./Images/Simulations/PSMs/large_standard_deviation_3Sim1.png}
+	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first large standard deviation scenario from table \ref{table:scenarioTable}. This is an example of all stationary chains agreeing in a simulation (and thus pooling of samples is no different to using any choice of chain for the performance analysis). Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 2.}
+	\label{fig:simPSMsAgreeExample}
+\end{figure}
+
+\begin{figure} %[!tpb]
+	\centering
+	\includegraphics[scale=0.65]{./Images/Simulations/PSMs/small_n_large_p_baseSim1.png}
+	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first small $N$, large $P$ scenario from table \ref{table:scenarioTable}. This is an example of different chains becoming trapped in different modes, but one mode (which does represent the generating structure well) is dominant, being fully present in 3 of the 6 chains, with the two other modes present having significant overlap. Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 3.}
+	\label{fig:simPSMsDisagreeExample}
+\end{figure}
 
 \subsection{Consensus clustering analysis} 
 A range of ensembles are investigated. All combinations of chain depth, $R=(1, 10, 100, 1000, 10000)$, and the number of chains, $S=(1, 10, 30, 50, 100)$ were used, a total of 25 different ensembles. A consensus matrix was constructed from the samples generated by each ensemble by finding the proportion of samples within which any pair of items are coclustered.
 
 \subsection{\texttt{Mclust}}
-\texttt{Mclust} was called using the default settings and a range of inputs for the choice of $K$. This was $K = (2, \ldots, \min(\frac{N}{2}, 50))$. The choice of $K=\min(\frac{N}{2}, 50)$ was made to mirror the default value of $K_{max}=50$ used for the overfitted mixture models, with the limit of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. The model choice is performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}.
+\texttt{Mclust} was called using the default settings and a range of inputs for the choice of $K$. This was $K = (2, \ldots, \min(\frac{N}{2}, 50))$. The choice of $K=\min(\frac{N}{2}, 50)$ was made to mirror the default value of $K_{max}=50$ used for the overfitted mixture models, with the bound of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. The model choice is performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}.
 
 % An example of each scenario may be seen in figure \ref{fig:genData}
 

@@ -159,6 +159,7 @@ for (i in 1:n_scn) {
   }
 }
 
+# write.csv(psm_df_full, "./Data/Simulations/PSMLongData.csv")
 
 # Subset and add the pooled samples
 cms_used <- cms[c(1, 3, 5, 6, 8, 10, 11, 12, 14)]

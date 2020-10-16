@@ -29,6 +29,7 @@ library(stringr)
 library(ggplot2)
 library(pheatmap)
 library(patchwork)
+library(scales)
 
 # Predicted clustering
 library(mcclust)
@@ -94,7 +95,7 @@ orig_data <- data_files %>%
   set_names(datasets)
 
 # Save plots in this directory
-save_dir <- "./Images/Yeast/Bayesian/"
+save_dir <- "./SupplementaryMaterial/Images/Yeast/"
 
 # Number of items
 N <- orig_data[[1]] %>%
@@ -223,6 +224,7 @@ for (i in 1:n_chains) {
   }
 }
 geweke_df$Seed <- factor(geweke_df$Seed)
+# geweke_df$Parameter <- factor(geweke_df$Parameter)
 
 # The 1.96 threshold for 0.05 significance on a standard normal distribution
 c_limit <- stats::qnorm(1 - 0.05 / 2)
@@ -231,18 +233,28 @@ c_limit <- stats::qnorm(1 - 0.05 / 2)
 y_limit <- max(c(c_limit, abs(geweke_df$Geweke_statistic)))
 
 p_geweke <- geweke_df %>%
-  ggplot(aes(x = Start_iteration, y = Geweke_statistic, color = Seed)) +
+  mutate(Parameter_expr = recode_factor(Parameter, 
+                                   MassParameter_1 = "alpha[1]",
+                                   MassParameter_2 = "alpha[2]",
+                                   MassParameter_3 = "alpha[3]",
+                                   Phi_12 = "phi[12]",
+                                   Phi_13 = "phi[13]",
+                                   Phi_23 = "phi[23]")) %>% 
+  ggplot(aes(x = Start_iteration, y = Geweke_statistic, color = Parameter_expr)) +
   geom_line() +
-  facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
+  # facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
+  facet_wrap(~Seed, labeller = as_labeller(chain_labels)) +
   ggplot2::geom_hline(yintercept = c_limit, linetype = "dashed", color = "grey") +
   ggplot2::geom_hline(yintercept = -c_limit, linetype = "dashed", color = "grey") +
   ggplot2::ylim(-y_limit, y_limit) +
   ggplot2::labs(
     x = "First iteration in segment",
     y = "Geweke's convergence dianostic",
-    title = "Within chain convergence"
+    title = "Within chain convergence",
+    color = "Parameter"
   ) +
-  scale_color_viridis_d()
+  # scale_colour_discrete(labels = parse_format())
+  scale_color_viridis_d(labels = parse_format())
 
 p_geweke
 
@@ -373,7 +385,7 @@ p_geweke +
   )
 
 ggsave("./SupplementaryMaterial/Images/Yeast/Convergence/gewekePlot.png",
-  height = 4, width = 6
+  height = 6, width = 6
 )
 
 p_geweke_reduced +
@@ -655,105 +667,140 @@ for (dataset in datasets) {
     )
 
   # Save!
-  ggsave(paste0(save_dir, dataset, "PSMcomparisonReduced.png"),
-    plot = p_psm,
-    height = 14,
-    width = 12
-  )
+  # ggsave(paste0(save_dir, dataset, "PSMcomparisonReduced.png"),
+  #   plot = p_psm,
+  #   height = 6,
+  #   width = 4
+  # )
 }
 
+dataset_labels <- datasets %>% 
+  set_names(datasets)
+
+psm_plt_data_all$Dataset <- factor(psm_plt_data_all$Dataset, levels = datasets)
+psm_all <- psm_plt_data_all %>%
+  ggplot(aes(X, Y, fill = Prop)) +
+  geom_tile() +
+  facet_grid(Dataset ~ Chain, labeller = labeller(Dataset = dataset_labels,
+                                                  Chain = chain_labels)
+             ) +
+  scale_fill_gradient(low = "white", high = "#146EB4") +
+  labs(
+    title = "Yeast dataset",
+    subtitle = "Posterior similarity matrices",
+    x = "Gene",
+    y = "Gene",
+    fill = "Coclustering\nproportion"
+  ) +
+  theme(
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    axis.title.y = element_text(size = 10.5),
+    axis.title.x = element_text(size = 10.5),
+    plot.title = element_text(size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    strip.text.x = element_text(size = 10.5),
+    legend.text = element_text(size = 10.5)
+  )
+
+ggsave(paste0(save_dir, "YeastPSMcomparisonReduced.png"),
+  plot = psm_all,
+  height = 6,
+  width = 6
+)
 
 # Iterate over each dataset and save a grid of heatmaps
   
 
-  # The indices and CMs of the tibble corresponding to the current dataset
-  curr_inds <- which(alloc_data_reduced$Dataset == "PPI")
-  curr_psms <- alloc_data_reduced$PSM[curr_inds]
-  chains <- alloc_data_reduced$Seed[curr_inds]
-  
-  # Find the order for the rows and oclumns of the consensus matrices based on
-  # the largest & deepest ensemble (here Consensus(1001, 1000))
-  row_order <- findOrder(curr_psms[[1]])
-  
-  # Set up the re-ordered items (this will be used to align the data when in
-  # long format)
-  item_order <- item_names[row_order]
-  
-  # Iterate over the different ensembles converting the consensus matrics to
-  # long format and prepare them for ggplot
-  for (i in 1:n_kept) {
-    .psm <- curr_psms[[i]]
-    row_order <- findOrder(.psm)
-    item_order <- item_names[row_order]
-    
-    
-    .df <- .psm[row_order, row_order] %>%
-      
-      # Convert to tibble adding the row names as a variable
-      as_tibble(rownames = "Gene_i") %>%
-      
-      # Pivot to long form
-      pivot_longer(cols = -Gene_i, names_to = "Gene_j", values_to = "Prop") %>%
-      
-      # Add variables to indicate the position of the grid for (gene_i, gene_j)
-      # on the heatmap based on the ordering defined previously and add the
-      # ensemble information
-      mutate(
-        X = match(Gene_i, item_order),
-        Y = N - match(Gene_j, item_order),
-        Chain = chains[i]
-      )
-    
-    # Bind the data frames together
-    if (i == 1) {
-      psm_plt <- .df
-    } else {
-      psm_plt <- rbind(psm_plt, .df)
-    }
-  }
-  
-  # Add a dataset label
-  psm_plt$Dataset <- "PPI"
-  
-  if (dataset == datasets[[1]]) {
-    psm_plt_data_all <- psm_plt
-  } else {
-    psm_plt_data_all <- rbind(psm_plt_data_all, psm_plt)
-  }
-  
-  # Plot a grid of consensus matrices where column number is increasing the
-  # number of samples used and row number corresponds to a value of chain depth
-  p_psm <- psm_plt %>%
-    ggplot(aes(X, Y, fill = Prop)) +
-    geom_tile() +
-    facet_wrap(~Chain, labeller = labeller(Chain = chain_labels)) +
-    scale_fill_gradient(low = "white", high = "#146EB4") +
-    labs(
-      title = dataset,
-      subtitle = "Posterior similarity matrices",
-      x = "Gene",
-      y = "Gene",
-      fill = "Coclustering\nproportion"
-    ) +
-    theme(
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      panel.grid = element_blank(),
-      axis.title.y = element_text(size = 10.5),
-      axis.title.x = element_text(size = 10.5),
-      plot.title = element_text(size = 18, face = "bold"),
-      plot.subtitle = element_text(size = 14),
-      strip.text.x = element_text(size = 10.5),
-      legend.text = element_text(size = 10.5)
-    )
-  
-  # Save!
-  ggsave(paste0("./SupplementaryMaterial/Images/Yeast/PPIPSMcomparisonReducedOwnOrder.png"),
-         plot = p_psm,
-         height = 14,
-         width = 12
-  )
-
-my_order <- findOrder(orig_data$PPI)
-compareSimilarityMatricesAnnotated(matrices = list(orig_data$PPI[my_order, ], .psm[my_order, my_order]),
-                                   order_cols = F, order_rows = F)
+#   # The indices and CMs of the tibble corresponding to the current dataset
+#   curr_inds <- which(alloc_data_reduced$Dataset == "PPI")
+#   curr_psms <- alloc_data_reduced$PSM[curr_inds]
+#   chains <- alloc_data_reduced$Seed[curr_inds]
+#   
+#   # Find the order for the rows and oclumns of the consensus matrices based on
+#   # the largest & deepest ensemble (here Consensus(1001, 1000))
+#   row_order <- findOrder(curr_psms[[1]])
+#   
+#   # Set up the re-ordered items (this will be used to align the data when in
+#   # long format)
+#   item_order <- item_names[row_order]
+#   
+#   # Iterate over the different ensembles converting the consensus matrics to
+#   # long format and prepare them for ggplot
+#   for (i in 1:n_kept) {
+#     .psm <- curr_psms[[i]]
+#     row_order <- findOrder(.psm)
+#     item_order <- item_names[row_order]
+#     
+#     
+#     .df <- .psm[row_order, row_order] %>%
+#       
+#       # Convert to tibble adding the row names as a variable
+#       as_tibble(rownames = "Gene_i") %>%
+#       
+#       # Pivot to long form
+#       pivot_longer(cols = -Gene_i, names_to = "Gene_j", values_to = "Prop") %>%
+#       
+#       # Add variables to indicate the position of the grid for (gene_i, gene_j)
+#       # on the heatmap based on the ordering defined previously and add the
+#       # ensemble information
+#       mutate(
+#         X = match(Gene_i, item_order),
+#         Y = N - match(Gene_j, item_order),
+#         Chain = chains[i]
+#       )
+#     
+#     # Bind the data frames together
+#     if (i == 1) {
+#       psm_plt <- .df
+#     } else {
+#       psm_plt <- rbind(psm_plt, .df)
+#     }
+#   }
+#   
+#   # Add a dataset label
+#   psm_plt$Dataset <- "PPI"
+#   
+#   if (dataset == datasets[[1]]) {
+#     psm_plt_data_all <- psm_plt
+#   } else {
+#     psm_plt_data_all <- rbind(psm_plt_data_all, psm_plt)
+#   }
+#   
+#   # Plot a grid of consensus matrices where column number is increasing the
+#   # number of samples used and row number corresponds to a value of chain depth
+#   p_psm <- psm_plt %>%
+#     ggplot(aes(X, Y, fill = Prop)) +
+#     geom_tile() +
+#     facet_wrap(~Chain, labeller = labeller(Chain = chain_labels)) +
+#     scale_fill_gradient(low = "white", high = "#146EB4") +
+#     labs(
+#       title = dataset,
+#       subtitle = "Posterior similarity matrices",
+#       x = "Gene",
+#       y = "Gene",
+#       fill = "Coclustering\nproportion"
+#     ) +
+#     theme(
+#       axis.text = element_blank(),
+#       axis.ticks = element_blank(),
+#       panel.grid = element_blank(),
+#       axis.title.y = element_text(size = 10.5),
+#       axis.title.x = element_text(size = 10.5),
+#       plot.title = element_text(size = 18, face = "bold"),
+#       plot.subtitle = element_text(size = 14),
+#       strip.text.x = element_text(size = 10.5),
+#       legend.text = element_text(size = 10.5)
+#     )
+#   
+#   # Save!
+#   ggsave(paste0("./SupplementaryMaterial/Images/Yeast/PPIPSMcomparisonReducedOwnOrder.png"),
+#          plot = p_psm,
+#          height = 14,
+#          width = 12
+#   )
+# 
+# my_order <- findOrder(orig_data$PPI)
+# compareSimilarityMatricesAnnotated(matrices = list(orig_data$PPI[my_order, ], .psm[my_order, my_order]),
+#                                    order_cols = F, order_rows = F)

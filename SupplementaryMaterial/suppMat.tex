@@ -48,6 +48,8 @@ Description of models used and analyses performed.
 \end{definition}
 
 \section{The models} \label{sec:models}
+
+\subsection{Individual dataset}
 In the simulations (see section \ref{sec:simulations}) where individual datasets are modelled a \emph{Bayesian mixture model} is used. We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
 \begin{align}
 	x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
@@ -71,7 +73,22 @@ An assumption that is frequently used is that the density of each feature is ind
 	%	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
 	%	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
 \end{align}
-The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixNormalsDAG}. 
+Additional flexibility is provided by the inclusion of hyperparameters on the priors for $\pi$ and $\theta$, denoted $\alpha$ and $\eta$ respectively. In our context where $\theta=(\mu, \sigma^2)$, we use
+\begin{align}
+	\sigma^2 &\sim \Gamma^{-1}(a, b) \\
+	\mu &\sim \mathcal{N}(\xi, \frac{1}{\lambda} \sigma^2)
+\end{align}
+
+
+The directed acyclic graph (\textbf{DAG}) for this model is shown in figure \ref{fig:simpleMixNormalsDAG}. The value of the hyperparameters we use are
+\begin{align}
+	\alpha &= 1, \\
+	\xi &= 0.0, \\
+	\lambda &= 1.0,\\
+	a &= 2.0,\\
+	b &= 2.0.
+\end{align}
+
 \begin{figure}
 	\centering
 	\begin{tikzpicture}[background rectangle/.style={fill=white!1}, show background rectangle, scale=.4, auto,>=latex']
@@ -79,12 +96,12 @@ The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixN
 		\tikzstyle{connect}=[-latex, thick]
 		\tikzstyle{box}=[rectangle, draw=black!100]
 		%\node[main] (k) {$K$ };
-		\node[main, rectangle] (kappa) {$1$};
-		\node[main, rectangle] (xi) [left =of kappa] {$0$ };
-		\node[main, rectangle] (alpha) [left =of xi] {$1$ };
+		\node[main, rectangle] (kappa) {$\lambda$};
+		\node[main, rectangle] (xi) [left =of kappa] {$\xi$ };
+		\node[main, rectangle] (alpha) [left =of xi] {$\alpha$ };
 		%		\node[main] (k) [above =of alpha] {$K$};
-		\node[main, rectangle] (alpha2) [right =of kappa] {$2$ };
-		\node[main, rectangle] (beta) [right =of alpha2] {$2$ };
+		\node[main, rectangle] (alpha2) [right =of kappa] {$a$ };
+		\node[main, rectangle] (beta) [right =of alpha2] {$b$ };
 		\node[main] (pi) [below =of alpha] {$\pi_k$ };
 		\node[main] (c_i) [below =of pi] {$c_n$};
 		\node[main] (mu) [below=of xi] {$\mu_{kp}$};		
@@ -107,6 +124,7 @@ The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixN
 		(c_i) edge [connect] (x_i)
 		(mu) edge [connect] (x_i)
 		(sigma) edge [connect] (x_i)
+		(sigma) edge [connect] (mu)
 		(xi) edge [connect] (mu)
 		(kappa) edge [connect] (mu)
 		(alpha2) edge [connect] (sigma)
@@ -117,12 +135,20 @@ The directed acyclic graph for this model is shown in figure \ref{fig:simpleMixN
 	\caption{Directed acyclic graph for the mixture of Gaussians used.}
 	\label{fig:simpleMixNormalsDAG}
 \end{figure}
-Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. We use MDI to model the clustering structure of the Yeast datasets in section \ref{sec:yeast}. The modelling of the common information is described by the prior distribution on item allocation for $L$ datasets
+
+\subsection{Integrative clustering}
+We are interested in the use of Consensus clustering for integrative methods. We use Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} as an example of a Bayesian integrative clustering method. 
+
+%We use the implementation made by \citep{mason2016mdi} which produces MCMC samples of the allocation vector and is thus suited to our construction of Consensus clustering.
+
+%Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. We use MDI to model the clustering structure of the Yeast datasets in section \ref{sec:yeast}. The modelling of the shared information is described by the prior distribution on item allocation for $L$ datasets
+
+In MDI information is shared between datasets. Dataset specific clusterings are modelled with more information shared between datasets with more similar clustering structure. This can be seen in the prior on the allocation of the $n^{th}$ item across $L$ datasets
 \begin{align}
 	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{l=1}^{L-1}\prod_{m=l+1}^L(1 + \phi_{lm} \mathbb{I}(c_{nl} = c_{nm})) \textrm{ for $n = 1,\ldots,N$.}
 	\label{eqn:mdiPrior}
 \end{align}
-$\phi_{lm}$ is the parameter defined by the correlation of the clusterings for the $l^{th}$ and $m^{th}$ datasets. As $\phi_{lm}$ increases more mass is placed on the common partition for these datasets. Conversely, in the limit $\phi_{lm}\to 0$ we have independent mixture models. In this way the correlation of the clustering between each pair of datasets controls how information is shared across each clustering, with more correlated datasets influencing each other and uncorrelated datasets remaining independent. The DAG for this model for three datasets is shown in figure \ref{fig:MDIDAG}.
+$\phi_{lm}$ is the parameter defined by the correlation of the clusterings for the $l^{th}$ and $m^{th}$ datasets and is also sampled in each iteration. As $\phi_{lm}$ increases more mass is placed on the common partition for these datasets. Conversely, in the limit $\phi_{lm}\to 0$ we have independent mixture models. The DAG for this model for three datasets is shown in figure \ref{fig:MDIDAG}.
 \begin{sidewaysfigure}
 	\centering
 	\begin{tikzpicture}[scale=.65, auto,>=latex']
@@ -294,11 +320,11 @@ A number of scenarios are defined by the parameters that they use in generating 
 	}
 	\caption{Data generation for a mixture of Gaussian with independent features. This algorithm is implemented in the \texttt{generateSimulationDataset} function from the \texttt{mdiHelpR} package available at \texttt{www.github.com/stcolema/mdiHelpR}.}
 \end{algorithm}
-Each scenario is seen as testing certain concepts or else specific characteristics of real data. 
+We included each scenario to test certain concepts of the method and to explore behaviour due to specific characteristics of real data.
 \begin{itemize}
-	\item \emph{2D}: a low dimensional scenario within which \texttt{Mclust} is epxected to perform well and the long chains are expected to converge and explore the full support of the posterior distribution.
+	\item \emph{2D}: a low dimensional scenario within which we expect \texttt{Mclust} to perform well and the long chains to converge and explore the full support of the posterior distribution.
 	\item \emph{No structure}: included to reassure fears that Consensus clustering has a predilection to finding clusters where none exist \citep{senbabaoglu2014reassessment,senbabaouglu2014critical}.
-	\item \emph{Base case}: a highly informative setting used to benchmark a number of other scenarios that are variations of this setting.
+	\item \emph{Base case}: highly informative datasets that all methods are expect to find the true generating labels quite easily and is included to benchmark other scenarios that are variations of this setting.
 	\item \emph{Large standard deviation}: these two scenarios investigate the degree of distinction required between clusters for the methods to uncover their structure.
 	\item \emph{Irrelevant features}: these scenarios investigate how robust the methods are to irrelevant features.
 	\item \emph{Varying proportions}: these scenarios investigate how well each method uncovers clusters when the clusters have significantly different membership counts.
@@ -306,25 +332,25 @@ Each scenario is seen as testing certain concepts or else specific characteristi
 \end{itemize}
 
 \subsection{Bayesian analysis} \label{sec:simBayesianAnalysis}
-For each simulation 10 chains of 1 million iterations were run, thinning to every thousandth sample. A burn-in of 10,000 iterations was then applied to the samples, leaving 990 samples per chain. These chains were investigated for 
+For each simulation we run 10 chains of 1 million iterations. These chains are then thinned to every thousandth sample. We used discarded the first 10,000 iterations to remove burn-in bias. This leaves 990 samples per chain. To check if the chains were converged we used
 \begin{itemize}
-	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
-	\item across-chain convergence using the potential scale reduction factor \citep[$\hat{R}$, ][]{gelman1992inference} and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$},][]{vats2018revisiting}.
+	\item the Geweke convergence diagnostic \citep{geweke1991evaluating} to investigate within-chain stationarity, and
+	\item the potential scale reduction factor \citep[$\hat{R}$, ][]{gelman1992inference} and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$},][]{vats2018revisiting} to check across-chain convergence.
 \end{itemize}
-The Geweke convergence diagnostic is a standard Z-score; it compares the sample mean of two sets of samples (in this case buckets of samples from the first half of the samples to the sample mean of the entire second half of samples). It is calculated under the assumption that the two parts of the chain are asymptotically independent and if this assumption holds than the scores are expected to be standard normally distributed presenting evidence for within chain stationarity. If a chain's Geweke convergence diagnostic passed a Shapiro-Wilks test for normality \citep{shapiro1965analysis} (based upon a threshold of 0.05), it was considered to have achieved stationarity and to be included in the model performance analysis. 
+The Geweke convergence diagnostic is a standard Z-score; it compares the sample mean of two sets of samples (in this case buckets of samples from the first half of the samples to the sample mean of the entire second half of samples). It is calculated under the assumption that the two parts of the chain are asymptotically independent and if this assumption holds (i.e. the chain is sampling the same distribution in both samples) than the scores are expected to be standard normally distributed. If a chain's Geweke convergence diagnostic passed a Shapiro-Wilks test for normality \citep{shapiro1965analysis} (based upon a threshold of 0.05), we considered it to have achieved stationarity and included it in the model performance analysis. 
 
-$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. It is their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} that is the final check of convergence. An example of the $\hat{R}$ series across the 100 simulations for a scenario where chains are well-behaved is shown in figure \ref{fig:simBaseCaseRhat}.
+$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. We use their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} as the final check of convergence. An example of the $\hat{R}$ series across the 100 simulations for a scenario where chains are well-behaved is shown in figure \ref{fig:simBaseCaseRhat}.
 
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.65]{./Images/Simulations/Convergence/base_caseConvergenceAcrossChains.png}
-	\caption{The $\hat{R}$ values for each simulation (in dotted grey), the median value and the interquartile range. One can see that $\hat{R}$ approaches 1.0. The "0\% of simulations failed to converge" is a statement based upon the low values of stable $\hat{R}$.}
+	\caption{The $\hat{R}$ values for each simulation (in dotted grey), the median value and the interquartile range. One can see that $\hat{R}$ approaches 1.0. The ``0\% of simulations failed to converge" is a statement based upon the percentage of simulations which passed the test of stable $\hat{R}$.}
 	\label{fig:simBaseCaseRhat}
 \end{figure}
 
-We focus upon stationarity of the continuous variables. This is as convergence of the allocation labels is difficult due to the label-switching problem. In our simulations, the only recorded continuous variable is the concentration parameter of the Dirichlet distribution for the component weights. 
+We focus upon stationarity of the continuous variables. This is as assesing convergence of the allocation labels is difficult due to the label-switching problem. In our simulations, the only recorded continuous variable is the concentration parameter of the Dirichlet distribution for the component weights. 
 
-The samples from the ``stationary'' chains were pooled and a Posterior similarity matrix created. There are three possibilities to consider this decision under.
+We pooled the samples from the stationary chains and used these to form a Posterior similarity matrix. There are three possibilities to consider this decision under.
 \begin{itemize}
 	\item The chains are converged and agree upon the distribution sampled (see figure \ref{fig:simPSMsAgreeExample} for an example).
 	\item The chains are not in agreement upon the partition sampled, becoming trapped in different modes. However, a mode does dominate being the mode present in a majority of chains (see figure \ref{fig:simPSMsDisagreeExample} for an example of this behaviour).
@@ -382,9 +408,7 @@ The "Yeast data" consists of three \emph{S. cerevisiae} datasets with gene produ
 The datasets were reduced to 551 items by considering only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles with no missing data in the PPI and ChIP-chip data, following the same steps as the original MDI paper \citep{kirk2012bayesian}. The datasets were modelled using a base measure of a Gaussian process in the Timecourse dataset and Multinomial distributions in the ChIP-chip and PPI datasets.
 
 \subsection{Bayesian analysis} \label{sec:yeastBayesianAnalysis}
-10 chains were run for 36 hours, resulting in 676,000 iterations per chain, thinned to every thousandth sample, resulting in 676 samples per chain. 
-%\subsubsection{Convergence} \label{sec:bayesianConvergence}
-Similar to section \ref{sec:simBayesianAnalysis} these chains were investigated for 
+We ran 10 chains of MDI for 36 hours saving every thousandth sample. This resulted in chains of varying length. We reduced the chains to 676 samples as this was the number of samples achieved by the slowest chain. Similar to section \ref{sec:simBayesianAnalysis} these chains were then investigated for 
 \begin{itemize}
 	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
 	\item across-chain convergence using $\hat{R}$ \citep{gelman1992inference} and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$},][]{vats2018revisiting}.
@@ -393,54 +417,28 @@ Similar to section \ref{sec:simBayesianAnalysis} these chains were investigated 
 %
 %$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. It is their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} that is the final check of convergence.
 %
-Again we focus upon stationarity of the continuous variables. In MDI, the continuous variables consist of the concentration parameters of the Dirichlet distribution for the dataset-specific component weights and the $\phi_{ij}$ parameter associated with the correlation between the $i^{th}$ and $j^{th}$ datasets. 
-
-We plot the Geweke-statistic for each chain in figure \ref{fig:gewekePlot} and the series of the $\phi$ parameters alone in figure \ref{fig:gewekePhiPlot}, excluding the most poorly behaved chain (chain 9). Very few of the chains appear to be truly stationary, but some behave far worse than others. Based upon this we exclude chains 1, 2, 4, 6 and 9, restricting the analysis to the 5 better, if not ideally, behaved chains. Further evidence that even these chains are not converged can be see in figure \ref{fig:gelmanPlot}, where the values of $\hat{R}$ do not drop below 1.25 for the $\phi$ parameters. Stable $\hat{R}$ is also too high, with several million more samples recommended before convergence is expected.
-
-Investigating the Posterior similarity matrices (PSMs) we can see that the Timecourse data appears to have only the mildest of disagreement between the PSMs from different chains. The lack of convergence between chains emerges in the ChIP-chip data and, to a far greater degree, in the PPI data.
-
+Again we focus upon stationarity of the continuous variables. In the implementation of MDI we used \cite{mason2016mdi}, the recorded continuous variables are the concentration parameters of the Dirichlet distribution for the dataset-specific component weights and the $\phi_{ij}$ parameter associated with the correlation between the $i^{th}$ and $j^{th}$ datasets. 
 \begin{figure}
 	\centering
 	\includegraphics[scale=1.0]{./Images/Yeast/Convergence/gewekePlot.png}
-	\caption{Chain 9 can be seen to have the most extreme behaviour in the distribution of the Geweke diagnostic for $\phi_{12}, \phi_{13}$ and $\phi_{23}$. We remove this chain from the analysis. We also see that is in these same variables that the chains reveal poor behaviour and focus on these.}
+	\caption{Chain 9 can be seen to have the most extreme behaviour in the distribution of the Geweke diagnostic for the parameters. We remove this chain from the analysis. Of the remaining chains we believe that 1, 2, 4 and 6 express the distributions furthest removed from the desired behaviour and are dropped from the analysis.}
 	\label{fig:gewekePlot}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.7]{./Images/Yeast/Convergence/gewekePhiChain.png}
-	\caption{None of the chains appear to be standard normal in their distribution. Chain 4 behaves very strangely and is also dropped from the analysis. Of the remaining chains there is less clear distinctions, but chains 1, 2, and 6 appear most extreme and thus are dropped.}
-	\label{fig:gewekePhiPlot}
-\end{figure}
-
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.7]{./Images/Yeast/Convergence/gewekePhiChain.png}
+%	\caption{None of the chains appear to be standard normal in their distribution. Chain 4 behaves very strangely and is also dropped from the analysis. Of the remaining chains there is less clear distinctions, but chains 1, 2, and 6 appear most extreme and thus are dropped.}
+%	\label{fig:gewekePhiPlot}
+%\end{figure}
+We plot the Geweke-statistic for each chain in figure \ref{fig:gewekePlot}. No chain is perfectly behaved; as we cannot reduce to the set of stationary chains we thus exclude the most poorly behaved chains. Our lack of belief in the convergence of these chains is fortified by the behaviour of $\hat{R}$ (which can be seen in figure \ref{fig:gelmanPlot}) and the different distributions sampled for the $\phi_{lm}$ parameters shown in figure \ref{fig:bayesDensities}.
+%where the values of $\hat{R}$ do not drop below 1.25 for the $\phi$ parameters. Stable $\hat{R}$ is also too high, with several million more samples recommended before convergence is expected.
 \begin{figure}
 	\centering
 	\includegraphics[scale=1.0]{./Images/Yeast/Convergence/gelmanPlot.png}
 	\caption{The chains still appear to be unconverged with $\hat{R}$ remaining above 1.25 for the $\phi_{12}, \phi_{13}$ and $\phi_{23}$ parameters. Stable $\hat{R}$ is also too high with values of 1.049, 1.052 and 1.057.}
 	\label{fig:gelmanPlot}
 \end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.5]{./Images/Yeast/TimecoursePSMcomparisonReduced.png}
-	\caption{No marked difference.}
-	\label{fig:timecoursePSMs}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.5]{./Images/Yeast/ChIP-chipPSMcomparisonReduced.png}
-	\caption{Some difference.}
-	\label{fig:chipchipPSMs}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[scale=0.5]{./Images/Yeast/PPIPSMcomparisonReduced.png}
-	\caption{These PSMs have very large disagreements between eachother. There is some common agreement in the square in the centre of each plot. However, the other sections (which consist of the most confident allocations) appear to completely fail to overlap.}
-	\label{fig:ppiPSMs}
-\end{figure}
-
 \begin{figure}
 	\centering
 	\includegraphics[scale=1]{./Images/Yeast/densityPlotReduced.png}
@@ -449,8 +447,40 @@ Investigating the Posterior similarity matrices (PSMs) we can see that the Timec
 	\label{fig:bayesDensities}
 \end{figure}
 
+We visualise the the PSMs for each dataset in figure \ref{fig:yeastPSMs}. 
+%The Timecourse data appears to have only the mildest of disagreement between the PSMs from different chains (see figure \ref{fig:timecoursePSMs}). The lack of convergence between chains emerges in the ChIP-chip data (figure \ref{fig:chipchipPSMs}) and, to a far greater degree, in the PPI data (figure \ref{fig:ppiPSMs}).
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=1.0]{./Images/Yeast/YeastPSMcomparisonReduced.png}
+	\caption{PSMs for each chain within each dataset. The PSMs are ordered by hierarchical clustering of the rows of the PSM for chain 3 in each dataset. There is no marked difference between the matrices for the Timecourse data with disagreement becoming more prominent in the ChIP-chip data and more so again in the PPI dataset.}
+	\label{fig:yeastPSMs}
+\end{figure}
+
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/TimecoursePSMcomparisonReduced.png}
+%	\caption{The entries of each matrix are ordered by hierarchical clustering of the PSM for chain 3. There is no marked difference between matrices.}
+%	\label{fig:timecoursePSMs}
+%\end{figure}
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/ChIP-chipPSMcomparisonReduced.png}
+%	\caption{The entries of each matrix are ordered by hierarchical clustering of the PSM for chain 3. Disagreement can be seen between each chain.}
+%	\label{fig:chipchipPSMs}
+%\end{figure}
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/PPIPSMcomparisonReduced.png}
+%	\caption{The entries of each matrix are ordered by hierarchical clustering of the PSM for chain 3. These PSMs express very large disagreement about the clustering. There is some agreement with the square in the centre of each plot appearing similar in each PSM. However, the other sections (which consist of the most confident allocations) appear to completely fail to overlap.}
+%	\label{fig:ppiPSMs}
+%\end{figure}
+
 \subsection{Consensus clustering analysis} \label{sec:consensusClustering}
-We investigate an ensemble of depth $R=1001$ and width $S=10000$. The consensus matrices for this ensemble was compared to those for the combinations of $R = (1, 101, 501, 1001, 5001, 10001)$, $S=(1, 100, 500, 1,000)$ in the three datasets. We use a heuristic to decide if the ensemble is sufficiently deep and wide to stop growing. For a given depth $r$ and width $s$, if there is no visible difference between the consensus matrices from the ensembles using $R=(a r, r)$, $S=(s, b s)$ (in our analysis we used $a=b=0.5$, but the smaller the choice of $a,b$ the more extreme the stopping criterion), then we consider the ensemble to have stabilised. This is inspired by the belief that a clustering method should produce stable results across similar datasets \citep{von2005towards, meinshausen2010stability}. We believe that if the method is still producing a partition that is visibly changing for additional chains and depth, than the random initialisation is influencing the result sufficiently that it is unlikely to be stable for similar datasets or reproducible for a random choice of seeds. An example of this logic can be seen in figures \ref{fig:chipchipCMs} and \ref{fig:ppiCMs} (and to a lesser degree in figure \ref{fig:timecourseCMs}). Here the decision to stop growing the ensemble is made as there is no apparent gain in increasing chain depth from $R=5001$ to $R=10001$, but it can be seen that a chain depth of $R=1001$ is insufficient as there is a marked difference in the consensus matrices for the PPI dataset particularly between $R=1001$ and $R=5001$. The number of chains appears required appears to have stabilised quickly, as there is no obvious change in increasing $S$ from 100.
+We investigate an ensemble of depth $R=1001$ and width $S=10000$. The consensus matrices for this ensemble was compared to those for the combinations of $R = (1, 101, 501, 1001, 5001, 10001)$, $S=(1, 100, 500, 1,000)$ in the three datasets. We decide the ensemble is sufficiently deep and wide to stop growing if,  for a given depth $r$ and width $s$, there is no visible difference between the consensus matrices from the ensembles using $R=(a r, r)$, $S=(s, b s)$. In our analysis we used $a=b=0.5$ (the smaller the choice of $a,b$ the more extreme the stopping criterion). This heuristic is inspired by the belief that a clustering method should produce stable results across similar datasets \citep{von2005towards, meinshausen2010stability}. We believe that if the method is still producing a partition that is visibly changing for additional chains and depth, than the random initialisation is influencing the result sufficiently that it is unlikely to be stable for similar datasets or reproducible for a random choice of seeds (i.e. not stable within the current dataset). An example of this logic can be seen in figures \ref{fig:chipchipCMs} and \ref{fig:ppiCMs} (and to a lesser degree in figure \ref{fig:timecourseCMs}). Here the decision to stop growing the ensemble is made as there is no apparent gain in increasing chain depth from $R=5001$ to $R=10001$, but it can be seen that a chain depth of $R=1001$ is insufficient as there is a marked difference in the consensus matrices for the PPI dataset particularly between $R=1001$ and $R=5001$. The number of chains appears required appears to have stabilised quickly, as there is no obvious change in increasing $S$ from 100.
 
 \begin{figure}
 	\centering
@@ -483,11 +513,13 @@ If we compare the distribution of sampled values for the $\phi$ parameters for t
 \end{figure}
 
 \subsection{GO term over-representation} \label{sec:goTermOverRep}
-To validate our analysis we test if the predicted clusters have a higher concentration of specific  Gene Ontology (GO) terms than would be expected by chance, conditioning on the background set of the 551 yeast genes in the data. The \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org} were used. Clusters were predicted from the Posterior similarity matrices of the chains kept from section \ref{sec:yeastBayesianAnalysis} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$). The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random given the 550 possible genes. The false discovery rate of this test was controlled using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and significance threshold of 0.05 was used. The over-represented GO terms were then plotted to compare methods. The three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) were all investigated. The over-represented terms are displayed in figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC} respectively. It can be seen that the Consensus clustering finds very similar results to the long chains, finding any term that is over-represented in each chain and a number of terms unique to this analysis.
+To validate the predicted clusters we test if they contain a higher concentration of specific Gene Ontology (GO) terms than would be expected by chance. Clusters were predicted from the PSMs of the chains kept from section \ref{sec:yeastBayesianAnalysis} visualised in figure \ref{fig:yeastPSMs} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$) using the \texttt{maxpear} function from the R package \texttt{mcclust} \cite{fritsch2012mcclust} using default settings except for \texttt{k.max} which was set to 275 (the rounding down of $N/2$). To perform the GO term over-representation analysis we used the \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org}.
+
+We conditioned the test on the background set of the 551 yeast genes in the data. The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random given the 550 possible genes. The false discovery rate of this test was controlled using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and significance threshold of 0.05 was used. The over-represented GO terms were then plotted to compare methods. The three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) were all investigated. The over-represented terms are displayed in figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC} respectively. It can be seen that the Consensus clustering finds very similar results to the long chains, finding any term that is over-represented in each chain and a number of terms unique to itself. Very few terms found by a single chain are over-represented in the clustering from the ensemble.
 
 \begin{sidewaysfigure}
 	\centering
-	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompMF.png}
+	\includegraphics[scale=0.5]{./Images/Yeast/goEnrichmentCompMF.png}
 	\caption{.}
 	\label{fig:yeastGOMF}
 \end{sidewaysfigure}

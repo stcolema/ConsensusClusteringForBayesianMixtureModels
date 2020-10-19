@@ -1,4 +1,6 @@
 
+# Investigate and compare the CMs and PSMs for the simulations
+
 library(Matrix)
 library(mdiHelpR)
 library(magrittr)
@@ -33,8 +35,12 @@ title_str <- c(
   expression(paste("Irrelevant features (", P[n], " = 10)")),
   expression(paste("Irrelevant features (", P[n], " = 100)")),
   expression(paste("Irrelevant features (", P[n], " = 20)")),
-  expression(paste("Large standard deviation (", sigma^{2}, " = 9)")),
-  expression(paste("Large standard deviation (", sigma^{2}, " = 25)")),
+  expression(paste("Large standard deviation (", sigma^{
+    2
+  }, " = 9)")),
+  expression(paste("Large standard deviation (", sigma^{
+    2
+  }, " = 25)")),
   "No structure",
   "2D",
   expression(paste("Small ", N, " large ", P, " (", Delta, mu, " = 1.0)")),
@@ -56,6 +62,8 @@ cm_files <- list.files(cm_dir, full.names = T, pattern = ".txt$") %>%
 cms <- lapply(cm_files, function(x) {
   as.matrix(readMM(x)) * 1
 })
+
+# === PSMs =====================================================================
 
 psm_df_full <- NULL
 for (i in 1:n_scn) {
@@ -79,7 +87,7 @@ for (i in 1:n_scn) {
 
     # Convert from sparse format
     psms <- lapply(psm_files, function(x) {
-      as.matrix(readMM(x))
+      as.matrix(readMM(x)) * 1
     })
 
     # Create a long data.frame of the PSM entries ready for ggplot2 heatmapping
@@ -94,7 +102,7 @@ for (i in 1:n_scn) {
         mutate(Chain = chains[s])
 
       if (s == 1) {
-        psm_long_df <- .data
+        psm_long_df <- .dat
       } else {
         psm_long_df <- rbind(psm_long_df, .dat)
       }
@@ -117,7 +125,7 @@ for (i in 1:n_scn) {
     # Set up the X and Y co-ordinates for the entries on the heatmap
     row_order <- findOrder(psms[[1]])
     item_order <- item_names[row_order]
-    match(psm_long_df$Item_i, item_order)
+    # match(psm_long_df$Item_i, item_order)
 
     psm_long_df <- psm_long_df %>%
       mutate(X = match(Item_i, item_order), Y = N - match(Item_j, item_order))
@@ -158,6 +166,133 @@ for (i in 1:n_scn) {
     )
   }
 }
+
+# === CMs ======================================================================
+
+s_plotted <- c(1, 10, 30, 50, 100)
+r_plotted <- c(1, 10, 100, 1000, 10000)
+
+cm_df_full <- NULL
+for (i in 1:n_scn) {
+  for (j in sims) {
+    data <- read.csv(paste0(data_dir, scenarios[i], "/dataset_", j, ".csv"), row.names = 1)
+    truth <- readRDS(paste0(data_dir, scenarios[i], "/cluster_IDs_", j, ".Rds"))
+
+    N <- nrow(data)
+    item_names <- row.names(data)
+
+    # CMs
+    cm_dir <- paste0(data_dir, scenarios[i], "/CMs/")
+    cm_files <- list.files(cm_dir, full.names = T, pattern = paste0("Simulation", j, "ConsensusMatrix")) %>%
+      stringr::str_sort(numeric = T)
+
+    # Find the ensembles present
+    S_used <- cm_files %>%
+      str_match("S([:digit:]+)") %>%
+      magrittr::extract(, 2) %>%
+      as.numeric()
+
+    R_used <- cm_files %>%
+      str_match("N([:digit:]+)") %>%
+      magrittr::extract(, 2) %>%
+      as.numeric()
+
+    # The ensemble details (expect this to be the same in each scenario)
+    ensembles <- data.frame("S" = S_used, "R" = R_used)
+    n_ensembles <- nrow(ensembles)
+
+    # Convert from sparse format
+    cms <- lapply(cm_files, function(x) {
+      as.matrix(readMM(x)) * 1
+    })
+
+    if (length(cms) != n_ensembles) {
+      stop("Number of ensembles and number of CMs not matching.\n")
+    }
+
+    # Create a long data.frame of the PSM entries ready for ggplot2 heatmapping
+
+    for (k in 1:n_ensembles) {
+      if (ensembles$S[k] %in% s_plotted & ensembles$R[k] %in% r_plotted) {
+        .dat <- cms[[k]] %>%
+          set_rownames(item_names) %>%
+          set_colnames(item_names) %>%
+          as.data.frame() %>%
+          rownames_to_column(var = "Item_i") %>%
+          pivot_longer(-Item_i, values_to = "Prop", names_to = "Item_j") %>%
+          mutate(S = ensembles$S[k], R = ensembles$R[k])
+
+        if (k == 1) {
+          cm_long_df <- .dat
+        } else {
+          cm_long_df <- rbind(cm_long_df, .dat)
+        }
+      }
+    }
+
+    cm_long_df$Scenario <- scenario_str[i]
+    cm_long_df$Simulation <- j
+
+    # The method and model ID
+    cm_long_df$Method <- "Consensus clustering"
+    cm_long_df$Model <- paste0("CC(", cm_long_df$R, ",", cm_long_df$S, ")")
+
+    R_labels <- paste0("R = ", unique(R_used)) %>%
+      set_names(unique(R_used))
+
+    S_labels <- paste0("S = ", unique(S_used)) %>%
+      set_names(unique(S_used))
+
+    # factor(paste0(psm_long_df$Method, ": chain ", psm_long_df$Chain),
+    #        levels = unique(paste0(psm_long_df$Method, ": chain ", psm_long_df$Chain))
+    # )
+
+    # Set up the X and Y co-ordinates for the entries on the heatmap
+    row_order <- findOrder(cms[[n_ensembles]])
+    item_order <- item_names[row_order]
+    # match(cm_long_df$Item_i, item_order)
+
+    cm_long_df <- cm_long_df %>%
+      mutate(X = match(Item_i, item_order), Y = N - match(Item_j, item_order))
+
+    if (is.null(cm_long_df)) {
+      cm_df_full <- cm_long_df
+    } else {
+      cm_df_full <- rbind(cm_df_full, cm_long_df)
+    }
+
+    cm_plt <- cm_long_df %>%
+      ggplot(aes(x = X, y = Y, fill = Prop)) +
+      geom_tile() +
+      facet_grid(R ~ S, labeller = labeller(R = R_labels, S = S_labels)) +
+      scale_fill_gradient(low = "white", high = "#146EB4") +
+      labs(
+        title = title_str[i],
+        subtitle = paste0("Consensus matrices (simulation ", j, ")"),
+        x = "Item",
+        y = "Item",
+        fill = "Coclustering\nproportion"
+      ) +
+      theme(
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank(),
+        axis.title.y = element_text(size = 10.5),
+        axis.title.x = element_text(size = 10.5),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 10.5),
+        legend.text = element_text(size = 10.5)
+      )
+
+    ggsave(paste0("./SupplementaryMaterial/Images/Simulations/CMs/", scenarios[i], "Sim", j, ".png"),
+      plot = cm_plt,
+      height = 6, width = 8
+    )
+  }
+}
+
+# === Old comparison ===========================================================
 
 # write.csv(psm_df_full, "./Data/Simulations/PSMLongData.csv")
 

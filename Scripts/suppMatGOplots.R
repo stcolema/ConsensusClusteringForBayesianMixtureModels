@@ -5,6 +5,7 @@ library(magrittr)
 library(ggplot2)
 library(dplyr)
 library(tibble)
+library(patchwork)
 
 # Read in the data
 goData <- read.csv("./Data/Yeast/AllGOoverRepresentationComparison.csv") %>%
@@ -29,8 +30,56 @@ plt_data <- goData %>%
 plt_data$Model <- factor(plt_data$Model, models_used)
 plt_data$ONTOLOGY <- factor(plt_data$ONTOLOGY, c("MF", "BP", "CC"))
 
+datasets <- plt_data$Dataset %>% unique()
+L <- length(datasets)
+
 p_lst <- vector("list", length = 3) %>%
   set_names(c("MF", "BP", "CC"))
+
+for (ont in c("MF", "BP", "CC")) {
+  p_lst[[ont]] <- vector("list", length = L) %>%
+    set_names(datasets)
+  for (dataset in datasets) {
+    
+    p_lst[[ont]][[dataset]] <- plt_data %>%
+      filter(ONTOLOGY == ont, p.adjust < p_threshold, Dataset == dataset) %>%
+      group_by(Description, Model) %>%
+      mutate(Number_cluster = as.character(n())) %>%
+      ggplot(aes(x = Description, y = Model)) +
+      geom_point(aes(colour = log(p.adjust), size = Count)) + # , position = position_stack(reverse = TRUE)) +
+      geom_text(aes(label = Number_cluster), position = position_nudge(y = -0.3)) +
+      # geom_jitter(width = 0, height = 0.4, seed = 1) +
+      # facet_grid(Dataset ~ ONTOLOGY, scales = "free_x") +
+      scale_color_viridis_c(direction = -1) +
+      labs(
+        title = paste0("GO set over-representation (", ont, ")"),
+        subtitle = dataset,
+        # x = "Descr",
+        colour = "Log adjusted p-value"
+      ) +
+      theme(
+        axis.text.y = element_text(hjust = 0.0, size = 8),
+        axis.text.x = element_text(angle = 30, size = 8, vjust = 1, hjust = 1),
+        axis.title.y = element_blank(),
+        # axis.title.x=element_blank(),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 9)
+      )
+
+    ggsave(paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "goEnrichmentComp", ont, ".png"),
+      plot = p_lst[[ont]][[dataset]],
+      height = 6,
+      width = 10
+    )
+  }
+}
+
+p1 <- p_lst[["MF"]]$Timecourse
+p2 <- p_lst[["MF"]]$`ChIP-chip`
+p3 <- p_lst[["MF"]]$PPI
+
+p1 / p2/ p3
 
 for (ont in c("MF", "BP", "CC")) {
   p_lst[[ont]] <- plt_data %>%
@@ -61,8 +110,8 @@ for (ont in c("MF", "BP", "CC")) {
 
   ggsave(paste0("./SupplementaryMaterial/Images/Yeast/goEnrichmentComp", ont, ".png"),
     plot = p_lst[[ont]],
-    height = 10,
-    width = 20
+    height = 12,
+    width = 18
   )
 }
 

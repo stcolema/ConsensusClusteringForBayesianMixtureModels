@@ -48,7 +48,7 @@ Description of models used and analyses performed.
 \end{definition}
 
 \begin{definition}[Partition \emph{or} Clustering]
-	For a dataset $X=(X_1, \ldots, X_N)$, a \emph{partition} or \emph{clustering} is a set of disjoint sets covering $X$, normally indicated by a $N$-vector of integers indicating which set each item is associated with. Note that as these labels only have meaning relative to each other and are symbolic. Each set within the clustering is referred to as a \emph{cluster}.
+	For a dataset $X=(X_1, \ldots, X_N)$, a \emph{partition} or \emph{clustering} is a set of disjoint sets covering $X$, normally indicated by a $N$-vector of integers indicating which set each item is associated with. Note that these labels only have meaning relative to each other, they are symbolic. Each set within the clustering is referred to as a \emph{cluster}.
 \end{definition}
 
 \section{The models} \label{sec:models}
@@ -56,9 +56,9 @@ Description of models used and analyses performed.
 \subsection{Individual dataset}
 In the simulations (see section \ref{sec:simulations}) where individual datasets are modelled a \emph{Bayesian mixture model} is used. We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
 \begin{align}
-	x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
+	x_n \sim \sum_{k=1}^K\pi_k f(x_n | \theta_k) \hspace{1cm} \textrm{independently for $n = 1,\ldots,N$}
 \end{align}
-where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$ (as in our simulation study). $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$ and thus each non-empty component of the mixture corresponds to a cluster. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
+where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$ (as in our simulation study). $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from, with each non-empty component of the mixture corresponds to a cluster. The model is
 \begin{equation}
 	\label{eqn:mixModel}
 	\begin{array}{r@{}l l}
@@ -71,7 +71,7 @@ The joint model can then be written
 	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
 \end{align}
 %An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore,
-Conditional independence is assumed between certain parameters such that the model reduces to
+We assume conditional independence between certain parameters such that the model reduces to
 \begin{align}
 	p(X, c, \theta, \pi, K) &=  p(\pi | K) p(\theta | K) p(K) \prod_{n=1}^N p(x_n | c_n, \theta_{c_n}) p (c_n | \pi, K).  \label{eqn:jointMixModel}
 	%	\\
@@ -80,8 +80,9 @@ Conditional independence is assumed between certain parameters such that the mod
 \end{align}
 Additional flexibility is provided by the inclusion of hyperparameters on the priors for $\pi$ and $\theta$, denoted $\alpha$ and $\eta$ respectively. In our context where $\theta=(\mu, \sigma^2)$, we use
 \begin{align}
-	\sigma^2 &\sim \Gamma^{-1}(a, b) \\
-	\mu &\sim \mathcal{N}(\xi, \frac{1}{\lambda} \sigma^2)
+	\sigma^2 &\sim \Gamma^{-1}(a, b), \\
+	\mu &\sim \mathcal{N}(\xi, \frac{1}{\lambda} \sigma^2), \\
+	\pi &\sim \textrm{Dirichlet}(\alpha).
 \end{align}
 The directed acyclic graph (\textbf{DAG}) for this model is shown in figure \ref{fig:simpleMixNormalsDAG}. The value of the hyperparameters we use are
 \begin{align}
@@ -145,7 +146,7 @@ We are interested in the use of Consensus clustering for integrative methods. We
 %We use the implementation made by \citep{mason2016mdi} which produces MCMC samples of the allocation vector and is thus suited to our construction of Consensus clustering.
 
 %Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. We use MDI to model the clustering structure of the Yeast datasets in section \ref{sec:yeast}. The modelling of the shared information is described by the prior distribution on item allocation for $L$ datasets
-The defining part of MDI is the prior on the allocation of the $n^{th}$ item across the $L$ datasets
+The defining aspect of MDI is the prior on the allocation of the $n^{th}$ item across the $L$ datasets
 \begin{align}
 	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{l=1}^{L-1}\prod_{m=l+1}^L(1 + \phi_{lm} \mathbb{I}(c_{nl} = c_{nm})) \textrm{ for $n = 1,\ldots,N$.}
 	\label{eqn:mdiPrior}
@@ -229,7 +230,7 @@ $\phi_{lm}$ is the parameter defined by the similarity of the clusterings for th
 	(phi23) edge [connect] (ci3);
 	
 \end{tikzpicture}
-	\caption{Directed acyclic graph for the Multiple Dataset Integration model for $L=3$ datasets.}
+	\caption{Directed acyclic graph for the Multiple Dataset Integration model for $L=3$ datasets. $h_l$ is the choice of hyperpriors for the $l^{th}$ dataset.}
 	\label{fig:MDIDAG}
 \end{sidewaysfigure}
 \section{Simulations} \label{sec:simulations}
@@ -261,9 +262,9 @@ We defined a number of scenarios to test certain concepts of the method and to e
 	Varying proportions & 200 & 20 & 0 & 5 & 1.0 & 1 & $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\
 	Varying proportions & 200 & 20 & 0 & 5 & 0.4 & 1 &  $(\frac{1}{2} , \frac{1}{4}, \frac{1}{8}, \frac{1}{16}, \frac{1}{16})$ \\ %(0.5, 0.25, 0.125, 0.0675, 0.0675)\\
 	%		\hline
-	Small N, large P & 50 & 500 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
+	Small $N$, large $P$ & 50 & 500 & 0 & 5 & 1.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$\\
 	%		\hline
-	Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
+	Small $N$, large $P$ & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
 	\\
 	\hline
 	\end{tabular}
@@ -324,12 +325,12 @@ We defined a number of scenarios to test certain concepts of the method and to e
 \end{algorithm}
 
 \begin{itemize}
-	\item \emph{2D}: a low dimensional scenario within which we expect \texttt{Mclust} to perform well and the long chains to converge and explore the full support of the posterior distribution.
-	\item \emph{No structure}: included to reassure fears that Consensus clustering has a predilection to finding clusters where none exist \citep{senbabaoglu2014reassessment,senbabaouglu2014critical}.
-	\item \emph{Base case}: highly informative datasets that all methods are expect to find the true generating labels quite easily and is included to benchmark other scenarios that are variations of this setting.
-	\item \emph{Large standard deviation}: these two scenarios investigate the degree of distinction required between clusters for the methods to uncover their structure.
-	\item \emph{Irrelevant features}: these scenarios investigate how robust the methods are to irrelevant features.
-	\item \emph{Varying proportions}: these scenarios investigate how well each method uncovers clusters when the clusters have significantly different membership counts.
+	\item \emph{2D}: a low dimensional scenario within which we expected \texttt{Mclust} to perform well and the long chains to converge and explore the full support of the posterior distribution.
+	\item \emph{No structure}: we included this scenario to reassure fears that Consensus clustering has a predilection to finding clusters where none exist \citep{senbabaoglu2014reassessment,senbabaouglu2014critical}.
+	\item \emph{Base case}: highly informative datasets within which we expected methods to find the true generating labels quite easily. We included this scenario to benchmark the others that are variations of this setting.
+	\item \emph{Large standard deviation}: these two scenarios investigated the degree of distinction required between clusters for the methods to uncover their structure.
+	\item \emph{Irrelevant features}: we included these scenarios to investigate how robust the methods are to irrelevant features.
+	\item \emph{Varying proportions}: these scenarios investigated how well each method uncovers clusters when the clusters have significantly different membership counts.
 	\item \emph{Small $N$, large $P$}: an investigation of behaviour when the number of features is far greater than the number of items.
 \end{itemize}
 
@@ -346,17 +347,17 @@ $\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.65]{./Images/Simulations/Convergence/base_caseConvergenceAcrossChains.png}
-	\caption{The $\hat{R}$ values for each simulation (in dotted grey), the median value and the interquartile range. One can see that $\hat{R}$ approaches 1.0. The ``0\% of simulations failed to converge" is a statement based upon the percentage of simulations which passed the test of stable $\hat{R}$.}
+	\caption{The $\hat{R}$ values for each simulation (in dotted grey), the median value and the interquartile range across simulations. One can see that $\hat{R}$ approaches 1.0, being below 1.01 for every simulation by the end of the chains. The ``0\% of simulations failed to converge" is a statement based upon the percentage of simulations which passed the test of stable $\hat{R}$.}
 	\label{fig:simBaseCaseRhat}
 \end{figure}
 
 We focused upon stationarity of the continuous variables as assesing convergence of the allocation labels is difficult due to label-switching. In our simulations the only recorded continuous variable is the concentration parameter of the Dirichlet distribution for the component weights. 
 
-We pooled the samples from the stationary chains and used these to form a PSM. This and the point estimate clustering found by applying the R function \texttt{maxpear} \citep{fritsch2012mcclust} to this PSM are used in model performance analysis in section \ref{sec:simModelPerformance}. \texttt{maxpear} attempts to find the clustering that maximises the Adjusted Rand Index to the true clustering. This requires the true clustering to be known; instead we use the expected clustering under the posterior, $\mathbb{E}(c|X)$, believing that this converges to the true clustering. To approximate the expected clustering, a sample average clustering is used, estimated from the PSM by maximising
+We pooled the samples from the stationary chains and used these to form a PSM. This and the point estimate clustering found by applying the R function \texttt{maxpear} \citep{fritsch2012mcclust} to this PSM are used in model performance analysis in section \ref{sec:simModelPerformance}. \texttt{maxpear} attempts to find the clustering that maximises the Adjusted Rand Index to the true clustering by using an approximation of the expected clustering under the posterior, $\mathbb{E}(c|X)$, believing that this converges to the true clustering. A sample average clustering is used to approximate the expected clustering. This is estimated from the PSM by maximising
 \begin{align}
 	\frac{\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) p_{ij} - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}{\frac{1}{2}\left[\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) + \sum_{i < j}p_{ij}\right] - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}
 \end{align}
-where $p_{ij}$ is the $(i,j)^{th}$ entry of the PSM \citep{fritsch2009improved}. This is maximising the posterior expected ARI to the true clustering (hence \texttt{maxpear}).
+where $p_{ij}$ is the $(i,j)^{th}$ entry of the PSM \citep{fritsch2009improved}. When the chain has converged this maximises the posterior expected ARI to the true clustering.
 
 There are three possibilities to consider the decision to pool the samples across chains under:
 \begin{itemize}
@@ -364,19 +365,20 @@ There are three possibilities to consider the decision to pool the samples acros
 	\item The chains are not in agreement upon the partition sampled, becoming trapped in different modes. However, a mode does dominate being the mode present in a majority of chains (see figure \ref{fig:simPSMsDisagreeExample} for an example of this behaviour).
 	\item The chains are not in agreement and no one mode dominates among chains (see figure \ref{fig:simPSMsPathologicalDisagreeExample} for an example of this behaviour).
 \end{itemize}
-In the first case pooling has no effect upon the predicted clustering compared to using any one chain. In the second case it feels natural that one would use the mode that dominates. Pooling the samples effectively does this for the predictive performance of the method as the mode with the greatest number of samples across the chains dominates; however, the uncertainty for this mode is increased. In the third case the analysis is non-trivial and further thought, chains and samples would be required. In our simulations this case only arises in the most pathological form where each chain remains trapped in the initial partition. The clustering inferred from any chain is not meaningful being a random clustering; thus the clustering predicted by pooling the PSMs is no more or less relevant as it too is random. However, the lessening of the certainty around any specific random partition is rewarded under the Frobenius norm.
+In the first case pooling has no effect upon the predicted clustering compared to using any one chain. In the second case it feels natural that one would use the mode that dominates. Pooling the samples effectively does this for the predictive performance of the method as the mode with the greatest number of samples across the chains dominates; however, the uncertainty for this mode is increased. In the third case the analysis is non-trivial and further thought, chains and samples would be required. In our simulations this case only arises in the most pathological form in the second \emph{Large $N$, small $P$} scenario, where each chain remains trapped in the initial partition. The clustering inferred from any chain is not meaningful being a random clustering; thus the clustering predicted by pooling the PSMs is no more or less relevant as it too is random. 
+%However, the lessening of the certainty around any specific random partition is rewarded under the Frobenius norm.
 
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.65]{./Images/Simulations/PSMs/large_standard_deviation_3Sim1.png}
-	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first large standard deviation scenario from table \ref{table:scenarioTable}. This is an example of all stationary chains agreeing in a simulation (and thus pooling of samples is no different to using any choice of chain for the performance analysis). Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 2.}
+	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first large standard deviation scenario from table \ref{table:scenarioTable}. This is an example of all stationary chains agreeing in a simulation (and thus pooling of samples is no different to using any choice of chain for the performance analysis). Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 1.}
 	\label{fig:simPSMsAgreeExample}
 \end{figure}
 
 \begin{figure} %[!tpb]
 	\centering
 	\includegraphics[scale=0.65]{./Images/Simulations/PSMs/small_n_large_p_baseSim1.png}
-	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first small $N$, large $P$ scenario from table \ref{table:scenarioTable}. This is an example of different chains becoming trapped in different modes, but one mode (which does represent the generating structure well) is dominant, being fully present in 3 of the 6 chains, with the two other modes present having significant overlap. Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 3.}
+	\caption{Posterior similarity matrices for the simulation generated using a random seed set to 1 for the first small $N$, large $P$ scenario from table \ref{table:scenarioTable}. This is an example of different chains becoming trapped in different modes, but one mode (which does represent the generating structure well) is dominant, being fully present in 3 of the 6 chains, with the two other modes present having significant overlap. Ordering of rows and columns is defined by hierarchical clustering of the first matrix in the series, in this case that from Chain 1.}
 	\label{fig:simPSMsDisagreeExample}
 \end{figure}
 
@@ -390,7 +392,7 @@ In the first case pooling has no effect upon the predicted clustering compared t
 
 
 \subsection{Consensus clustering analysis} 
-A range of ensembles are investigated. All combinations of chain depth, $R=(1, 10, 100, 1000, 10000)$, and the number of chains, $S=(1, 10, 30, 50, 100)$ were used, a total of 25 different ensembles. A Consensus matrix was constructed from the samples generated by each ensemble by finding the proportion of samples within which any pair of items are coclustered. An example of the Consensus matrices for each ensemble in a given simulation is shown in figure \ref{fig:simCMsIrr100}. We used the \texttt{maxpear} function from the R package \texttt{mcclust} to create a point clustering estimate from the Consensus matrix. In this context where we do not assume that the Consensus matrix of the samples is the Posterior similarity matrix we do not expect that the predicted clustering maximises the posterior expected ARI. Instead \texttt{maxpear} is used as calculating a sample average clustering which we believe is representative of the ensemble.
+We investigated a range of ensembles, using all combinations of chain depth, $R=(1, 10, 100, 1000, 10000)$, and the number of chains, $S=(1, 10, 30, 50, 100)$. This gave a total of 25 different ensembles. A Consensus matrix was constructed from the samples generated by each ensemble by finding the proportion of samples within which any pair of items are coclustered. An example of the Consensus matrices for each ensemble in a given simulation is shown in figure \ref{fig:simCMsIrr100}. We used the \texttt{maxpear} function from the R package \texttt{mcclust} to create a point clustering estimate from the Consensus matrix. In this context where we do not assume that the Consensus matrix of the samples is the Posterior similarity matrix we do not expect that the predicted clustering maximises the posterior expected ARI. Instead \texttt{maxpear} is used as calculating a sample average clustering which we believe is representative of the ensemble.
 
 \begin{figure} %[!tpb]
 	\centering
@@ -401,7 +403,7 @@ A range of ensembles are investigated. All combinations of chain depth, $R=(1, 1
 
 
 \subsection{\texttt{Mclust}}
-\texttt{Mclust} was called using the default settings and a range of inputs for the choice of $K$. This was $K = (2, \ldots, \min(\frac{N}{2}, 50))$. The choice of $K=\min(\frac{N}{2}, 50)$ was made to mirror the choice of $K_{max}=50$ used for the overfitted mixture models (the default in the software used), with the bound of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. The model choice is performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}.
+We called \texttt{Mclust} using the default settings and a range of inputs for the choice of $K$. We used $K = (2, \ldots, \min(\frac{N}{2}, 50))$ to mirror the choice of $K_{max}=50$ used for the overfitted mixture models (the default in the software we used), with the bound of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. In the \emph{No structure} scenarios we extended to range to $K = (1 \ldots, 50)$ to include the correct structure as an option. The model choice was performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}.
 
 % An example of each scenario may be seen in figure \ref{fig:genData}
 
@@ -413,13 +415,15 @@ In figure \ref{fig:simPrediction} the ARI between the generating labels and the 
 	\item $ARI(c_1, c_2) = 1.0$: a perfect match between the two partitions,
 	\item $ARI(c_1, c_2) = 0.0$: $c_1$ is no more similar to $c_2$ than is expected for a random partition of the data.
 \end{itemize}
-In several scenarios \texttt{Mclust} performs the best under this metric (e.g. 2D, Small $N$, large $P$ ($\Delta \mu = 0.2$)). However when the number of irrelevant features is large \texttt{Mclust} performs less well (see \emph{Irrelevant features ($P_n = 20$)} and \emph{($P_n = 100$)}) than the other methods. 
+In several scenarios \texttt{Mclust} performs the best under this metric (e.g. in the scenarios \emph{2D}, \emph{Small $N$, large $P$ ($\Delta \mu = 0.2$)}). However when the number of irrelevant features is large \texttt{Mclust} performs less well (see \emph{Irrelevant features ($P_n = 20$)} and \emph{($P_n = 100$)}) than the other methods. 
 %The decrease in uncertainty due to conditioning on a given number of clusters, $K$, means that when \texttt{Mclust} is correct it is more certain than it might otherwise be. Secondly, 
 The initialisation used by \texttt{Mclust} is based upon a hierarchical clustering of the data. We suspect that this contributes to the better performance in the \emph{Small $N$, large $P$ ($\Delta \mu = 0.2$)} case and the poor performance in the presence of large numbers of irrelevant features.
 
 The pooled Bayesian samples act as an upper bound on the Consensus clustering ensembles in these simulations.
 
-For the ensembles there are two parameters changing between each model, the iteration used to provide the clustering in the ensemble, $R$, and the number of chains (and hence samples) used, $S$. In many of the scenarios we find that the benefit of increasing $R$ stabilises by approximately $R = 10$. We believe that in a low-dimensional dataset (such as \emph{2D}), or a highly informative dataset (such as \emph{Base case} or any of the higher dimensional scenarios with no irrelevant features where $\frac{\Delta \mu}{\sigma^2} \geq 1$) the chains quickly find a ``sensible" partition of the data and thus increasing the depth within the chain does not increase the probability that any partition sampled will be closer to the generating partition. For example in figure \ref{fig:simPrediction} in the \emph{Small $N$, large $P$} case, the distribution of the ARI across the ensembles for which $R\geq10$ and $S=1$ is nearly identical; this suggests that the chain is sampling a very similar partition again and again for 9,900 iterations (and possibly beyond based upon the PSMs shown in figure \ref{fig:simPSMsDisagreeExample}) and it is through adding more chains rather than using particularly long chains that we improve the ability to uncover the generating structure. 
+For the ensembles there are two parameters changing between each model, the iteration used to provide the clustering in the ensemble, $R$, and the number of chains (and hence samples) used, $S$. In many of the scenarios we find that the benefit of increasing $R$ stabilises by approximately $R = 10$. We believe that in a low-dimensional dataset (such as \emph{2D}), or a highly informative dataset (such as \emph{Base case} or any of the higher dimensional scenarios with no irrelevant features where $\frac{\Delta \mu}{\sigma^2} \geq 1$) the chains quickly find a ``sensible" partition of the data and thus increasing the depth within the chain does not increase the probability that any partition sampled will be closer to the generating partition. For example in figure \ref{fig:simPrediction} in the \emph{Small $N$, large $P$} case, the distribution of the ARI across the ensembles for which $R\geq10$ and $S=1$ is nearly identical; this suggests that the chain is sampling a very similar partition again and again for 990,000 iterations (and possibly beyond based upon the PSMs shown in figure \ref{fig:simPSMsDisagreeExample}) and it is through adding more chains rather than using particularly long chains that we improve the ability to uncover the generating structure. 
+
+We also notice that even if the behaviour has not stabilised for $R$ that the ensemble can uncover meaningful structure. The ARI for the ensembles of short chains can be quite high (as is the case in many of the scenarios). The behaviour of the Consensus matrices also shows that low $R$ is not a disqualifier from meaningful inference even if longer chains would be ideal. Consider the Consensus matrices in figure \ref{fig:simCMsIrr100}, it can be seen that the behaviour has not stabilised before $R=10000$ (and possibly there is still some benefit in increasing $R$), but the structure being uncovered when there is a sufficient number of chains and $R$ is small does correspond to the structure uncovered in the largest and deepest ensemble. We believe that the order in which components merge and items are co-clustered varies depending on initialisation, and thus if the chain is not sufficiently deep that all of the final mergings have occured that a sufficiently large ensemble can still perform meaningful inference of the subpopulation structure. Even though each learner probably has too many clusters for small $R$ the consensus among them will have less. This is why the entries of the Consensus matrix for $R=100$ and $S=100$ in figure \ref{fig:simCMsIrr100} are more pale than in deeper ensembles; very few items correctly (possibly none) cocluster in every partition, it is only in observing the consensus that the global structure of interest emerges. Thus if there is some limit to the length of chains available for an analysis (e.g. computational or temporal constraints) than the inference obtained from the shorter chains can still be meaningful, with the caveat that the point clustering might have more clusters than the same analysis with longer chains would provide. Additional post-hoc merging of some clusters might be necessary in this case.
 
 In contrast, when the dataset is sparse or contains many irrelevant features, we believe that deeper chains are required to reach this steady-state sampling where no single sample is expected to be better than any other (see the \emph{Irrelevant features ($P_n = 100$)} facet of figure \ref{fig:simPrediction}).
 %think that in the scenarios with less distinct clusters (i.e. where the number of irrelevant features, $P_n$, is large or $\frac{\Delta \mu}{\sigma^2} \leq 1$), 
@@ -483,12 +487,12 @@ Following the original MDI paper we set $K_{max}=275$.
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.7]{./Images/Yeast/yeastData.png}
-	\caption{Heatmap of the yeast datasets. Each plot has a common row order corresponding to the genes being clustered. This order was decided by a hierarchical clustering of the rows of the Timecourse expression matrix. The Timecourse data is associated with the ``Gene expression" legend and the ChIP-chip and PPI data with ``Protein interaction" legend.}
+	\caption{Heatmap of the yeast datasets. Each plot has a common row order corresponding to the gene products being clustered. This order was decided by a hierarchical clustering of the rows of the Timecourse expression matrix. The Timecourse data is associated with the ``Gene expression" legend and the ChIP-chip and PPI data with ``Protein interaction" legend.}
 	\label{fig:yeastData}
 \end{figure}
 
 \subsection{Bayesian analysis} \label{sec:yeastBayesianAnalysis}
-We ran 10 chains of MDI for 36 hours saving every thousandth sample. This resulted in chains of varying length. We reduced the chains to 676 samples as this was the number of samples achieved by the slowest chain. Similar to section \ref{sec:simBayesianAnalysis} these chains were then investigated for 
+We used the implementation of MDI from \cite{mason2016mdi}. We ran 10 chains of MDI for 36 hours saving every thousandth sample. This resulted in chains of varying length. We reduced the chains to 676 samples as this was the number of samples achieved by the slowest chain. Similar to section \ref{sec:simBayesianAnalysis} these chains were then investigated for 
 \begin{itemize}
 	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
 	\item across-chain convergence using $\hat{R}$ \citep{gelman1992inference} and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$},][]{vats2018revisiting}.
@@ -497,7 +501,7 @@ We ran 10 chains of MDI for 36 hours saving every thousandth sample. This result
 %
 %$\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\hat{R}$ is not sufficient in itself to claim chain convergence, but values above 1.1 are clear evidence for a lack of convergence \citep{gelman2013bayesian}. \cite{vats2018revisiting} show that this threshold is significantly too high (1.01 being a better choice) and propose extensions to $\hat{R}$ that enable a more formal rule for a threshold. It is their method as implemented in the R package \texttt{stableGR} \citep{knudson20202stableGR} that is the final check of convergence.
 %
-Again we focus upon stationarity of the continuous variables. In the implementation of MDI we used \cite{mason2016mdi}, the recorded continuous variables are the concentration parameters of the Dirichlet distribution for the dataset-specific component weights and the $\phi_{ij}$ parameter associated with the correlation between the $i^{th}$ and $j^{th}$ datasets. 
+Again we focus upon stationarity of the continuous variables. In the implementation of MDI we used, the recorded continuous variables are the concentration parameters of the Dirichlet distribution for the dataset-specific component weights and the $\phi_{ij}$ parameter associated with the correlation between the $i^{th}$ and $j^{th}$ datasets. 
 \begin{figure}
 	\centering
 	\includegraphics[scale=1.0]{./Images/Yeast/Convergence/gewekePlot.png}
@@ -516,7 +520,7 @@ We plot the Geweke-statistic for each chain in figure \ref{fig:gewekePlot}. No c
 \begin{figure}
 	\centering
 	\includegraphics[scale=1.0]{./Images/Yeast/Convergence/gelmanPlot.png}
-	\caption{The chains still appear to be unconverged with $\hat{R}$ remaining above 1.25 for the $\phi_{12}, \phi_{13}$ and $\phi_{23}$ parameters. Stable $\hat{R}$ is also too high with values of 1.049, 1.052 and 1.057.}
+	\caption{The chains still appear to be unconverged with $\hat{R}$ remaining above 1.25 for the $\phi_{12}, \phi_{13}$ and $\phi_{23}$ parameters. Stable $\hat{R}$ is also too high with values of 1.049, 1.052 and 1.057 for $\phi_{12}, \phi_{13}$ and $\phi_{23}$ respectively.}
 	\label{fig:gelmanPlot}
 \end{figure}
 \begin{figure}
@@ -579,11 +583,11 @@ We investigate an ensemble of depth $R=1001$ and width $S=10000$. The Consensus 
 \begin{figure}
 	\centering
 	\includegraphics[scale=0.8]{./Images/Yeast/PPICMcomparison.png}
-	\caption{The PPI dataset has awkward characteristics for modelling. A wide, sparse dataset it is again chain depth that is the most important parameter for the ensemble. Similar to the results in figure \ref{fig:chipchipCMs}, the matrices only stabilise from $R=5001$ to $R=10001$.}
+	\caption{The PPI dataset has awkward characteristics for modelling. A wide, sparse dataset it is chain depth that we found to be the most important parameter for the ensemble. Similar to the results in figure \ref{fig:chipchipCMs}, the matrices only stabilise from $R=5001$ to $R=10001$.}
 	\label{fig:ppiCMs}
 \end{figure}
 
-If we compare the distribution of sampled values for the $\phi$ parameters for the Bayesian chains that we keep based upon their convergence diagnostics, the final ensemble used ($R=10001$, $S=1000$) and the pooled samples from the 5 long chains, then we see that the ensemble consisting of the long chains (which might be believed to sampling different parts of the posterior distribution) is closer in its appearance to the distributions sampled by the Consensus clustering than to any single chain.
+If we compare the distribution of sampled values for the $\phi$ parameters for the Bayesian chains that we keep based upon their convergence diagnostics, the final ensemble used ($R=10001$, $S=1000$) and the pooled samples from the 5 long chains, then we see that the ensemble consisting of the long chains (which might be believed to sampling different parts of the posterior distribution) is closer in its appearance to the distributions sampled by the Consensus clustering than to any single chain. We also find that the clusters of time series in the Timecourse dataset shown in figure \ref{fig:timecourseCCTimeSeries} to be consistent.
 
 \begin{figure}
 	\centering
@@ -592,31 +596,137 @@ If we compare the distribution of sampled values for the $\phi$ parameters for t
 	\label{fig:densityComparison}
 \end{figure}
 
+Evidence for this can also be seen in the coherent clusters of time series from the Timecourse dataset in figure \ref{fig:timecourseCCTimeSeries}.
+
+\begin{sidewaysfigure}
+	\centering
+	\includegraphics[scale=0.6]{./Images/Yeast/TimeSeriesClusterR10001S1000.png}
+	\caption{Gene expression across time for the predicted clusters in the Timecourse dataset for Consensus clustering of MDI with $R=10001$ and $S=1000$.}
+	\label{fig:timecourseCCTimeSeries}
+\end{sidewaysfigure}
+
+
 \subsection{GO term over-representation} \label{sec:goTermOverRep}
 To validate the predicted clusters we tested if they contained a higher concentration of specific Gene Ontology (GO) terms than would be expected by chance. We estimated clusterings from the PSMs of the chains kept from section \ref{sec:yeastBayesianAnalysis} visualised in figure \ref{fig:yeastPSMs} and the Consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$) using the \texttt{maxpear} function from the R package \texttt{mcclust} \cite{fritsch2012mcclust} using default settings except for \texttt{k.max} which was set to 275 (the rounding down of $N/2$). To perform the GO term over-representation analysis we used the \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org}.
 
-We conditioned the test on the background set of the 551 yeast genes in the data. The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random chance. We corrected the $p$-values using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and defined significance by a threshold of 0.01. We plot the over-represented GO terms for the different clusterings within each dataset using the three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) (figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC}). It can be seen that the Consensus clustering finds very similar results to the long chains, finding any term that is over-represented in each chain and a number of terms unique to itself. Very few terms found by a single chain are over-represented in the clustering from the ensemble.
+We conditioned the test on the background set of the 551 yeast genes in the data. The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random chance. We corrected the $p$-values using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and defined significance by a threshold of 0.01. We plot the over-represented GO terms for the different clusterings within each dataset using the three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) (figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC} respectively). 
 
-\begin{sidewaysfigure}
+We find that the Consensus clustering finds terms common to all of the long chains. It also finds some terms with low $p$-values common to a majority of chains (such as DNA helicase activity in the MF ontology for the Timecourse dataset) and a small number of GO terms unique to itself. These terms that no long chain find are normally related to other terms already enriched either in the Consensus clustering or a number of the long chains. For example, we believe that uncovering transmembrane transporter activity and transporter activity terms in the Timecourse dataset due to an unstable or inconsistent clustering as these are related to terms found across 3 of the chains and by Consensus clustering (specifically transferase activity and phosphotransferase). We believe that Consensus clustering of MDI results in a meaningful clustering.
+
+Furthermore, we also note that the Bayesian chains have very significant disagreements between eachother; there is no consensus on the results with many terms enriched in one or two chains (see the behaviour in any ontology for the ChIP-chip and PPI datasets). 
+
+We argue that the final partition from Consensus clustering is more consistent than any of the individual long chains, agreeing where the chains agree and providing sensible differences to any given chain. As the chains are not converged and there is no clear consensus, a full analysis would be difficult to defend using any one of these long chains. We believe that Consensus clustering does offer a solution to problems preventing the use of complex models such as MDI in their currently implemented forms.
+
+%PPI MF GO:
+%There is much disagreement between the Bayesian chains; more so in this case with no terms found in all 5 chains. This is the dataset with the most disagreement between chains in the PSMs (as seen in figure \ref{fig:yeastPSMs}).
+%
+%ChIP-chip MF GO:
+%there is more consistency across chains, but there is still significant disagreement. The Consensus clustering finds largely terms that are common to several chains. Some terms are unique to the Consensus clustering, for example \emph{DNA binding} and \emph{nucleic acid binding} emerge in the Consensus clustering but no Bayesian chain, but this terms have overlap in their associated genes and thus evidence for one suggests the other. Furthermore, 3 clusters in chain 10 from the Bayesian analysis does have terms associated with binding over-represented in three clusters and chains 3 and 5 have many different types of binding emerging. Thus the binding terms found by the Consensus clustering are partially supported in the long chains. The other two terms unique to Consensus clustering, transmembrane transporter activity and transporter activity, are both related to each other. Transferase activity and phosphotransferase, two terms found by both Consensus clustering and three of the Bayesian chains, are associated with transporting molecules within the cell and across the cell membrane. Thus the emergence of additional terms associated with transportation are not surprising, particularly as those unique to Consensus clustering have small $p$-values.
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/TimecoursegoEnrichmentCompMF.png}
+%	\caption{GO enrichment for the Molecular function ontology in the Timecourse dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term. Terms common to all chains are found also by Consensus clustering. Many terms are found only in a subset of chains. Except for DNA helicase activity, which has smaller associated $p$-values, no GO term not found in all 5 chains is over-represented in the Consensus clustering.}
+%	\label{fig:timecourseGOMF}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/PPIgoEnrichmentCompMF.png}
+%	\caption{GO enrichment for the Molecular function ontology in the PPI dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term. Similar to figure \ref{fig:timecourseGOMF}, there is much disagreement between the Bayesian chains; more so in this case with no terms found in all 5 chains. This is the dataset with the most disagreement between chains in the PSMs (as seen in figure \ref{fig:yeastPSMs}).}
+%	\label{fig:ppiGOMF}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/ChIP-chipgoEnrichmentCompMF.png}
+%	\caption{GO enrichment for the Molecular function ontology in the ChIP-chip dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term. Here there is more consistency across chains, but there is still significant disagreement. The Consensus clustering finds largely terms that are common to several chains. Some terms are unique to the Consensus clustering, for example \emph{DNA binding} and \emph{nucleic acid binding} emerge in the Consensus clustering but no Bayesian chain, but this terms have overlap in their associated genes and thus evidence for one suggests the other. Furthermore, 3 clusters in chain 10 from the Bayesian analysis does have terms associated with binding over-represented in three clusters and chains 3 and 5 have many different types of binding emerging. Thus the binding terms found by the Consensus clustering are partially supported in the long chains. The other two terms unique to Consensus clustering, transmembrane transporter activity and transporter activity, are both related to each other. Transferase activity and phosphotransferase, two terms found by both Consensus clustering and three of the Bayesian chains, are associated with transporting molecules within the cell and across the cell membrane. Thus the emergence of additional terms associated with transportation are not surprising, particularly as those unique to Consensus clustering have small $p$-values.}
+%	\label{fig:chipchipGOMF}
+%\end{figure}
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/TimecoursegoEnrichmentCompBP.png}
+%	\caption{GO enrichment for the Biological process ontology in the Timecourse dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:timecourseGOBP}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/ChIP-chipgoEnrichmentCompBP.png}
+%	\caption{GO enrichment for the Biological process ontology in the ChIP-chip dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:chipchipGOBP}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/PPIgoEnrichmentCompBP.png}
+%	\caption{GO enrichment for the Biological process ontology in the PPI dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:ppiGOBP}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/TimecoursegoEnrichmentCompCC.png}
+%	\caption{GO enrichment for the Cellular component ontology in the Timecourse dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:timecourseGOCC}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/ChIP-chipgoEnrichmentCompCC.png}
+%	\caption{GO enrichment for the Cellular component ontology in the ChIP-chip dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:chipchipGOCC}
+%\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/PPIgoEnrichmentCompCC.png}
+%	\caption{GO enrichment for the Cellular component ontology in the PPI dataset. Each dot corresponds to a GO term that was over-represented in at least one cluster in the analysis, with colour corresponding to the adjusted $p$-value and size to the number items associated with that term in the given cluster. The number below each dot is the number of clusters from the analysis that were enriched for the term.}
+%	\label{fig:ppiGOCC}
+%\end{figure}
+
+\begin{figure}
 	\centering
-	\includegraphics[scale=0.5]{./Images/Yeast/goEnrichmentCompMF.png}
-	\caption{.}
+	\includegraphics[scale=0.365]{./Images/Yeast/goEnrichmentCompMFvertical.png}
+	\caption{GO term over-representation for the Molecular function ontology for each dataset from the final clustering of each method.}
 	\label{fig:yeastGOMF}
-\end{sidewaysfigure}
+\end{figure}
 
-\begin{sidewaysfigure}
+\begin{figure}
 	\centering
-	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompBP.png}
-	\caption{.}
+	\includegraphics[scale=0.365]{./Images/Yeast/goEnrichmentCompBPvertical.png}
+	\caption{GO term over-representation for the Biological process ontology for each dataset from the final clustering of each method.}
 	\label{fig:yeastGOBP}
-\end{sidewaysfigure}
+\end{figure}
 
-\begin{sidewaysfigure}
+\begin{figure}
 	\centering
-	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompCC.png}
-	\caption{.}
+	\includegraphics[scale=0.365]{./Images/Yeast/goEnrichmentCompCCvertical.png}
+	\caption{GO term over-representation for the Cellular component ontology for each dataset from the final clustering of each method.}
 	\label{fig:yeastGOCC}
-\end{sidewaysfigure}
+\end{figure}
+
+%\begin{sidewaysfigure}
+%	\centering
+%	\includegraphics[scale=0.5]{./Images/Yeast/goEnrichmentCompMF.png}
+%	\caption{.}
+%	\label{fig:yeastGOMF}
+%\end{sidewaysfigure}
+%
+%\begin{sidewaysfigure}
+%	\centering
+%	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompBP.png}
+%	\caption{.}
+%	\label{fig:yeastGOBP}
+%\end{sidewaysfigure}
+%
+%\begin{sidewaysfigure}
+%	\centering
+%	\includegraphics[scale=0.4]{./Images/Yeast/goEnrichmentCompCC.png}
+%	\caption{.}
+%	\label{fig:yeastGOCC}
+%\end{sidewaysfigure}
 
 \bibliographystyle{plainnat}
 \bibliography{suppMat}  

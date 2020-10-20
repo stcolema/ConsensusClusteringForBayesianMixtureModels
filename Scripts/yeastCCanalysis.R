@@ -434,6 +434,43 @@ for (i in curr_inds) {
   )
 }
 
+# The CC(10001, 1000) analysis. This plot is used in the supplementary materials
+r <- alloc_data$R[118]
+s <- alloc_data$S[118]
+
+plt_data_transformed <- plt_data %>%
+  mutate(Cluster = alloc_data$Cl[[118]]) %>%
+  add_count(Cluster) %>%
+  pivot_longer(cols = -c(Gene, Cluster, n), values_to = "Expression") %>%
+  mutate(Time = stringr::str_extract(name, "[:digit:]+"))
+
+# Plot time series by cluster
+p_time_series <- plt_data_transformed %>%
+  ggplot(aes(x = as.numeric(Time), y = Expression, group = Gene)) +
+  geom_line(alpha = 0.3) +
+  facet_wrap(~Cluster, nrow = 4) +
+  labs(
+    title = dataset,
+    subtitle = paste0("Clustering predicted by CC(", r, ",", s, ")"),
+    x = "Time"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 14),
+    axis.text.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    axis.title.x = element_text(size = 14),
+    plot.title = element_text(size = 21, face = "bold"),
+    plot.subtitle = element_text(size = 18),
+    strip.text.x = element_text(size = 14),
+    legend.text = element_text(size = 14)
+  )
+
+ggsave(paste0("./SupplementaryMaterial/Images/Yeast/TimeSeriesClusterR", r, "S", s, ".png"),
+       plot = p_time_series,
+       height = 10,
+       width = 14
+)
+
 # === Consensus matrices =======================================================
 
 # Compare consensus matrices for the different ensembles

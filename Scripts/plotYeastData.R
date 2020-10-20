@@ -81,7 +81,7 @@ p_timecourse <- timecourse_plt_data %>%
   geom_tile() +
   scale_fill_gradient2(low = "#146EB4", mid = "white", high = "#FF9900") +
   labs(
-    title = "Timecourse data",
+    title = "Timecourse",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),
     x = "Timepoint",
     y = "Gene",
@@ -122,7 +122,7 @@ p_ppi <- ppi_plt_data %>%
   geom_tile() +
   scale_fill_gradient(low = "white", high = "#146EB4") +
   labs(
-    title = "PPI data",
+    title = "PPI",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),
     x = "Protein",
     y = "",
@@ -163,7 +163,7 @@ p_chipchip <- chip_chip_plt_data %>%
   geom_tile() +
   scale_fill_gradient(low = "white", high = "#146EB4") +
   labs(
-    title = "ChIP-chip data",
+    title = "ChIP-chip",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),
     x = "Protein",
     y = "",
@@ -182,6 +182,10 @@ p_chipchip <- chip_chip_plt_data %>%
     panel.border =element_blank()
   )
 
-p_timecourse + p_ppi + p_chipchip +
+p_yeast <- p_timecourse + p_ppi + p_chipchip +
   plot_layout(guides = "collect")
-  
+
+ggsave("./SupplementaryMaterial/Images/Yeast/yeastData.png",
+       plot = p_yeast,
+       height = 5,
+       width = 7)  

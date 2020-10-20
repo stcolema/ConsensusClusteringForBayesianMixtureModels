@@ -6,7 +6,7 @@ library(stringr)
 mdiHelpR::setMyTheme()
 
 
-data_dir <- "./Data/"
+data_dir <- "./Data/Simulations/"
 save_dir <- "./SupplementaryMaterial/Images/Simulations/"
 
 scenarios <- list.dirs(data_dir, recursive = F, full.names = F)
@@ -59,6 +59,9 @@ smallNlargeP <- expression(paste("Small ", N, " large ", P))
 smallNlargePsmallDm <- expression(paste("Small ", N, " large ", P, " (", Delta, mu, " = ", 0.2, ")"))
 varyPropName <- expression(paste("Varying proportions"))
 varyPropSmallDmName <- expression(paste("Varying proportions (", Delta, mu, " = ", 0.4, ")"))
+
+# mcclust::arandi returns NA for two partitions of a single cluster
+my_df$ARI[my_df$Model == "Mclust" & my_df$Scenario == "No structure" & is.na(my_df$ARI)] <- 1.0
 
 my_df$Scenario <- as.numeric(my_df$Scenario)
 

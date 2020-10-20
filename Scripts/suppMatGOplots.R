@@ -99,8 +99,8 @@ for (ont in c("MF", "BP", "CC")) {
       colour = "Log adjusted p-value"
     ) +
     theme(
-      axis.text.y = element_text(hjust = 0.0, size = 8),
-      axis.text.x = element_text(angle = 30, size = 8, vjust = 1, hjust = 1),
+      axis.text.y = element_text(hjust = 0.0, size = 12),
+      axis.text.x = element_text(angle = 30, size = 12, vjust = 1, hjust = 1),
       axis.title.y = element_blank(),
       # axis.title.x=element_blank(),
       plot.title = element_text(size = 18, face = "bold"),
@@ -114,6 +114,118 @@ for (ont in c("MF", "BP", "CC")) {
     width = 18
   )
 }
+
+ont <- "BP"
+dataset <- "ChIP-chip"
+bp_final <- plt_data %>%
+  filter(ONTOLOGY == ont, p.adjust < p_threshold) %>% #, Dataset == dataset) %>%
+  group_by(Description, Model) %>%
+  mutate(Number_cluster = as.character(n()), Description = str_to_sentence(Description)) %>%
+  ggplot(aes(x = Description, y = Model)) +
+  geom_point(aes(colour = log(p.adjust), size = Count)) + # , position = position_stack(reverse = TRUE)) +
+  geom_text(aes(label = Number_cluster), position = position_nudge(y = -0.3)) +
+  # geom_jitter(width = 0, height = 0.4, seed = 1) +
+  facet_wrap(~ Dataset) + #, scales = "free_x") +
+  scale_color_viridis_c(direction = -1) +
+  labs(
+    title = paste0("GO set over-representation (", ont, ")"),
+    # subtitle = "Across chains",
+    # x = "Descr",
+    colour = "Log adjusted\np-value"
+  ) +
+  theme(
+    axis.text.y = element_text(hjust = 0.0, size = 15),
+    axis.text.x = element_text(angle = 30, size = 15, vjust = 1, hjust = 1),
+    axis.title.y = element_blank(),
+    # axis.title.x=element_blank(),
+    plot.title = element_text(size = 24, face = "bold"),
+    plot.subtitle = element_text(size = 20),
+    strip.text.x = element_text(size = 18),
+    legend.title=element_text(size=18), 
+    legend.text=element_text(size=15)
+  ) +
+  coord_flip()
+
+ggsave(paste0("./SupplementaryMaterial/Images/Yeast/goEnrichmentCompBPvertical.png"),
+       plot = bp_final,
+       height = 20,
+       width = 16
+)
+
+ont <- "MF"
+
+mf_final <- plt_data %>%
+  filter(ONTOLOGY == ont, p.adjust < p_threshold) %>% #, Dataset == dataset) %>%
+  group_by(Description, Model) %>%
+  mutate(Number_cluster = as.character(n()), Description = str_to_sentence(Description)) %>%
+  ggplot(aes(x = Description, y = Model)) +
+  geom_point(aes(colour = log(p.adjust), size = Count)) + # , position = position_stack(reverse = TRUE)) +
+  geom_text(aes(label = Number_cluster), position = position_nudge(y = -0.3)) +
+  # geom_jitter(width = 0, height = 0.4, seed = 1) +
+  facet_wrap(~ Dataset) + #, scales = "free_x") +
+  scale_color_viridis_c(direction = -1) +
+  labs(
+    title = paste0("GO set over-representation (", ont, ")"),
+    # subtitle = "Across chains",
+    # x = "Descr",
+    colour = "Log adjusted\np-value"
+  ) +
+  theme(
+    axis.text.y = element_text(hjust = 0.0, size = 15),
+    axis.text.x = element_text(angle = 30, size = 15, vjust = 1, hjust = 1),
+    axis.title.y = element_blank(),
+    # axis.title.x=element_blank(),
+    plot.title = element_text(size = 24, face = "bold"),
+    plot.subtitle = element_text(size = 20),
+    strip.text.x = element_text(size = 18),
+    legend.title=element_text(size=18), 
+    legend.text=element_text(size=15)
+  ) +
+  coord_flip()
+
+ggsave(paste0("./SupplementaryMaterial/Images/Yeast/goEnrichmentCompMFvertical.png"),
+       plot = mf_final,
+       height = 20,
+       width = 16
+)
+
+ont <- "CC"
+# dataset <- "ChIP-chip"
+cc_final <- plt_data %>%
+  filter(ONTOLOGY == ont, p.adjust < p_threshold) %>% #, Dataset == dataset) %>%
+  group_by(Description, Model) %>%
+  mutate(Number_cluster = as.character(n()), Description = str_to_sentence(Description)) %>%
+  ggplot(aes(x = Description, y = Model)) +
+  geom_point(aes(colour = log(p.adjust), size = Count)) + # , position = position_stack(reverse = TRUE)) +
+  geom_text(aes(label = Number_cluster), position = position_nudge(y = -0.3)) +
+  # geom_jitter(width = 0, height = 0.4, seed = 1) +
+  facet_wrap(~ Dataset) + #, scales = "free_x") +
+  scale_color_viridis_c(direction = -1) +
+  labs(
+    title = paste0("GO set over-representation (", ont, ")"),
+    # subtitle = "Across chains",
+    # x = "Descr",
+    colour = "Log adjusted\np-value"
+  ) +
+  theme(
+    axis.text.y = element_text(hjust = 0.0, size = 15),
+    axis.text.x = element_text(angle = 30, size = 15, vjust = 1, hjust = 1),
+    axis.title.y = element_blank(),
+    # axis.title.x=element_blank(),
+    plot.title = element_text(size = 24, face = "bold"),
+    plot.subtitle = element_text(size = 20),
+    strip.text.x = element_text(size = 18),
+    legend.title=element_text(size=18), 
+    legend.text=element_text(size=15)
+  ) +
+  coord_flip()
+
+ggsave(paste0("./SupplementaryMaterial/Images/Yeast/goEnrichmentCompCCvertical.png"),
+       plot = cc_final,
+       height = 20,
+       width = 16
+)
+
 
 # p_lst[[1]]
 # p_lst[[2]]

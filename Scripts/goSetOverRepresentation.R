@@ -41,7 +41,8 @@ library(magrittr)
 
 # === Functions ================================================================
 
-clusterList <- function(cl, geneTable, items_to_drop = NULL, exclude_singletons = T) {
+
+clusterList <- function(cl, geneTable, items_to_drop = NULL, min_cluster_size = 1) {
   cl_lst <- list()
   labels_present <- unique(cl)
   K <- length(labels_present)
@@ -52,7 +53,7 @@ clusterList <- function(cl, geneTable, items_to_drop = NULL, exclude_singletons 
     k <- labels_present[i]
     cl_k <- cl == k
 
-    if ((!exclude_singletons) || sum(cl_k) > 1) {
+    if (sum(cl_k) >= min_cluster_size) {
       list_ind <- list_ind + 1
 
       # Fidn the genes
@@ -166,7 +167,10 @@ goOverRep <- function(cl, X, geneTable, universe = row.names(X), drop_na = NULL,
 
 
 
-doClusterComparison <- function(cl, X, geneTable, universe, ont = "MF", drop_na = NULL) {
+doClusterComparison <- function(cl, X, geneTable, universe, 
+                                ont = "MF", 
+                                drop_na = NULL,
+                                min_cluster_size = 1) {
   clustered_genes <- list()
   labels_present <- unique(cl)
   n_labels <- length(labels_present)
@@ -190,7 +194,7 @@ doClusterComparison <- function(cl, X, geneTable, universe, ont = "MF", drop_na 
 
   clustered_genes <- clusterList(cl, geneTable,
     items_to_drop = drop_na,
-    exclude_singletons = T
+    min_cluster_size = min_cluster_size
   )
 
   cl_comp <- compareCluster(
@@ -264,6 +268,9 @@ ontologies <- c("MF", "BP", "CC")
 
 # Save results
 go_dir <- "Go_enrichment"
+
+# Minimum cluster size to consider in GO over represetnation
+min_cluster_size <- 5
 
 # === Yeast data ===============================================================
 
@@ -350,6 +357,10 @@ bgoMap <- buildGOmap(gomap)
 # head(geneTable)
 genes_present <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
+
+drop_na <- gene_names[missing]
+universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
+
 # === Random partition =========================================================
 
 R_max <- max(tibbles$CC$R)
@@ -365,25 +376,23 @@ rand_cl <- K_cc %>% lapply(function(k){
   sample(1:k, size = N, replace = T)
 })
 
-drop_na <- gene_names[missing]
-universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
-
 rand_go <- list()
 for(l in 1:L){
 rand_go[[l]] <- tryCatch(
     {
       doClusterComparison(rand_cl[[l]], orig_data[[l]], geneTable, universe, 
                           ont = "ALL",
-                          drop_na = drop_na)
+                          drop_na = drop_na,
+                          min_cluster_size = min_cluster_size)
     },
     error=function(cond) {
-      message(paste("No enriched GO terms found."))
+      message(paste("\nNo enriched GO terms found."))
       message(cond)
       # Choose a return value in case of error
       return(NA)
     },
     warning=function(cond) {
-      message(paste("Clusterign cause a warning?"))
+      message(paste("\nClusterign cause a warning?"))
       message("Here's the original warning message:")
       message(cond)
       # Choose a return value in case of warning
@@ -392,7 +401,11 @@ rand_go[[l]] <- tryCatch(
   )    
 }
 
-rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]], geneTable, universe, ont = "ALL", drop_na = drop_na)
+rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]],
+                                    geneTable,
+                                    universe, ont = "ALL",
+                                    drop_na = drop_na,
+                                    min_cluster_size = min_cluster_size)
 rand_time_cl
 # Error in compareCluster(geneCluster = clustered_genes, fun = "enrichGO",  : 
 # No enrichment found in any of gene cluster, please check your input... 
@@ -439,7 +452,8 @@ for (dataset in datasets) {
           geneTable,
           universe,
           ont = ontology,
-          drop_na = drop_na
+          drop_na = drop_na,
+          min_cluster_size = min_cluster_size
         )
 
       # cc_p <- lapply(cc_tib, function(x) {

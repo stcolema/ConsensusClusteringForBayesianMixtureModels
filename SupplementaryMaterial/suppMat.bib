@@ -1,22 +1,5 @@
-@article{senbabaouglu2014critical,
-  title={Critical limitations of consensus clustering in class discovery},
-  author={Șenbabao{\u{g}}lu, Yasin and Michailidis, George and Li, Jun Z},
-  journal={Scientific reports},
-  volume={4},
-  number={1},
-  pages={1--13},
-  year={2014},
-  publisher={Nature Publishing Group}
-}
 
-@article{senbabaoglu2014reassessment,
-  title={A reassessment of consensus clustering for class discovery},
-  author={Șenbabao{\u{g}}lu, Yasin and Michailidis, George and Li, Jun Z},
-  journal={bioRxiv},
-  pages={002642},
-  year={2014},
-  publisher={Cold Spring Harbor Laboratory}
-}
+% === Datasets =================================================================
 
 @article{granovskaia2010high,
   title={High-resolution transcription atlas of the mitotic cell cycle in budding yeast},
@@ -51,17 +34,31 @@
   publisher={Oxford University Press}
 }
 
-@article{kirk2012bayesian,
-  title={Bayesian correlated clustering to integrate multiple datasets},
-  author={Kirk, Paul and Griffin, Jim E and Savage, Richard S and Ghahramani, Zoubin and Wild, David L},
-  journal={Bioinformatics},
-  volume={28},
-  number={24},
-  pages={3290--3297},
-  year={2012},
-  publisher={Oxford University Press}
+%% Relevant GWAS
+@article{cho1998genome,
+  title={A genome-wide transcriptional analysis of the mitotic cell cycle},
+  author={Cho, Raymond J and Campbell, Michael J and Winzeler, Elizabeth A and Steinmetz, Lars and Conway, Andrew and Wodicka, Lisa and Wolfsberg, Tyra G and Gabrielian, Andrei E and Landsman, David and Lockhart, David J and others},
+  journal={Molecular cell},
+  volume={2},
+  number={1},
+  pages={65--73},
+  year={1998},
+  publisher={Elsevier}
 }
 
+@article{spellman1998comprehensive,
+  title={Comprehensive identification of cell cycle--regulated genes of the yeast Saccharomyces cerevisiae by microarray hybridization},
+  author={Spellman, Paul T and Sherlock, Gavin and Zhang, Michael Q and Iyer, Vishwanath R and Anders, Kirk and Eisen, Michael B and Brown, Patrick O and Botstein, David and Futcher, Bruce},
+  journal={Molecular biology of the cell},
+  volume={9},
+  number={12},
+  pages={3273--3297},
+  year={1998},
+  publisher={Am Soc Cell Biol}
+}
+
+
+% === Bayesian convergence =====================================================
 @article{vats2018revisiting,
   title={Revisiting the Gelman-Rubin diagnostic},
   author={Vats, Dootika and Knudson, Christina},
@@ -92,15 +89,6 @@
   publisher={Federal Reserve Bank of Minneapolis, Research Department Minneapolis, MN}
 }
 
-@inproceedings{von2005towards,
-  title={Towards a statistical theory of clustering},
-  author={Von Luxburg, Ulrike and Ben-David, Shai},
-  booktitle={Pascal workshop on statistics and optimization of clustering},
-  pages={20--26},
-  year={2005},
-  organization={Citeseer}
-}
-
 @article{gelman1992inference,
   title={Inference from iterative simulation using multiple sequences},
   author={Gelman, Andrew and Rubin, Donald B and others},
@@ -112,40 +100,58 @@
   publisher={Institute of Mathematical Statistics}
 }
 
-@inproceedings{von2005towards,
-  title={Towards a statistical theory of clustering},
-  author={Von Luxburg, Ulrike and Ben-David, Shai},
-  booktitle={Pascal workshop on statistics and optimization of clustering},
-  pages={20--26},
-  year={2005},
-  organization={Citeseer}
+% === MDI ======================================================================
+
+@article{kirk2012bayesian,
+  title={Bayesian correlated clustering to integrate multiple datasets},
+  author={Kirk, Paul and Griffin, Jim E and Savage, Richard S and Ghahramani, Zoubin and Wild, David L},
+  journal={Bioinformatics},
+  volume={28},
+  number={24},
+  pages={3290--3297},
+  year={2012},
+  publisher={Oxford University Press}
 }
 
+% Implementation
+@article{mason2016mdi,
+  title={MDI-GPU: accelerating integrative modelling for genomic-scale data using GP-GPU computing},
+  author={Mason, Samuel A and Sayyid, Faiz and Kirk, Paul DW and Starr, Colin and Wild, David L},
+  journal={Statistical Applications in Genetics and Molecular Biology},
+  volume={15},
+  number={1},
+  pages={83--86},
+  year={2016},
+  publisher={De Gruyter}
+}
 
-  @article{meinshausen2010stability,
-    title={Stability selection},
-    author={Meinshausen, Nicolai and B{\"u}hlmann, Peter},
-    journal={Journal of the Royal Statistical Society: Series B (Statistical Methodology)},
-    volume={72},
-    number={4},
-    pages={417--473},
-    year={2010},
-    publisher={Wiley Online Library}
-  }
+%% Competitor
+@article{gabasova2017clusternomics,
+  title={Clusternomics: Integrative context-dependent clustering for heterogeneous datasets},
+  author={Gabasova, Evelina and Reid, John and Wernisch, Lorenz},
+  journal={PLoS computational biology},
+  volume={13},
+  number={10},
+  pages={e1005781},
+  year={2017},
+  publisher={Public Library of Science}
+}
+
+% === BioConductor =============================================================
 
 @Article{yu2012clusterProfiler,
-   title = {clusterProfiler: an R package for comparing biological themes among gene clusters},
-   author = {Guangchuang Yu and Li-Gen Wang and Yanyan Han and Qing-Yu He},
-   journal = {OMICS: A Journal of Integrative Biology},
-   year = {2012},
-   volume = {16},
-   number = {5},
-   pages = {284-287},
-   pmid = {22455463},
-   doi = {10.1089/omi.2011.0118},
- }
+ title = {clusterProfiler: an R package for comparing biological themes among gene clusters},
+ author = {Guangchuang Yu and Li-Gen Wang and Yanyan Han and Qing-Yu He},
+ journal = {OMICS: A Journal of Integrative Biology},
+ year = {2012},
+ volume = {16},
+ number = {5},
+ pages = {284-287},
+ pmid = {22455463},
+ doi = {10.1089/omi.2011.0118},
+}
 
- @article{durinck2009mapping,
+@article{durinck2009mapping,
   title={Mapping identifiers for the integration of genomic datasets with the R/Bioconductor package biomaRt},
   author={Durinck, Steffen and Spellman, Paul T and Birney, Ewan and Huber, Wolfgang},
   journal={Nature protocols},
@@ -165,6 +171,9 @@
   year={2014}
 }
 
+% === Statistical tests ========================================================
+
+%% FDR
 @article{benjamini1995controlling,
   title={Controlling the false discovery rate: a practical and powerful approach to multiple testing},
   author={Benjamini, Yoav and Hochberg, Yosef},
@@ -176,6 +185,7 @@
   publisher={Wiley Online Library}
 }
 
+%% Normality
 @article{shapiro1965analysis,
   title={An analysis of variance test for normality (complete samples)},
   author={Shapiro, Samuel Sanford and Wilk, Martin B},
@@ -187,6 +197,7 @@
   publisher={JSTOR}
 }
 
+%% BIC
 @article{schwarz1978estimating,
   title={Estimating the dimension of a model},
   author={Schwarz, Gideon and others},
@@ -198,44 +209,236 @@
   publisher={Institute of Mathematical Statistics}
 }
 
-@article{mason2016mdi,
-  title={MDI-GPU: accelerating integrative modelling for genomic-scale data using GP-GPU computing},
-  author={Mason, Samuel A and Sayyid, Faiz and Kirk, Paul DW and Starr, Colin and Wild, David L},
-  journal={Statistical Applications in Genetics and Molecular Biology},
-  volume={15},
-  number={1},
-  pages={83--86},
-  year={2016},
-  publisher={De Gruyter}
+% === Predicted clustering =====================================================
+@Manual{fritsch2012mcclust,
+  title = {mcclust: Process an MCMC Sample of Clusterings},
+  author = {Arno Fritsch},
+  year = {2012},
+  note = {R package version 1.0},
+  url = {https://CRAN.R-project.org/package=mcclust},
 }
 
-@Manual{fritsch2012mcclust,
-    title = {mcclust: Process an MCMC Sample of Clusterings},
-    author = {Arno Fritsch},
-    year = {2012},
-    note = {R package version 1.0},
-    url = {https://CRAN.R-project.org/package=mcclust},
-  }
+@article{fritsch2009improved,
+  title={Improved criteria for clustering based on the posterior similarity matrix},
+  author={Fritsch, Arno and Ickstadt, Katja and others},
+  journal={Bayesian analysis},
+  volume={4},
+  number={2},
+  pages={367--391},
+  year={2009},
+  publisher={International Society for Bayesian Analysis}
+}
 
-  @article{fritsch2009improved,
-    title={Improved criteria for clustering based on the posterior similarity matrix},
-    author={Fritsch, Arno and Ickstadt, Katja and others},
-    journal={Bayesian analysis},
-    volume={4},
-    number={2},
-    pages={367--391},
-    year={2009},
-    publisher={International Society for Bayesian Analysis}
-  }
+% === Consensus clustering ===================================================
+%% Ensembles
+@article{ghaemi2009survey,
+  title={A survey: clustering ensembles techniques},
+  author={Ghaemi, Reza and Sulaiman, Md Nasir and Ibrahim, Hamidah and Mustapha, Norwati and others},
+  journal={World Academy of Science, Engineering and Technology},
+  volume={50},
+  pages={636--645},
+  year={2009}
+}
+
+@article{ghaemi2011review,
+  title={A review: accuracy optimization in clustering ensembles using genetic algorithms},
+  author={Ghaemi, Reza and bin Sulaiman, Nasir and Ibrahim, Hamidah and Mustapha, Norwati},
+  journal={Artificial Intelligence Review},
+  volume={35},
+  number={4},
+  pages={287--318},
+  year={2011},
+  publisher={Springer}
+}
+
+%% Consensus clustering original paper
+@article{monti2003consensus,
+  title={Consensus clustering: a resampling-based method for class discovery and visualization of gene expression microarray data},
+  author={Monti, Stefano and Tamayo, Pablo and Mesirov, Jill and Golub, Todd},
+  journal={Machine learning},
+  volume={52},
+  number={1-2},
+  pages={91--118},
+  year={2003},
+  publisher={Springer}
+}
 
 
-  @article{gabasova2017clusternomics,
-    title={Clusternomics: Integrative context-dependent clustering for heterogeneous datasets},
-    author={Gabasova, Evelina and Reid, John and Wernisch, Lorenz},
-    journal={PLoS computational biology},
-    volume={13},
-    number={10},
-    pages={e1005781},
-    year={2017},
-    publisher={Public Library of Science}
-  }
+%% R package
+@Article{wilkerson2010consensusclusterplus,
+  author = {{Wilkerson} and Matthew D. and {Hayes} and D. Neil},
+  title = {ConsensusClusterPlus: a class discovery tool with confidence assessments and item tracking},
+  journal = {Bioinformatics},
+  year = {2010},
+  volume = {26},
+  number = {12},
+  pages = {1572-1573}
+}
+
+%% Problems
+@article{senbabaouglu2014critical,
+  title={Critical limitations of consensus clustering in class discovery},
+  author={Șenbabao{\u{g}}lu, Yasin and Michailidis, George and Li, Jun Z},
+  journal={Scientific reports},
+  volume={4},
+  number={1},
+  pages={1--13},
+  year={2014},
+  publisher={Nature Publishing Group}
+}
+
+@article{senbabaoglu2014reassessment,
+  title={A reassessment of consensus clustering for class discovery},
+  author={Șenbabao{\u{g}}lu, Yasin and Michailidis, George and Li, Jun Z},
+  journal={bioRxiv},
+  pages={002642},
+  year={2014},
+  publisher={Cold Spring Harbor Laboratory}
+}
+
+
+%% Applications
+@article{guedj2020functional,
+  title={Functional connectivity fingerprints of the human pulvinar: decoding its role in cognition},
+  author={Guedj, Carole and Vuilleumier, Patrik},
+  journal={NeuroImage},
+  volume={221},
+  pages={117162},
+  year={2020},
+  publisher={Elsevier}
+}
+
+%% Single cell version
+@ARTICLE{kiselev2017sc3,
+	author={Kiselev, Vladimir Yu and Kirschner, Kristina and Schaub, Michael T and Andrews, Tallulah and Yiu, Andrew and Chandra, Tamir and Natarajan, Kedar N and Reik, Wolf and Barahona, Mauricio and Green, Anthony R and others},
+	title={SC3: consensus clustering of single-cell RNA-seq data},
+	journal={Nature methods},
+	year={2017},
+	volume={14},
+	 number={5},
+	pages={483--486},
+	publisher={Nature Publishing Group}
+}
+
+@article{xu2020integrative,
+  title={Integrative proteomic characterization of human lung adenocarcinoma},
+  author={Xu, Jun-Yu and Zhang, Chunchao and Wang, Xiang and Zhai, Linhui and Ma, Yiming and Mao, Yousheng and Qian, Kun and Sun, Changqing and Liu, Zhiwei and Jiang, Shangwen and others},
+  journal={Cell},
+  volume={182},
+  number={1},
+  pages={245--261},
+  year={2020},
+  publisher={Elsevier}
+}
+
+@article{verhaak2010integrated,
+  title={Integrated genomic analysis identifies clinically relevant subtypes of glioblastoma characterized by abnormalities in PDGFRA, IDH1, EGFR, and NF1},
+  author={Verhaak, Roel GW and Hoadley, Katherine A and Purdom, Elizabeth and Wang, Victoria and Qi, Yuan and Wilkerson, Matthew D and Miller, C Ryan and Ding, Li and Golub, Todd and Mesirov, Jill P and others},
+  journal={Cancer cell},
+  volume={17},
+  number={1},
+  pages={98--110},
+  year={2010},
+  publisher={Elsevier}
+}
+
+@article{lehmann2011identification,
+  author={Lehmann, Brian D and Bauer, Joshua A and Chen, Xi and Sanders, Melinda E and Chakravarthy, A Bapsi and Shyr, Yu and Pietenpol, Jennifer A and others},
+	title={Identification of human triple-negative breast cancer subtypes and preclinical models for selection of targeted therapies},
+  journal={The Journal of clinical investigation},
+  year={2011},
+	volume={121},
+  number={7},
+  pages={2750--2767},
+  publisher={Am Soc Clin Investig}
+}
+
+%% Stopping rule
+@inproceedings{von2005towards,
+  title={Towards a statistical theory of clustering},
+  author={Von Luxburg, Ulrike and Ben-David, Shai},
+  booktitle={Pascal workshop on statistics and optimization of clustering},
+  pages={20--26},
+  year={2005},
+  organization={Citeseer}
+}
+
+
+@article{meinshausen2010stability,
+  title={Stability selection},
+  author={Meinshausen, Nicolai and B{\"u}hlmann, Peter},
+  journal={Journal of the Royal Statistical Society: Series B (Statistical Methodology)},
+  volume={72},
+  number={4},
+  pages={417--473},
+  year={2010},
+  publisher={Wiley Online Library}
+}
+
+% === Interpreting clusters ====================================================
+
+@article{miles2016msa1,
+  title={Msa1 and Msa2 modulate G1-specific transcription to promote G1 arrest and the transition to quiescence in budding yeast},
+  author={Miles, Shawna and Croxford, Matthew W and Abeysinghe, Amali P and Breeden, Linda L},
+  journal={PLoS genetics},
+  volume={12},
+  number={6},
+  pages={e1006088},
+  year={2016},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
+
+@article{chang2017yeast,
+  title={Yeast Cip1 is activated by environmental stress to inhibit Cdk1--G1 cyclins via Mcm1 and Msn2/4},
+  author={Chang, Ya-Lan and Tseng, Shun-Fu and Huang, Yu-Ching and Shen, Zih-Jie and Hsu, Pang-Hung and Hsieh, Meng-Hsun and Yang, Chia-Wei and Tognetti, Silvia and Canal, Berta and Subirana, Laia and others},
+  journal={Nature communications},
+  volume={8},
+  number={1},
+  pages={1--14},
+  year={2017},
+  publisher={Nature Publishing Group}
+}
+
+@article{stuart1998clb5,
+  title={CLB5 and CLB6 are required for premeiotic DNA replication and activation of the meiotic S/M checkpoint},
+  author={Stuart, David and Wittenberg, Curt},
+  journal={Genes \& Development},
+  volume={12},
+  number={17},
+  pages={2698--2710},
+  year={1998},
+  publisher={Cold Spring Harbor Lab}
+}
+
+@article{schwob1993clb5,
+  title={CLB5 and CLB6, a new pair of B cyclins involved in DNA replication in Saccharomyces cerevisiae.},
+  author={Schwob, Etienne and Nasmyth, K},
+  journal={Genes \& development},
+  volume={7},
+  number={7a},
+  pages={1160--1175},
+  year={1993},
+  publisher={Cold Spring Harbor Lab}
+}
+
+@article{crosby2007cell,
+  title={Cell cycle: principles of control},
+  author={Crosby, Meredith E},
+  journal={The Yale journal of biology and medicine},
+  volume={80},
+  number={3},
+  pages={141},
+  year={2007},
+  publisher={Yale Journal of Biology and Medicine}
+}
+
+@article{ciosk1998esp1,
+  title={An ESP1/PDS1 complex regulates loss of sister chromatid cohesion at the metaphase to anaphase transition in yeast},
+  author={Ciosk, Rafal and Zachariae, Wolfgang and Michaelis, Christine and Shevchenko, Andrej and Mann, Matthias and Nasmyth, Kim},
+  journal={Cell},
+  volume={93},
+  number={6},
+  pages={1067--1076},
+  year={1998},
+  publisher={Elsevier}
+}

@@ -162,7 +162,7 @@ for (i in 1:n_scn) {
 
     ggsave(paste0("./SupplementaryMaterial/Images/Simulations/PSMs/", scenarios[i], "Sim", j, ".png"),
       plot = psm_plt,
-      height = 6, width = 8
+      height = 5, width = 6
     )
   }
 }

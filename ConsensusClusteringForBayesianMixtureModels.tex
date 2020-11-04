@@ -61,38 +61,38 @@ In many analyses or decision making processes, understanding how certain the clu
 However in many cluster analyses only a point clustering is estimated and thus no one is no wiser about which individuals are boundary members of clusters. Bayesian mixture models provide an uncertainty quantification that allows one to include this uncertainty in a formal manner in downstream analyses and decisions. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles \citep{medvedovic2002bayesian}, cell types in flow cytometry \citep{chan2008statistical, hejblum2019sequential} or scRNAseq experiments \citep{prabhakaran2016dirichlet}, and predicting protein localisation \citep{crook2018bayesian}.
 
 One might believe that the number of occupied clusters present, $K$, is a random variable that should be inferred from the data. Bayesian mixture models can treat $K$ in this way, thereby incorporating uncertainty about $K$ into the the allocation uncertainty and reducing some of the subjectivity of choosing $K$. The most common models for are the mixture of finite mixtures (\citealp{miller2018mixture}, frequently implemented using Reversible Jump MCMC moves via \citealp{richardson1997bayesian}), the Dirichlet process \citep{ferguson1973bayesian, neal2000markov} or the overfitted mixture model \citep{van2015overfitting}. In these models the number of components and the component parameters are modelled jointly, in contrast with many clustering methods. Furthermore, if there is a prior information about $K$, this may be included due to the Bayesian nature of the model. 
-
-We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
-\begin{align}
-x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
-\end{align}
-where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$. $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
-\begin{equation}
-	\label{eqn:mixModel}
-	\begin{array}{r@{}l l}
-		p(c_i = k) = \pi_k&  &\textrm{for $k = 1,\ldots,K$,} \\
-		x_i | c_i \sim f(x_i | \theta_k)& &\textrm{independently for $i = 1,\ldots,N$.} 
-	\end{array}
-\end{equation}
-The joint model can then be written
-\begin{align}
-	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
-\end{align}
-An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
-
-\begin{align}
-	p(X, c, \theta, \pi, K) &=  p(\pi | K) p(\theta | K) p(K) \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) p (c_i | \pi, K).  \label{eqn:jointMixModel}
-%	\\
-%	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
-%	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
-\end{align}
-
-Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. This is captured by the different prior on the allocation
-\begin{align}
-	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{i=1}^{L-1}\prod_{j=i+1}^L(1 + \phi_{ij} \mathbb{I}(c_{ni} = c_{nj}))
-	\label{eqn:mdiPrior}
-\end{align}
-for $L$ datasets and $n = 1,\ldots, N$. $\phi_{ij}$ is the parameter defined by the correlation of the clusterings for the $i^{th}$ and $j^{th}$ datasets. As this increases more mass is placed on the common partition for $i$ and $j$. Conversely, as $\phi_{ij}\to 0$ we have independent mixture models. In this way the correlation of the clustering between each pair of datasets controls how information is shared across each clustering, with more correlated datasets influencing each other and uncorrelated datasets remaining independent.
+%
+%We write the basic mixture model for independent items $X=(x_1, \ldots, x_N)$ as 
+%\begin{align}
+%x_i \sim \sum_{k=1}^K\pi_k f(x_i | \theta_k) \hspace{1cm} \textrm{independently for $i = 1,\ldots,N$}
+%\end{align}
+%where $f(\cdot| \theta)$ is some family of densities parametrised by $\theta$. A common choice is the Gaussian density function, with $\theta=(\mu, \sigma^2)$. $K$, the number of subgroups in the population, $\{\theta_k\}_{k=1}^K$, the component parameters, and $\pi=(\pi_1, \ldots, \pi_K)$, the component weights are the objects to be inferred. In the context of \emph{clustering}, such a model arises due to the belief that the population from which the random sample under analysis has been drawn consists of $K$ unknown groups proportional to $\pi$. In this setting it is natural to include a latent \emph{allocation variable}, $c=(c_1, \ldots, c_N)$, to indicate which group each item is drawn from. The model is then
+%\begin{equation}
+%	\label{eqn:mixModel}
+%	\begin{array}{r@{}l l}
+%		p(c_i = k) = \pi_k&  &\textrm{for $k = 1,\ldots,K$,} \\
+%		x_i | c_i \sim f(x_i | \theta_k)& &\textrm{independently for $i = 1,\ldots,N$.} 
+%	\end{array}
+%\end{equation}
+%The joint model can then be written
+%\begin{align}
+%	p(X, c, K, \pi, \theta) &= p(X | c, \pi, K, \theta) p(\theta | c, \pi, K) p(c | \pi, K) p(\pi | K) p(K) \nonumber
+%\end{align}
+%An assumption that is frequently used is that the density of each feature is independent, with $\theta_k=(\theta_{k1},\ldots, \theta_{kP})$ for all $k=1,\ldots,K$. Furthermore, conditional independence is assumed between certain parameters such that the model reduces to
+%
+%\begin{align}
+%	p(X, c, \theta, \pi, K) &=  p(\pi | K) p(\theta | K) p(K) \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) p (c_i | \pi, K).  \label{eqn:jointMixModel}
+%%	\\
+%%	&= \prod_{i=1}^N \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^{(1 - \phi_p)} p(x_{ip} | \theta_p) ^ {\phi_p} \times \\
+%%	& \prod_{i=1}^N p (c_i | \pi, K) p(\pi | K) p(\theta | K)
+%\end{align}
+%
+%Bayesian mixture models have been extended to the multiple dataset context where they are used to perform integrative clustering. This means that as much pertinent information as possible can be included in the joint model. Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} is an example of such a model where dataset specific clusterings are learnt, informed by common information. This is captured by the different prior on the allocation
+%\begin{align}
+%	p(c_{n1}, \ldots, c_{nL}) \propto \prod_{l=1}^L \pi_{c_{nl}l}\prod_{i=1}^{L-1}\prod_{j=i+1}^L(1 + \phi_{ij} \mathbb{I}(c_{ni} = c_{nj}))
+%	\label{eqn:mdiPrior}
+%\end{align}
+%for $L$ datasets and $n = 1,\ldots, N$. $\phi_{ij}$ is the parameter defined by the correlation of the clusterings for the $i^{th}$ and $j^{th}$ datasets. As this increases more mass is placed on the common partition for $i$ and $j$. Conversely, as $\phi_{ij}\to 0$ we have independent mixture models. In this way the correlation of the clustering between each pair of datasets controls how information is shared across each clustering, with more correlated datasets influencing each other and uncorrelated datasets remaining independent.
 
 
 

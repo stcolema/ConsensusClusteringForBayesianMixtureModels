@@ -353,7 +353,7 @@ plt_ensembles <- expand.grid(plt_params$R, plt_params$S) %>%
   set_colnames(c("R", "S"))
 
 # Facet labels for continuous variables
-param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", 1:3, "]"))
+param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", c(12, 13, 23), "]"))
 names(param_labels) <- colnames(continuous_data$Samples[[1]])
 
 # === Time series ==============================================================
@@ -644,23 +644,25 @@ for (i in 1:n_plts) {
 cont_plt_data$Model <- paste0("CC(", cont_plt_data$R, ", ", cont_plt_data$S, ")")
 
 # Facet labels for continuous variables
-param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", c(12, 13, 23), "]"))
-names(param_labels) <- colnames(continuous_data$Samples[[n_ensembles]])
+# param_labels <- c(paste0("alpha[", 1:3, "]"), paste0("phi[", c(12, 13, 23), "]"))
+# names(param_labels) <- colnames(continuous_data$Samples[[n_ensembles]])
 
 
 p_param_density <- cont_plt_data %>%
-  # filter(Model == "CC(10001, 1000)") %>%
-  ggplot(aes(x = value, fill = Model)) +
-  geom_density(alpha = 0.2) +
+  filter(Model == "CC(10001, 1000)", Parameter %in% c("Phi_12", "Phi_13", "Phi_23")) %>%
+  ggplot(aes(x = value)) + #, fill = Model)) +
+  # geom_density(alpha = 0.2) +
+  geom_histogram() +
   facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
   labs(
-    title = "Parameter density",
+    title = "Consensus clustering",
+    subtitle = expr(paste("Sampled ", phi, " densities")),
     x = "Value",
     y = "Density"
   ) +
   scale_fill_viridis_d()
 
-p_param_density +
+p_phi <- p_param_density +
   theme(
     axis.text.y = element_text(size = 10.5),
     axis.text.x = element_text(size = 10.5),
@@ -671,3 +673,8 @@ p_param_density +
     strip.text.x = element_text(size = 10.5),
     legend.text = element_text(size = 10.5)
   )
+
+ggsave("./SupplementaryMaterial/Images/Yeast/Convergence/CCPhiDensityPlot.png",
+       plot = p_phi,
+       height = 4, 
+       width = 6)

@@ -93,8 +93,33 @@ fusedTable <- function(genes, cl,
   as.tibble(fused_df[, c(2, 4, 3, 1)])
 }
 
+# === Setup ====================================================================
 
 setMyTheme()
+
+# Pheatmap visuals
+col_pal <- simColPal()
+breaks <- defineBreaks(col_pal, lb = 0)
+
+# random seed
+set.seed(1)
+
+# Original data modelled
+data_dir <- "./Data/Yeast/Original_data/"
+datasets <- c("Timecourse", "ChIP-chip", "PPI")
+data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
+orig_data <- data_files %>%
+  lapply(read.csv, row.names = 1) %>%
+  set_names(datasets)
+
+# The number of items in each dataset
+N <- nrow(orig_data[[1]])
+
+# The number of datasets
+L <- length(datasets)
+
+# Genes present
+gene_names <- row.names(orig_data[[1]])
 
 # Read in the CC and Bayes tibbles.
 alloc_data <- readRDS("./Data/Yeast/CCAllocTibble.rds")
@@ -127,7 +152,7 @@ for (l in 1:(L - 1)) {
   }
 }
 
-
+# === All datasets =============================================================
 
 genes_fused <- findFusedYeast(cc_results$Samples)
 
@@ -205,6 +230,8 @@ p_patch <- p1 + p2 + p3 +
   plot_layout(guides = "collect")
 p_patch
 
+# === Timecourse + ChIP-chip ===================================================
+
 fused_timecourse_chipchip <- findFusedPairwise(cc_results$Samples[1:2])
 
 timecourse_chipchip_table <- fusedTable(fused_timecourse_chipchip,
@@ -213,6 +240,9 @@ timecourse_chipchip_table <- fusedTable(fused_timecourse_chipchip,
   gene_names = org.Sc.sgdGENENAME
 ) %>%
   dplyr::arrange(Cluster, Name)
+
+# LaTex table for the fused clusters
+stargazer(timecourse_chipchip_table, summary = FALSE, rownames = FALSE)
 
 # Trnasform the data to ggplot form
 long_chipchip_data <- orig_data$`ChIP-chip`[match(timecourse_chipchip_table$Gene, row.names(orig_data$Timecourse)), ] %>%
@@ -328,8 +358,8 @@ p2 + p6 + plot_layout(guides = "collect")
 p3 + p7 + plot_layout(guides = "collect")
 p4 + p8 + plot_layout(guides = "collect")
 
-# Keep only those with some interactions in the TF data
-cl_to_plt <- c(1:2, 5, 9, 11:12, 16:18, 20, 26)
+# Keep only those with some interactions in the TF data and not singletons
+cl_to_plt <- c(1:2, 5, 9, 11:12, 16:17, 20, 26)
 
 # The timecourse data for these clusters
 p9 <- long_timecourse_data %>%
@@ -354,6 +384,26 @@ tfs_important <- c(
   "ACE2", "DIG1", "FKH1", "FKH2", "MBP1", "MCM1", "NDD1",
   "STE12", "SWI4", "SWI5", "SWI6", "TEC1", "YOX1"
 )
+
+# Find descriptions of these TFs
+descriptions <- org.Sc.sgdDESCRIPTION
+
+# Convert to a list
+orfs <- as.list(org.Sc.sgdCOMMON2ORF)
+
+# Remove probes that do not map in COMMON2ORF
+tf_orfs <- orfs[match(tfs_important, names(orfs))] %>% 
+  unlist()
+
+tf_descriptions <- as.list(descriptions[tf_orfs])
+
+tf__df <- tf_descriptions %>%
+  unlist() %>%
+  data.frame(Description = .) %>%
+  cbind(data.frame(Gene = tfs_important, ORF = tf_orfs)) %>%
+  dplyr::arrange(Gene)
+
+stargazer(tf__df[, c(3, 2, 1)], summary = FALSE, rownames = FALSE)
 
 # Now we do an awful hack to separate out these on the x-axis
 tfs_pres <- long_chipchip_data$TF %>%
@@ -405,8 +455,25 @@ ggsave("./SupplementaryMaterial/Images/Yeast/timecourseChIPchipFused.png",
   width = 14
 )
 
-# LaTex table for the fused clusters
-stargazer(timecourse_chipchip_table, summary = FALSE, rownames = FALSE)
+cl_5_and_12 <- timecourse_chipchip_table$Gene[timecourse_chipchip_table$Cluster %in% c(5, 12)]
+
+inds <- match(cl_5_and_12, row.names(alloc_data$CM[[1]]))
+
+alloc_data$CM[[118]][inds, ] %>% 
+  extract(, colSums(.) > 0.5) %>% 
+  pheatmap()
+
+alloc_data$CM[[119]][inds, ] %>% 
+  extract(, colSums(.) > 0.5) %>% 
+  pheatmap()
+
+
+cl18 <- alloc_data$CM[[118]][c(1:3, which(row.names(alloc_data$CM[[1]]) == "YLR209C")), ] %>% 
+  magrittr::extract(, colSums(.) > 0.05)
+  
+pheatmap(cl18[, 15:45], cluster_cols = T)
+
+# === GO term attempts =========================================================
 
 # GO term over-representation in the fused clusters
 cluster_comp <- cc_results$Cl[[1]][match(genes_fused, names(cc_results$Cl[[1]]))] %>%

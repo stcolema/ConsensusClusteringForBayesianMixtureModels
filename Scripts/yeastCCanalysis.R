@@ -99,7 +99,7 @@ thin
 # R <- list(c(0, 1, 5, 10) * 100 + 1, c(2:10) * 1000 + 1)
 # S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
 
-R <- list(c(0, 1, 5) * 100 + 1, c(1, 5:10) * 1000 + 1)
+R <- list(c(0, 1, 5) * 100 + 1, c(1:10) * 1000 + 1)
 S <- list(c(1, c(1, 5, 10) * 100), c(1, c(1, 5, 10) * 100))
 
 # The ensembles available
@@ -242,31 +242,31 @@ for (i in 1:n_ensembles) {
 # )
 # s_final <- 1000
 # r_merged <- c(5:10)*1000 + 1
-# 
+#
 # # The phis and mass parameters
-# merged_cont_data <- continuous_data$Samples[which(continuous_data$R %in% r_merged & 
+# merged_cont_data <- continuous_data$Samples[which(continuous_data$R %in% r_merged &
 #                                 continuous_data$S == s_final)] %>%
-#   unlist() %>% 
-#   matrix(byrow = T, ncol = n_cont_parameters) %>% 
+#   unlist() %>%
+#   matrix(byrow = T, ncol = n_cont_parameters) %>%
 #   set_colnames(colnames(continuous_data$Samples[[1]]))
-# 
+#
 # merged_cont_tib <- tibble(Samples = list(merged_cont_data), S = 1000* 6, R= "Merged")
-# 
+#
 # for(dataset in datasets){
-# ensembles_merged <- which(alloc_data$R %in% r_merged & 
+# ensembles_merged <- which(alloc_data$R %in% r_merged &
 #                             alloc_data$S == s_final &
 #                             alloc_data$Dataset == dataset)
-# 
-# merged_samples <- alloc_data[ensembles_merged, ]$Samples %>% 
+#
+# merged_samples <- alloc_data[ensembles_merged, ]$Samples %>%
 #   do.call(rbind, .)
-# 
+#
 # merged_cm <- createSimilarityMat(as.matrix(merged_samples)) %>%
 #   set_rownames(item_names) %>%
 #   set_colnames(item_names)
-# 
+#
 # # Predicted clustering (k is set to an arbitrarily large number)
 # cl <- mcclust::maxpear(merged_cm, max.k = 275)$cl
-# 
+#
 # .alloc_tib <- tibble(
 #   Samples = list(merged_samples),
 #   R = "Merged",
@@ -275,7 +275,7 @@ for (i in 1:n_ensembles) {
 #   CM = list(merged_cm),
 #   Cl = list(cl)
 # )
-# 
+#
 # merged_tib <- rbind(merged_tib, .alloc_tib)
 # }
 
@@ -285,56 +285,56 @@ for (i in 1:n_ensembles) {
 # arandi(comp_tib$Cl[[1]], merged_tib$Cl[[1]])
 # arandi(comp_tib$Cl[[2]], merged_tib$Cl[[2]])
 # arandi(comp_tib$Cl[[3]], merged_tib$Cl[[3]])
-# 
+#
 # for(l in 1:L){
 #   cl_dat <- data.frame(Cl = comp_tib$Cl[[l]],
 #                        Dataset = datasets[l],
-#                        R = comp_tib$R[l], 
-#                        S = comp_tib$S[l], 
-#                        Item = 1:N, 
+#                        R = comp_tib$R[l],
+#                        S = comp_tib$S[l],
+#                        Item = 1:N,
 #                        Model = paste0("CC(", comp_tib$R[l], ",", comp_tib$S[l], ")")
 #                        )
-#   
+#
 #   cl_dat_2 <- data.frame(Cl = merged_tib$Cl[[l]],
 #                          Dataset = datasets[l],
 #                          R = merged_tib$R[l],
-#                          S = merged_tib$S[l], 
+#                          S = merged_tib$S[l],
 #                          Item = 1:N,
 #                          Model = "Merged")
-#   
+#
 #   if(l == 1){
 #     cl_plt_data <- rbind(cl_dat, cl_dat_2)
 #   } else{
 #     cl_plt_data <- rbind(cl_plt_data, cl_dat, cl_dat_2)
 #   }
-#   
+#
 # }
-# 
-# cl_plt_data %>% 
+#
+# cl_plt_data %>%
 #   ggplot(aes(x = Item, y = Cl, colour = Model)) +
 #   geom_point() +
 #   geom_jitter() +
 #   facet_wrap(~Dataset)
-# 
+#
 # table(comp_tib$Cl[[1]])
 # table(merged_tib$Cl[[1]])
 # arandi(comp_tib$Cl[[2]], merged_tib$Cl[[2]])
 # arandi(comp_tib$Cl[[3]], merged_tib$Cl[[3]])
-# 
-# # Compare the consensus matrix for the 
+#
+# # Compare the consensus matrix for the
 # p1 <- compareSimilarityMatricesAnnotated(comp_tib$CM[[1]], merged_tib$CM[[1]])
 # p1_alt <- compareSimilarityMatricesAnnotated(comp_tib$CM[[1]], merged_tib$CM[[1]], matrix_imposing_order = 2)
 # p2 <-compareSimilarityMatricesAnnotated(comp_tib$CM[[2]], merged_tib$CM[[2]])
 # p2_alt <-compareSimilarityMatricesAnnotated(comp_tib$CM[[2]], merged_tib$CM[[2]], matrix_imposing_order = 2)
 # p3 <-compareSimilarityMatricesAnnotated(comp_tib$CM[[3]], merged_tib$CM[[3]])
 # p3_alt <-compareSimilarityMatricesAnnotated(comp_tib$CM[[3]], merged_tib$CM[[3]], matrix_imposing_order = 2)
-# 
+#
 # library(patchwork)
 # p1 / p1_alt
 # p2 / p2_alt
 # p3 / p3_alt
 #
-# 
+#
 # rbind(alloc_data, merged_tib)
 # rbind(continuous_data, merged_cont_tib)
 
@@ -466,9 +466,9 @@ p_time_series <- plt_data_transformed %>%
   )
 
 ggsave(paste0("./SupplementaryMaterial/Images/Yeast/TimeSeriesClusterR", r, "S", s, ".png"),
-       plot = p_time_series,
-       height = 10,
-       width = 14
+  plot = p_time_series,
+  height = 10,
+  width = 14
 )
 
 # === Consensus matrices =======================================================
@@ -616,6 +616,76 @@ for (l in 1:L) {
   )
 }
 
+# === Elbow plot ===============================================================
+
+# dataset <- "ChIP-chip"
+for (dataset in datasets) {
+  dataset_ind <- which(alloc_data$Dataset == dataset)
+  .alloc <- alloc_data[dataset_ind, ]
+  s_used <- .alloc$S %>%
+    unique()
+
+  r_used <- .alloc$R %>%
+    unique()
+
+  n_r <- length(r_used)
+
+  for (s in s_used) {
+    .cms <- .alloc$CM[.alloc$S == s]
+
+    scores <- .cms %>%
+      lapply(function(x) {
+        sum((x - .alloc$CM[[n_ensembles]])**2)
+      }) %>%
+      unlist()
+
+    .df <- data.frame(S = s, R = r_used, Score = scores, Dataset = dataset)
+    if (s == s_used[1]) {
+      score_df <- .df
+    } else {
+      score_df <- rbind(score_df, .df)
+    }
+  }
+  if (dataset == datasets[1]) {
+    plt_df <- score_df
+  } else {
+    plt_df <- rbind(plt_df, score_df)
+  }
+}
+
+ensemble_choice_plot <- plt_df %>%
+  filter(S != 1) %>%
+  ggplot(aes(x = R, y = Score, group = S, colour = as.factor(S))) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Yeast data",
+    subtitle = "Consensus clustering ensemble choice",
+    x = "Chain depth",
+    y = "Mean squared similarity difference",
+    colour = "Number of chains"
+  ) +
+  facet_wrap(~Dataset) +
+  scale_color_viridis_d() +
+  theme(
+    axis.text.y = element_text(hjust = 0.0, size = 10),
+    axis.text.x = element_text(angle = 0, size = 10),
+    axis.title.y = element_text(size = 12),
+    axis.title.x = element_text(size = 12),
+    plot.title = element_text(size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    strip.text.x = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 12),
+  ) +
+  scale_x_continuous(breaks = c(0, 5000, 10000))
+
+ggsave("./SupplementaryMaterial/Images/Yeast/EnsembleChoicePlot.png",
+  plot = ensemble_choice_plot,
+  height = 6,
+  width = 8
+)
+
 # === Density plots ============================================================
 
 n_plts <- nrow(plt_ensembles)
@@ -650,7 +720,7 @@ cont_plt_data$Model <- paste0("CC(", cont_plt_data$R, ", ", cont_plt_data$S, ")"
 
 p_param_density <- cont_plt_data %>%
   filter(Model == "CC(10001, 1000)", Parameter %in% c("Phi_12", "Phi_13", "Phi_23")) %>%
-  ggplot(aes(x = value)) + #, fill = Model)) +
+  ggplot(aes(x = value)) + # , fill = Model)) +
   # geom_density(alpha = 0.2) +
   geom_histogram() +
   facet_wrap(~Parameter, labeller = as_labeller(param_labels, label_parsed)) +
@@ -675,6 +745,7 @@ p_phi <- p_param_density +
   )
 
 ggsave("./SupplementaryMaterial/Images/Yeast/Convergence/CCPhiDensityPlot.png",
-       plot = p_phi,
-       height = 4, 
-       width = 6)
+  plot = p_phi,
+  height = 4,
+  width = 6
+)

@@ -240,7 +240,9 @@ $\phi_{lm}$ is the parameter defined by the similarity of the clusterings for th
 \section{Consensus clustering}
 Consensus clustering is an ensemble approach to cluster analysis. Ensembles are often better able to explore the full parameter space than any individual learner in its composition, thus describing more modes within parameters than the individual learners \citep{ghaemi2011review}. Ensembles also offer reductions in computational runtime because most ensemble methods enable use of a parallel environment to improve computation speed \citep{ghaemi2009survey}. 
 
-Consensus clustering \citep{monti2003consensus} is an ensemble method for cluster analysis, previously implemented using $k$-means clustering as the base learner in the R package \texttt{ConsensusClusterPlus} \citep{wilkerson2010consensusclusterplus}. Consensus clustering has been applied in a variety of biomedical setting such as cancer subtyping \citep{lehmann2011identification, verhaak2010integrated}, identifying subclones in single cell analysis \citep{kiselev2017sc3}, and proteomic characterisation of tumours \citep{xu2020integrative}. Consensus clustering applies $S$ independent runs of the based clustering algorithm to peturbed versions of the dataset and combines the $S$ final partitions in a \emph{Consensus matrix} which is used to infer a final clustering. An outline of this algorithm is described in algorithm \ref{algorithm:CC}. The consensus matrix is a symmetric matrix with the $(i, j)^{th}$ entry being the proportions of model runs for which the $i^{th}$ and $j^{th}$ items are clustered together. For a single partition the \emph{coclustering matrix} represents this information, being a binary matrix with the $(i, j)^{th}$ entry indicating if items $i$ and $j$ are allocated to the same cluster.
+Consensus clustering \citep{monti2003consensus} is an ensemble method for cluster analysis, previously implemented using $k$-means clustering as the base learner in the R package \texttt{ConsensusClusterPlus} \citep{wilkerson2010consensusclusterplus}. Consensus clustering has been applied in a variety of biomedical setting such as cancer subtyping \citep{lehmann2011identification, verhaak2010integrated}, identifying subclones in single cell analysis \citep{kiselev2017sc3}, and proteomic characterisation of tumours \citep{xu2020integrative}. Consensus clustering applies $S$ independent runs of the underlying clustering algorithm to peturbed versions of the dataset and combines the $S$ final partitions in a \emph{Consensus matrix} which is used to infer a final clustering. An outline of this is described in algorithm \ref{algorithm:CC}. 
+
+The consensus matrix is a symmetric matrix with the $(i, j)^{th}$ entry being the proportions of model runs for which the $i^{th}$ and $j^{th}$ items are clustered together. For a single partition the \emph{coclustering matrix} represents this information, being a binary matrix with the $(i, j)^{th}$ entry indicating if items $i$ and $j$ are allocated to the same cluster.
 %definition CM
 
 \begin{algorithm} \label{algorithm:CC}
@@ -268,7 +270,7 @@ Consensus clustering \citep{monti2003consensus} is an ensemble method for cluste
 \end{algorithm}
 
 %\subsubsection{Consensus clustering of Bayesian mixture models}
-Ensemble methods are rarely applied Bayesian models despite \cite{monti2003consensus} suggesting this. We believe that Bayesian methods are under exploited in the ensemble framework and propose applying Consensus clustering to Bayesian mixture models. Our implementation of this is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
+Ensemble methods are rarely applied Bayesian models despite \cite{monti2003consensus} suggesting this. We believe that Bayesian methods are underexploited in the ensemble framework and propose applying Consensus clustering to Bayesian mixture models. Our implementation of this is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
 
 \begin{algorithm} \label{algorithm:CCforBayesianMixtures}
 	\KwData{\(X=(x_1, \ldots, x_N)\)}
@@ -298,12 +300,11 @@ Ensemble methods are rarely applied Bayesian models despite \cite{monti2003conse
 		$\mathbf{M} \leftarrow \frac{1}{S} \mathbf{M}$\;
 		$\hat{Y} \leftarrow$ partition $X$ based upon $\mathbf{M}$\;
 	}
-	\caption{Consensus Clustering for Bayesian mixture models}
+	\caption{Consensus clustering for Bayesian mixture models}
 \end{algorithm}
+We show via simulation that ensembles consisting of short chains are sufficient to uncover meaningful structure in a number of scenarios including some within which a Gibbs sampler becomes trapped in individual modes for any reasonable length of runtime. The chains are both short and independent, thus their individual runtime is far shorter than the chains traditionally used for Bayesian inference and may also be run in parallel. This means that Consensus clustering of Bayesian mixture models offers significant reductions in runtime without sacrifices in performance. As the ensemble can describe multiple modes, the uncertainty present in the consensus matrix can be more representative of the data than the individual modes captured by any single chain.
 
-We show via simulation that ensembles consisting of short chains are sufficient to uncover meaningful structure in a number of scenarios including some within which a Gibbs sampler becomes trapped in individual modes for any reasonable length of runtime. The chains are both short and independent, thus their individual runtime is far shorter than the chains traditionally used for Bayesian inference and may also be run in parallel. This means that consensus clustering of Bayesian mixture models offers significant reductions in runtime without sacrifices in performance. As the ensemble can describe multiple modes, the uncertainty present in the consensus matrix can be more representative of the data than the individual modes captured by any single chain.
-
-We then consider the multiple dataset setting. We apply Consensus clustering to an integrative extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We apply this ensemble to three 'omics datasets for \emph{Saccharomyces cerevisiae} and discover biological meaningful clusters. We then compared this result to performing Bayesian inference of MDI.
+We then considered the multiple dataset setting. We applied Consensus clustering to an integrative extension of Bayesian mixture models, Multiple Dataset Integration (MDI). We applied this ensemble to three 'omics datasets for \emph{Saccharomyces cerevisiae} and uncovered clusters that have a biological interpretation. We then compared this result to performing Bayesian inference of MDI.
 
 %We show on three datasets from the original MDI paper that Consensus clustering performs similarly to Bayesian inference of this model, and then using more modern, larger data that Consensus clustering enables implementation of such models in scenarios where the problem of long runtimes and poor mixing previously discouraged this. 
 
@@ -321,8 +322,9 @@ We defined a number of scenarios to test certain concepts of the method and to e
 	\centering
 	% To place a caption above a table
 %	\caption{Caption above table.}
-	\begin{tabular}{|l|ccccccc|}
-	\hline
+	\begin{tabular}{l|ccccccc}
+		\\[-1.8ex]\hline 
+		\hline \\[-1.8ex] 
 	\textbf{Scenario} & $N$ & $P_s$ & $P_n$ & $K$ & $\Delta\mu$ & $\sigma^2$ & $\pi$\\
 	\hline 
 	2D & 100 & 2 & 0 & 5 & 3.0 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$ \\
@@ -497,7 +499,7 @@ In figure \ref{fig:simPrediction} the ARI between the generating labels and the 
 	\item $ARI(c_1, c_2) = 1.0$: a perfect match between the two partitions,
 	\item $ARI(c_1, c_2) = 0.0$: $c_1$ is no more similar to $c_2$ than is expected for a random partition of the data.
 \end{itemize}
-In several scenarios \texttt{Mclust} performs the best under this metric (e.g. in the scenarios \emph{2D}, \emph{Small $N$, large $P$ ($\Delta \mu = 0.2$)}). However when the number of irrelevant features is large \texttt{Mclust} performs less well (see \emph{Irrelevant features ($P_n = 20$)} and \emph{($P_n = 100$)}) than the other methods. In the scenario that $P_n = 100$ failing to find structure is not inherently wrong as a majority of the features suggest that there are no subpopulations. We suspect that the initialisation based upon hierarchical clustering initialises the model in or very near to a small local mode in the likelihood surface and thus higher values of $K$ are rejected as under the BIC the model fit is not any better and the model complexity is higher. 
+In several scenarios \texttt{Mclust} performs the best under this metric (e.g. in the scenarios \emph{2D}, \emph{Small $N$, large $P$ ($\Delta \mu = 0.2$)}). However when the number of irrelevant features is large \texttt{Mclust} performs less well (see \emph{Irrelevant features ($P_n = 20$)} and \emph{($P_n = 100$)}) than the other methods. In the scenario that $P_n = 100$ failing to find structure is not inherently wrong as a majority of the features suggest that there are no subpopulations. We suspect that the initialisation based upon hierarchical clustering initialises the model in or very near to a small local mode in the likelihood surface and thus higher values of $K$ are rejected as under the BIC as the model fit is not significantly improved and the model complexity is higher. 
 %The decrease in uncertainty due to conditioning on a given number of clusters, $K$, means that when \texttt{Mclust} is correct it is more certain than it might otherwise be. Secondly, 
 %The initialisation used by \texttt{Mclust} is based upon a hierarchical clustering of the data. We suspect that this contributes to the better performance in the \emph{Small $N$, large $P$ ($\Delta \mu = 0.2$)} case and the poor performance in the presence of large numbers of irrelevant features.
 
@@ -505,7 +507,7 @@ The pooled Bayesian samples act as an upper bound on the Consensus clustering en
 
 For the ensembles there are two parameters changing between each model, the iteration used to provide the clustering in the ensemble, $R$, and the number of chains (and hence samples) used, $S$. In many of the scenarios we find that the benefit of increasing $R$ stabilises by approximately $R = 10$. We believe that in a low-dimensional dataset (such as \emph{2D}), or a highly informative dataset (such as \emph{Base case} or any of the higher dimensional scenarios with no irrelevant features where $\frac{\Delta \mu}{\sigma^2} \geq 1$) the chains quickly find a ``sensible" partition of the data and thus increasing the depth within the chain does not increase the probability that any partition sampled will be closer to the generating partition. For example in figure \ref{fig:simPrediction} in the \emph{Small $N$, large $P$} case, the distribution of the ARI across the ensembles for which $R\geq10$ and $S=1$ is nearly identical; this suggests that the chain is sampling a very similar partition again and again for 9,990 iterations (and possibly beyond based upon the PSMs shown in figure \ref{fig:simPSMsDisagreeExample}) and it is through adding more chains rather than using particularly long chains that we improve the ability to uncover the generating structure. 
 
-We also notice that even if the behaviour has not stabilised for $R$ that the ensemble can uncover meaningful structure. The ARI for the ensembles of short chains can be quite high (as is the case in many of the scenarios). The behaviour of the Consensus matrices also shows that low $R$ is not a disqualifier from meaningful inference even if longer chains would be ideal. Consider the Consensus matrices in figure \ref{fig:simCMsIrr100}, it can be seen that the behaviour has not stabilised before $R=10000$ (and possibly there is still some benefit in increasing $R$ beyond this value), but the structure being uncovered when there is a sufficient number of chains and $R$ is small does correspond to the structure uncovered in the largest and deepest ensemble. We believe that the order in which components merge and items are co-clustered varies depending on initialisation, and thus if the chain is not sufficiently deep that all of the final mergings have occured that a sufficiently large ensemble can still perform meaningful inference of the subpopulation structure. Even though each learner probably has too many clusters for small $R$ the consensus among them will have less. This is why the entries of the Consensus matrix for $R=100$ and $S=100$ in figure \ref{fig:simCMsIrr100} are more pale than in deeper ensembles; very few items correctly (possibly none) cocluster in every partition, it is only in observing the consensus that the global structure of interest emerges. Thus if there is some limit to the length of chains available for an analysis (e.g. computational or temporal constraints) than the inference obtained from the shorter chains can still be meaningful, with the caveat that the point clustering might have more clusters than the same analysis with longer chains would provide. Additional post-hoc merging of some clusters might be necessary in this case.
+We also notice that even if the behaviour has not stabilised for $R$ that the ensemble can uncover meaningful structure. The ARI for the ensembles of short chains can be quite high (as is the case in many of the scenarios). The behaviour of the Consensus matrices also shows that low $R$ is not a disqualifier from meaningful inference even if longer chains would be ideal, a result that might be useful in real applications with large datasets and complex models. Consider the Consensus matrices in figure \ref{fig:simCMsIrr100}, it can be seen that the behaviour has not stabilised before $R=10000$ (and possibly there is still some benefit in increasing $R$ beyond this value), but the structure being uncovered when there is a sufficient number of chains and $R$ is small does correspond to the structure uncovered in the largest and deepest ensemble. We believe that the order in which components merge and items are co-clustered varies depending on initialisation, and thus if the chain is not sufficiently deep that all of the final mergings have occured that a sufficiently large ensemble can still perform meaningful inference of the subpopulation structure despite the poor performance of any individual model. Even though each learner probably has too many clusters for small $R$ the consensus among them will have less if the individual learners have low correlation between their partitions (something we might expect if the chains are stopped very early). This is why the entries of the Consensus matrix for $R=100$ and $S=100$ in figure \ref{fig:simCMsIrr100} are more pale than in deeper ensembles; very few items correctly (possibly none) cocluster in every partition, it is only in observing the consensus that the global structure of interest emerges. Thus if there is some limit to the length of chains available for an analysis (e.g. computational or temporal constraints) than the inference obtained from the shorter chains can still be meaningful, with the caveat that the point clustering might have more clusters than the same analysis with longer chains would provide. Additional post-hoc merging of some clusters might be necessary in this case.
 
 In contrast, when the dataset is sparse or contains many irrelevant features, we believe that deeper chains are required to reach this steady-state sampling where no single sample is expected to be better than any other (see the \emph{Irrelevant features ($P_n = 100$)} facet of figure \ref{fig:simPrediction}).
 %think that in the scenarios with less distinct clusters (i.e. where the number of irrelevant features, $P_n$, is large or $\frac{\Delta \mu}{\sigma^2} \leq 1$), 
@@ -559,6 +561,28 @@ In figure \ref{fig:simPrediction}, limiting behaviour for increases of $S$ and $
 
 \section{Yeast} \label{sec:yeast}
 
+The cell cycle is the process by which a growing cell divides into two daughter cells. This involves virtually all cellular processes - metabolism, protein synthesis, secretion, DNA replication, organelle biogenesis, cytoskeletal dynamics and chromosome segregation - and diverse regulatory events \citep{granovskaia2010high}. The cell cycle is crucial to biological growth, repair, reproduction, and development; it is fundamental to sustaining life \citep{tyson2013cell, chen2004integrative, alberts2018molecular}. The regulatory proteins of the system first appeared over a billion years ago and are so highly conserved among eukaryotes that many of them function perfectly when transferred from a human cell to a yeast cell \citep{alberts2018molecular}. This conservation means that a relatively simple eukaryote such as \emph{Saccharomyces cerevisiae} can provide insight into a variety of cell cycle perturbations including those that occur in human cancer \citep{ingalls2007systems, chen2004integrative} and ageing \citep{jimenez2015live}. Budding yeast is particularly attractive for genetic analysis as it can proliferate as haploid cells, its genetic makeup can be easily altered by standard tools of molecular genetics, and large numbers of cells may be synchronised in a particular stage of the cell cycle  \citep{tyson2013cell, juanes2017methods}.
+
+
+%Cell-cycle data is exciting as virtually all cellular processes - metabolism, protein synthesis, secretion, DNA replication, organelle biogenesis, cytoskeletal dynamics and chromosome segregation - and diverse regulatory events emerge \citep{granovskaia2010high}. 
+
+%It is also naturally suited to integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
+
+%Why?
+%
+%\cite{alberts2018molecular}: The proteins of the control system first appeared over a billion years ago. Remarkably, they have been so well conserved over the course of evolution that many of them function perfectly when transferred from a human cell to a yeast cell.
+%
+%\cite{ingalls2007systems}: Proteins involved in the regulation of the cell cycle are highly conserved across all eukaryotes, and so a relatively simple eukaryote such as yeast can provide insight into a variety of cell cycle perturbations including those that occur in human cancer. 
+%
+%\cite{chen2004integrative}: Cell proliferation underlies all biological growth, reproduction, and development, and its misregulation results in serious human diseases. 
+%
+%The cell cycle is the sequence of events during which a growing cell replicates all its components and divides them more or less evenly between two daughter cells, so that each daughter contains the information and machinery necessary to repeat the process 
+%
+%
+%\cite{tyson2013cell}: The cell cycle of budding yeast has become a hallmark problem of molecular systems biology for a number of reasons. (1) The cycle of DNA replication, mitosis, and cell division is crucial to all aspects of biological growth, development, and reproduction. (2) The genes and pathways for cell cycle control seem to be very similar in all eukaryotes, including mammals. (3) Budding yeast is exceptionally good for genetic analysis of cell cycle controls because it can proliferate as haploid cells, and its genetic makeup can be easily altered by standard tools of molecular genetics. For this reason, a great deal is known about the molecular machinery regulating the events of the budding yeast cell cycle. (4) The machinery is very complicated, and its properties cannot be worked out reliably by intuitive reasoning alone.
+%
+%\cite{jimenez2015live}: Our understanding of lifespan has benefited enormously from the study of a simple model, the yeast Saccharomyces cerevisiae. Although a uni-cellular organism, yeasts undergo many of the processes directly related with aging that to some extent are conserved in mammalian cells.
+
 %Contents:
 %\begin{itemize}
 %	\item Walkthrough datasets (e.g. define protein interactions, what they should tell about gene benefit of co-analysing), 
@@ -566,25 +590,50 @@ In figure \ref{fig:simPrediction}, limiting behaviour for increases of $S$ and $
 %	\item what info each is expected to contribute.
 %\end{itemize}
 
-We aimed to construct sets of co-regulated genes that share biological functions in \emph{Saccharomyces cerevisiae}. We believe such informed gene sets are more relevant to phenotypic traits and offer insight into more complex biological processes. To construct these sets we performed an integrative cluster analysis incorporating more biological meaning than is possible in analysis of a single experiment. In the latter case interpreting the clusters defined by similarity within a single experiment often entails strong assumptions about the biological processes behind the result (e.g. correlation of transcripts implies co-regulation).
+To better understand the regulatory mechanisms and the genes most important in this process, we performed an integrative cluster analysis of gene products across three yeast datasets. These datasets were generated using different 'omics technologies and target different aspects of the molecular biology underpinning the cell cycle process.
 
-We included three datasets that are generated using different techniques. We expect that including measurements from a variety of experiments offers more useful information about specific genes and their products than any single type of 'omics data. We performed an integrative analysis of these datasets using the MDI model, jointly modelling the clustering in each dataset. The additional information from the integrative analysis for each gene and the flexible joint model improve our ability to interpret the clusters that emerge as biological constructs without forcing meaning via agressive assumptions or excessive structure \emph{a priori} due to our model choice (e.g. a model that assumes a global generating structure across all datasets).
+\begin{itemize}
+	\item Microarray profiles of RNA expression from \cite{granovskaia2010high}. This dataset comprises measurements of cell-cycle-regulated expression at 5-minute intervals for 41 time points (up to three cell division cycles) and is referred to as the \textbf{Timecourse} dataset. We include only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles. This includes some non-coding RNAs (\textbf{ncRNAs}) of which the majority are anti-sense RNAs.
+	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset discretizes $p$-values from tests of associated between 117 DNA-binding transcriptional regulators and a set of yeast genes. based upon a significance threshold these $p$-values are represented as either a 0 (no interaction) or a 1 (an interaction).
+	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This database consists of of physical and genetic interactions between gene and gene products. The interactions included are a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we used contained 603 proteins as columns. An entry of 1  in the $(i, j)^{th}$ cell indicates that the $i^{th}$ gene has a protein product that interacts with the $j^{th}$ protein.
+\end{itemize}
+We used these datasets to construct sets of co-regulated genes that share biological functions in \emph{Saccharomyces cerevisiae}. We believe such informed gene sets are more relevant to phenotypic traits and offer insight into more complex biological processes. 
+%We used these datasets to perform an integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
+
+
+%To construct these sets we performed an integrative cluster analysis incorporating more biological meaning than is possible in analysis of a single experiment.
+
+We believe that the integrative aspect of the experiments means that the clusters are more interpretable than in a standalone cluster analysis. Cluster analysis of a single dataset entails interpreting the clusters defined by similarity within a single experiment which often involves strong assumptions about the biological processes behind the result (e.g. correlation of transcripts implies co-regulation).
+
+%Furthermore, integrative analysis means that power may be loaned between datasets - for example the ChIP-chip dataset involved discreization based upon $p$-values. By clustering this data with the Timecourse dataset, genes which have similar behaviour in the Timecourse dataset and some similarity in the ChIP-chip data may be clustered together
+
+%We included three datasets that are generated using different techniques. We expect that including measurements from a variety of experiments offers more useful information about specific genes and their products than any single type of 'omics data. 
+
+We used the MDI model for our integrative analysis. This jointly models the clustering in each dataset, inferring individual clusterings for each dataset that are informed by similarity in the other clusterings. As described in section \ref{sec:models}, MDI learns the similarity between the datasets being analysed and does not assume global structure. This means that the similarity between datasets is not strongly assumed in our model. As the MDI model allows different clusters to align across datasets but does not enforce a global structure; this means that individual clusters or even genes can align across datasets based upon the evidence present in the data without forcing global alignment. Thus we can include the PPI data and expect it to contribute to our final clustering despite the expectation that the ncRNAs might not have common cluster allocation across the Timecourse and PPI datasets.
+
+%The additional information from the integrative analysis for each gene and the flexible joint model improve our ability to interpret the clusters that emerge as biological constructs without forcing meaning via agressive assumptions or excessive structure \emph{a priori} due to our model choice (e.g. a model that assumes a global generating structure across all datasets).
 
 % We are attempting to learn about higher-level processes that individual genes. To enable this we include more information and use a flexible joint model to improve our ability to interpret the clusters that emerge as biological constructs without forcing \emph{a priori} structure via assumptions (e.g. that co-expressed genes are co-regulated) or our model choice (e.g. a model that assumes a global generating structure across all datasets). Performing individual cluster analyses on each dataset means that 
 
-Our \textbf{Yeast dataset} consists of three datasets with different types of gene products associated with a common set of 551 genes. The datasets are:
-\begin{itemize}
-	\item microarray profiles of RNA expression from \cite{granovskaia2010high}. This dataset comprises measurements of cell-cycle-regulated expression at 5-minute intervals for 41 time points (up to three cell division cycles) and is referred to as the \textbf{Timecourse} dataset. We include only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles. This includes some non-coding RNAs (\textbf{ncRNAs}) of which the majority are anti-sense RNAs.
-	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset has comprises measurements across 117 DNA-binding transcriptional regulators.
-	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This dataset consists of of physical and genetic interactions between gene and gene products. The dataset is a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we use contains 603 proteins.
-\end{itemize}
-The datasets were reduced to 551 items by considering only the genes with no missing data in the PPI and ChIP-chip data. The choices to reduce the datasets to these 551 genes are the same steps as the original MDI paper \citep{kirk2012bayesian}. The data is shown in figure \ref{fig:yeastData}.
+%Our \textbf{Yeast dataset} consists of three datasets with different types of gene products associated with a common set of 551 genes. 
+%The datasets are:
+%\begin{itemize}
+%	\item microarray profiles of RNA expression from \cite{granovskaia2010high}. This dataset comprises measurements of cell-cycle-regulated expression at 5-minute intervals for 41 time points (up to three cell division cycles) and is referred to as the \textbf{Timecourse} dataset. We include only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles. This includes some non-coding RNAs (\textbf{ncRNAs}) of which the majority are anti-sense RNAs.
+%	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset has comprises measurements across 117 DNA-binding transcriptional regulators.
+%	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This database consists of of physical and genetic interactions between gene and gene products. The interactions included are a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we used contained 603 proteins.
+%\end{itemize}
+The datasets were reduced to 551 items by considering only the genes with no missing data in the PPI and ChIP-chip data. The choices to reduce the datasets to these 551 genes are the same steps as the original MDI paper \citep{kirk2012bayesian}. The datasets are shown in figure \ref{fig:yeastData}.
 
-Cell-cycle data is exciting as virtually all cellular processes - metabolism, protein synthesis, secretion, DNA replication, organelle biogenesis, cytoskeletal dynamics and chromosome segregation - and diverse regulatory events emerge \citep{granovskaia2010high}. It is also naturally suited to integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped of transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
+%Cell-cycle data is exciting as virtually all cellular processes - metabolism, protein synthesis, secretion, DNA replication, organelle biogenesis, cytoskeletal dynamics and chromosome segregation - and diverse regulatory events emerge \citep{granovskaia2010high}. It is also naturally suited to integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
+
+We used these datasets to perform an integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}; thus the inclusion of the ChIP-chip data means that the clusters that fuse across the datasets should include well studied regulatory proteins. If a cluster of genes are similarly expressed in the Timecourse, share associated regulatory protein in the ChIP-chip and are associated with common protein complexes in the PPI data, than this implies a gene set with strong biological significance.
+%Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
 
 For example, if we cluster the Timecourse dataset alone, any clusters that we find are defined by correlation across time. This might be assumed to be driven by shared regulatory mechanisms, but other sources of structure might be encouraging this, even experimental error. However, if a cluster aligns across both the Timecourse dataset and the ChIP-chip dataset we can be more certain that these genes are part of some regulatory network; if this cluster also emerges in the PPI dataset we might believe that the genes are co-regulated as part of the formation of some protein complex.
 
-The MDI model allows different clusters to align across datasets but does not enforce a global structure; this means that individual clusters or even genes can align across datasets based upon the evidence present in the data without forcing global alignment. Thus we can include the PPI data and expect it to contribute to our final clustering despite the expectation that the ncRNAs might not have common cluster allocation across the Timecourse and PPI datasets.
+Thus we performed an integrative analysis using MDI to avoid agressive assumptions about either the biology defining any clusters and modelling assumptions about the latent structure.
+
+%The MDI model allows different clusters to align across datasets but does not enforce a global structure; this means that individual clusters or even genes can align across datasets based upon the evidence present in the data without forcing global alignment. Thus we can include the PPI data and expect it to contribute to our final clustering despite the expectation that the ncRNAs might not have common cluster allocation across the Timecourse and PPI datasets.
 
 We expect that the complexity of this data and model means that the time required for convergence of the MCMC algorithm would be very large. We avoid this problem by using Consensus clustering of MDI, instead basing our final ensemble choice on the stopping rule laid out in section \ref{sec:stopping}.
 
@@ -599,22 +648,29 @@ The datasets were modelled using a mixture of Gaussian processes in the Timecour
 
 \subsection{Consensus clustering analysis} \label{sec:consensusClustering}
 
-Contents:
-\begin{itemize}
-	\item Talk about clusters that emerge, number of clusters, similarity across datasets,
-	\item Do full analysis via Consensus clustering and then compare to the long chains (comparison separately).
-	\item Cluster X is a cluster of genes involved in function Y – look at gene names and gene descriptions.
-%	\item Take clusters more than 5 – increases power 
-	\item Talk about alignment across datasets.
-	\item If ChIP-chip are contributing to timecourse, maybe know which regulate – something is controlling the periodic expression.
-\end{itemize}
+%Contents:
+%\begin{itemize}
+%	\item Talk about clusters that emerge, number of clusters, similarity across datasets,
+%	\item Do full analysis via Consensus clustering and then compare to the long chains (comparison separately).
+%	\item Cluster X is a cluster of genes involved in function Y – look at gene names and gene descriptions.
+%%	\item Take clusters more than 5 – increases power 
+%	\item Talk about alignment across datasets.
+%	\item If ChIP-chip are contributing to timecourse, maybe know which regulate – something is controlling the periodic expression.
+%\end{itemize}
 
 \subsubsection{Ensemble choice}
-We use an ensemble of depth $R=10001$ and width $S=1000$ with a base learner of MDI \citep[using the implementation from][]{mason2016mdi}. This ensemble depth and width were decided using the stopping rule from section \ref{sec:stopping}. We include the Consensus matrices for this ensemble and those for the combinations of $R = (1001, 5001, 10001)$, $S=(100, 500, 1,000)$ in the three datasets (shown in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}).
+We use an ensemble of depth $R=10001$ and width $S=1000$ with a base learner of MDI \citep[using the software implementation from][]{mason2016mdi}. This ensemble depth and width were decided using the stopping rule from section \ref{sec:stopping}. We include the Consensus matrices for this ensemble and those for the combinations of $R = (1001, 5001, 10001)$, $S=(100, 500, 1,000)$ in the three datasets (shown in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}) and a plot of the mean squared difference between the Consensus matrix for $R=10001$ and $S=1000$ to a range of smaller and shallower ensembles.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.6]{./Images/Yeast/EnsembleChoicePlot.png}
+	\caption{The mean squared difference between the Consensus matrix for chain depth $R$ and $S$ chains to the Consensus matrix for chain depth 10,001 and 1,000 chains. We find that increasing $S$ beyond 100 has marginal effect except in the PPI dataset where values have stabilised by $S=500$. The changes in item coclustering across the ensemble changes very slightly for chains deeper than 5,000.}
+	\label{fig:ensembleChoice}
+\end{figure}
 
 %Following the logic inspired by the behaviour seen in section \ref{sec:simModelPerformance}, we decide the ensemble is sufficiently deep and wide to stop growing if,  for a given depth $r$ and width $s$, there is no visible difference between the Consensus matrices from the ensembles using $R=(a r, r)$, $S=(s, b s)$. In our analysis we used $a=b=0.5$ (the smaller the choice of $a,b$ the more extreme the stopping criterion). An example of this logic can be seen in figures \ref{fig:chipchipCMs} and \ref{fig:ppiCMs} (and to a lesser degree in figure \ref{fig:timecourseCMs}). 
 
-We decide to stop increasing at $R=10001$ as there is no apparent gain in increasing chain depth from $R=5001$ to $R=10001$ across the three datasets. An example of insufficient depth can be see for $R=1001$ in figure \ref{fig:ppiCMs}; there is a marked difference in the Consensus matrices between $R=1001$ and $R=5001$. 
+We decide to stop increasing at $R=10001$ as there is little change between Consensus matrices for increasing chain depth from $R=5001$ to $R=10001$ across the three datasets. An example of insufficient depth can be see for $R=1001$ in figure \ref{fig:ppiCMs}; there is a marked difference in the Consensus matrices between $R=1001$ and $R=5001$. 
 
 In terms of the number of chains required, we believe this to have stabilised, as there is no obvious change in increasing $S$ from 100 in any dataset.
 
@@ -629,34 +685,34 @@ We use \texttt{maxpear} to infer an estimate clustering from the Consensus matri
 %	\label{} 
 
 \subsubsection{Fused genes}
-We wish to identify groups of genes that tend to be grouped together in
-multiple datasets. We use the concept of \emph{fused genes} proposed by \cite{savage2010discovering} and used by \cite{kirk2012bayesian}. We define a gene to be fused across some set of datasets if the gene has the same label in each of these datasets for at least half of the recorded clustering samples. In our case we have the possible sets of:
+We wish to identify groups of genes that tend to be grouped together in multiple datasets. We use the concept of \emph{fused genes} proposed by \cite{savage2010discovering} and used by \cite{kirk2012bayesian}, but to avoid confusion due to other possible ideas of fused genes (e.g. those that contribute to a common protein complex, the behaviour of TFs upon a gene) we use the term \emph{integrated}. We define a gene to be integrated across some set of datasets if the gene has the same label in each of these datasets for at least half of the recorded clustering samples. Integrated genes are those most affected by the integrative aspect of the analysis and therefore we focus upon these in the following analysis. In our case we have the possible sets of:
 \begin{itemize}
 	\item $\{$Timecourse$\}$, $\{$ChIP-chip$\}$, $\{$PPI$\}$,
 	\item $\{$Timecourse, ChIP-chip$\}$, $\{$Timecourse, PPI$\}$, $\{$ChIP-chip, PPI$\}$, and
 	\item $\{$Timecourse, ChIP-chip, PPI$\}$.
 \end{itemize}
-Any set of a single dataset is the trivial case that all genes are considered fused. These fused genes are those most affected by the integrative aspect of the analysis and therefore we focus upon these in our analysis.
+Any set of a single dataset is the trivial case that all genes are considered integrated.
 
-The number of fused genes between any two datasets is indicative of how strongly they influence eachother and is expected to align with the $phi_{lm}$ parameters from the MDI model. We find the following number of genes fuse between each combination of datasets:
-
-\begin{itemize}
-	\item Timecourse + ChIP-chip: 261,
-	\item Timecourse + PPI: 68,
-	\item ChIP-chip + PPI: 99,
-	\item Timecourse + ChIP-chip + PPI: 56.
+The number of integrated genes between any two datasets is indicative of how strongly they influence eachother and is expected to align with the $\phi_{lm}$ parameters from the MDI model. We find the following number of unqiue genes integrated between each combination of datasets:
+\begin{itemize}	
+	\item Timecourse + ChIP-chip + PPI: 56,
+	\item Timecourse + ChIP-chip: 205 (261 including the 56 integrated across all datasets),
+	\item Timecourse + PPI: 12 (68),
+	\item ChIP-chip + PPI: 43 (99).
+.
 \end{itemize}
 which aligns with the sampled $\phi_{lm}$ values in figure \ref{fig:ccPhiDensities}, which shows that the Timecourse and ChIP-chip datasets contain very similar structure, the ChIP-chip and PPI datasets have some similarity but significantly less and the Timecourse and PPI datasets have less similarity again. 
+%Note that the 56 genes that integrate across all three datasets must also integrate in all of the pair combinations of datasets.
 
-Compare this to the original analysis of this data in \cite{kirk2012bayesian}, where the number of fused genes in each combination is:
+Compare this to the original analysis of this data in \cite{kirk2012bayesian}, where the number of integrated genes in each combination is:
 
 \begin{itemize}
-	\item Timecourse + ChIP-chip: 48,
-	\item Timecourse + PPI: 32,
-	\item ChIP-chip + PPI: 31,
-	\item Timecourse + ChIP-chip + PPI: 16.
+	\item Timecourse + ChIP-chip + PPI: 16,
+	\item Timecourse + ChIP-chip: 32 (48),
+	\item Timecourse + PPI: 16 (32),
+	\item ChIP-chip + PPI: 15 (31).
 \end{itemize}
-Our analysis has found significantly more across dataset signal.
+Our analysis has found significantly more shared structure.
 
 \begin{figure}
 	\centering
@@ -665,178 +721,141 @@ Our analysis has found significantly more across dataset signal.
 	\label{fig:ccPhiDensities}
 \end{figure}
 
-\section{fused genes}
-
-\begin{itemize}
-	\item Cluster 1: NAD+ Metabolism and Regulation
-	\item Cluster 2: singleton
-	\item Cluster 3: G1 arrest / S-phase initiation \citep{schwob1993clb5, stuart1998clb5, crosby2007cell, chang2017yeast, miles2016msa1};
-	\item Cluster 4: 
-\end{itemize}
-
-	\begin{longtable}{@{\extracolsep{3pt}} cccp{85mm}} 
-	\\[-1.8ex]\hline 
-	\hline \\[-1.8ex] 
-		ORF & Gene & Cluster & Description \\ 
-		\hline \\[-1.8ex] 
-		YOR374W & ALD4 & 1 & Mitochondrial aldehyde dehydrogenase; required for growth on ethanol and conversion of acetaldehyde to acetate; phosphorylated; activity is K+ dependent; utilizes NADP+ or NAD+ equally as coenzymes; expression is glucose repressed; can substitute for cytosolic NADP-dependent aldehyde dehydrogenase when directed to the cytosol; human homolog ALDH2 can complement yeast ald4 mutant \\ 
-		YCL040W & GLK1 & 1 & Glucokinase; catalyzes the phosphorylation of glucose at C6 in the first irreversible step of glucose metabolism; one of three glucose phosphorylating enzymes; expression regulated by non-fermentable carbon sources; GLK1 has a paralog, EMI2, that arose from the whole genome duplication \\ 
-		YGL037C & PNC1 & 1 & Nicotinamidase that converts nicotinamide to nicotinic acid; part of the NAD(+) salvage pathway; required for life span extension by calorie restriction; lacks a peroxisomal targeting signal but is imported into peroxisomes via binding to Gpd1p; PNC1 expression responds to all known stimuli that extend replicative life span; protein increases in abundance and relative distribution to cytoplasmic foci decreases upon DNA replication stress \\ \hline \\[-1.8ex]
-		YBL010C &  & 2 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein colocalizes with clathrin-coated vesicles \\ \hline \\[-1.8ex]
-		YPL014W & CIP1 & 3 & Cyclin-dependent kinase inhibitor; interacts with and inhibits the Cdc28p/Cln2p, G1/S phase cyclin-dependent kinase complex but not S-phase, or M-phase complexes; overexpression blocks cells in G1 phase and stabilizes the Cdc28p inhibitor Sic1p, while disruption accelerates the G1/S phase transition; phosphorylated during S phase in a Cdc28p-dependent manner; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus \\ 
-		YGR109C & CLB6 & 3 & B-type cyclin involved in DNA replication during S phase; activates Cdc28p to promote initiation of DNA synthesis; functions in formation of mitotic spindles along with Clb3p and Clb4p; most abundant during late G1; CLB6 has a paralog, CLB5, that arose from the whole genome duplication \\ 
-		YKR077W & MSA2 & 3 & Putative transcriptional activator; interacts with G1-specific transcription factor MBF and G1-specific promoters; MSA2 has a paralog, MSA1, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
-		YER170W & ADK2 & 4 & Mitochondrial adenylate kinase; catalyzes the reversible synthesis of GTP and AMP from GDP and ADP; may serve as a back-up for synthesizing GTP or ADP depending on metabolic conditions; 3' sequence of ADK2 varies with strain background \\ 
-		YBR073W & RDH54 & 4 & DNA-dependent ATPase; DNA recombination/repair translocase, supercoils DNA and promotes DNA strand opening; stimulates strand exchange by modifying dsDNA topology; involved in recombinational repair of DNA double-strand breaks (DSBs) during mitosis and meiosis; phosphorylated in Mec1p-, Rad53p-dependent way in response to one DSB; contributes to remodelling of nucleosomes; proposed to be involved in crossover interference; interacts with Dmc1p; stimulates Dmc1p and Rad51p \\ 
-		YHR159W & TDA11 & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm; potential Cdc28p substrate; null mutant is sensitive to expression of the top1-T722A allele \\ 
-		YNL310C & ZIM17 & 4 & Protein co-chaperone with a zinc finger motif; essential for protein import into mitochondria; may act with Pam18p to facilitate recognition and folding of imported proteins by Ssc1p (mtHSP70) in the mitochondrial matrix; required for the maintenance of Ssc1p solubility and assists in the functional interaction of Ssc1p with substrate proteins \\ 
-		YML020W &  & 4 & Putative protein of unknown function \\ 
-		YJR154W &  & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ \hline \\[-1.8ex]
-		YIL132C & CSM2 & 5 & Component of Shu complex (aka PCSS complex); Shu complex also includes Psy3, Shu1, Shu2, and promotes error-free DNA repair,; Shu complex mediates inhibition of Srs2p function; promotes formation of Rad51p filaments; Psy3p and Csm2p contain similar DNA-binding regions which work together to form a single DNA binding site; required for accurate chromosome segregation during meiosis \\ 
-		YGL027C & CWH41 & 5 & Processing alpha glucosidase I; ER type II integral membrane N-glycoprotein involved in assembly of cell wall beta 1,6 glucan and asparagine-linked protein glycosylation; also involved in ER protein quality control and sensing of ER stress \\ 
-		YDR518W & EUG1 & 5 & Protein disulfide isomerase of the endoplasmic reticulum lumen; EUG1 has a paralog, PDI1, that arose from the whole genome duplication; function overlaps with that of Pdi1p; may interact with nascent polypeptides in the ER \\ 
-		YKL165C & MCD4 & 5 & Protein involved in GPI anchor synthesis; multimembrane-spanning protein that localizes to the endoplasmic reticulum; highly conserved among eukaryotes; GPI stands for glycosylphosphatidylinositol \\ 
-		YLR151C & PCD1 & 5 & 8-oxo-dGTP diphosphatase; prevents spontaneous mutagenesis via sanitization of oxidized purine nucleoside triphosphates; can also act as peroxisomal pyrophosphatase with specificity for coenzyme A and CoA derivatives, may function to remove potentially toxic oxidized CoA disulfide from peroxisomes to maintain the capacity for beta-oxidation of fatty acids; nudix hydrolase family member; similar E. coli MutT and human, rat and mouse MTH1 \\ 
-		YDL093W & PMT5 & 5 & Protein O-mannosyltransferase; transfers mannose residues from dolichyl phosphate-D-mannose to protein serine/threonine residues; acts in a complex with Pmt3p, can instead interact with Pmt2p in some conditions; target for new antifungals \\ 
-		YNL165W &  & 5 & Putative protein of unknown function; YNL165W is not an essential gene \\ \hline \\[-1.8ex]
-		YPL163C & SVS1 & 6 & Cell wall and vacuolar protein; required for wild-type resistance to vanadate; SVS1 has a paralog, SRL1, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
-		YDL010W & GRX6 & 7 & Cis-golgi localized monothiol glutaredoxin, binds Fe-S cluster; more similar in activity to dithiol than other monothiol glutaredoxins; involved in the oxidative stress response; GRX6 has a paralog, GRX7, that arose from the whole genome duplication \\ 
-		YNL072W & RNH201 & 7 & Ribonuclease H2 catalytic subunit; removes RNA primers during Okazaki fragment synthesis and errant ribonucleotides misincorporated during DNA replication; role in ribonucleotide excision repair; homolog of RNAse HI; related to human AGS4 which causes Aicardi-Goutieres syndrome \\ 
-		YDR400W & URH1 & 7 & Uridine nucleosidase (uridine-cytidine N-ribohydrolase); cleaves N-glycosidic bonds in nucleosides; involved in the pyrimidine salvage and nicotinamide riboside salvage pathways \\ 
-		YOL019W &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cell periphery and vacuole; YOL019W has a paralog, DCV1, that arose from the whole genome duplication \\ 
-		YDL211C &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the vacuole; YDL211C has a paralog, TDA7, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
-		YDR356W & SPC110 & 8 & Inner plaque spindle pole body (SPB) component; ortholog of human kendrin; gamma-tubulin small complex (gamma-TuSC) receptor that interacts with Spc98p to recruit the complex to the nuclear side of the SPB, connecting nuclear microtubules to the SPB; promotes gamma-TuSC assembly and oligomerization to initiate microtubule nucleation; interacts with Tub4p-complex and calmodulin; phosphorylated by Mps1p in cell cycle-dependent manner \\ 
-		YHR172W & SPC97 & 8 & Component of the microtubule-nucleating Tub4p (gamma-tubulin) complex; interacts with Spc110p at the spindle pole body (SPB) inner plaque and with Spc72p at the SPB outer plaque \\ \hline \\[-1.8ex]
-		YDR389W & SAC7 & 9 & GTPase activating protein (GAP) for Rho1p; regulator of a Tor2p-mediated, Rho1p GTPase switch that controls organization of the actin cytoskeleton; negative regulator of the RHO1-PKC1-MAPK cell integrity (CWI) and membrane fluidity homeostasis signaling pathways; potential Cdc28p substrate; SAC7 has a paralog, BAG7, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
-		YMR009W & ADI1 & 10 & Acireductone dioxygenease involved in methionine salvage pathway; transcribed as polycistronic mRNA with YMR010W and regulated post-transcriptionally by RNase III (Rnt1p) cleavage; ADI1 mRNA is induced in heat shock conditions; human ortholog ADI1 can complement yeast adi1 mutant \\ 
-		YGR177C & ATF2 & 10 & Alcohol acetyltransferase; may play a role in steroid detoxification; forms volatile esters during fermentation, which is important for brewing and winemaking \\ 
-		YDR020C & DAS2 & 10 & Putative protein of unknown function; non-essential gene identified in a screen for mutants with increased levels of rDNA transcription; weak similarity with uridine kinases and with phosphoribokinases \\ 
-		YNL024C & EFM6 & 10 & Putative S-adenosylmethionine-dependent lysine methyltransferase; responsible for modifying Lys-390 in translational elongation factor EF-1 alpha (eEF1A); has seven beta-strand methyltransferase motif; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ 
-		YER140W & EMP65 & 10 & Integral membrane protein of the ER; forms an ER-membrane associated protein complex with Slp1p; identified along with SLP1 in a screen for mutants defective in the unfolded protein response (UPR); proposed to function in the folding of integral membrane proteins; interacts genetically with MPS3; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies \\ 
-		YOL158C & ENB1 & 10 & Endosomal ferric enterobactin transporter; expressed under conditions of iron deprivation; member of the major facilitator superfamily; expression is regulated by Rcs1p and affected by chloroquine treatment \\ 
-		YHR046C & INM1 & 10 & Inositol monophosphatase; involved in biosynthesis of inositol and in phosphoinositide second messenger signaling; INM1 expression increases in the presence of inositol and decreases upon exposure to antibipolar drugs lithium and valproate \\ 
-		YDL044C & MTF2 & 10 & Mitochondrial protein that interacts with mitochondrial RNA polymerase; interacts with an N-terminal region of mitochondrial RNA polymerase (Rpo41p) and couples RNA processing and translation to transcription \\ 
-		YOR104W & PIN2 & 10 & Exomer-dependent cargo protein; induces appearance of [PIN+] prion when overproduced; prion-like domain serves as a retention signal in the trans-Golgi network; predicted to be palmitoylated \\ 
-		YCR024C-A & PMP1 & 10 & Regulatory subunit for the plasma membrane H(+)-ATPase Pma1p; small single-membrane span proteolipid; forms unique helix and positively charged cytoplasmic domain that is able to specifically segregate phosphatidylserines; PMP1 has a paralog, PMP2, that arose from the whole genome duplication \\ 
-		YDR198C & RKM2 & 10 & Ribosomal protein lysine methyltransferase; responsible for trimethylation of the lysine residue at position 3 of Rpl12Ap and Rpl12Bp \\ 
-		YPL183C & RTT10 & 10 & WD40 domain-containing protein involved in endosomal recycling; forms a complex with Rrt2p that functions in the retromer-mediated pathway for recycling internalized cell-surface proteins; interacts with Trm7p for 2'-O-methylation of N34 of substrate tRNAs; has a role in regulation of Ty1 transposition; human ortholog is WDR6 \\ 
-		YIL167W & SDL1 & 10 & Blocked reading frame otherwise encoding L-serine dehydratase \\ 
-		YNR004W & SWM2 & 10 & Protein with a role in snRNA and snoRNA cap trimethylation; interacts with Tgs1p and shows similar phenotypes; required for trimethylation of the caps of spliceosomal snRNAs and the U3 snoRNA, and for efficient 3' end processing of U3 snoRNA; may act as a specificity factor for Tgs1p \\ 
-		YLR237W & THI7 & 10 & Plasma membrane transporter responsible for the uptake of thiamine; contributes to uptake of 5-aminoimidazole-4-carboxamide-1-beta-D-ribofuranoside (acadesine); member of the major facilitator superfamily of transporters; mutation of human ortholog causes thiamine-responsive megaloblastic anemia \\ 
-		YLL028W & TPO1 & 10 & Polyamine transporter of the major facilitator superfamily; member of the 12-spanner drug:H(+) antiporter DHA1 family; recognizes spermine, putrescine, and spermidine; catalyzes uptake of polyamines at alkaline pH and excretion at acidic pH; during oxidative stress exports spermine, spermidine from the cell, which controls timing of expression of stress-responsive genes; phosphorylation enhances activity and sorting to the plasma membrane \\ 
-		YBL067C & UBP13 & 10 & Ubiquitin-specific protease that cleaves Ub-protein fusions; UBP13 has a paralog, UBP9, that arose from the whole genome duplication \\ 
-		YBR242W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and nucleus; YBR242W is not an essential gene; YBR242W has a paralog, YGL101W, that arose from the whole genome duplication \\ 
-		YDR514C &  & 10 & Protein of unknown function that localizes to mitochondria; overexpression affects endocytic protein trafficking; YDR514C has a paralog, GFD2, that arose from the whole genome duplication \\ 
-		YIL092W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus \\ 
-		YOL014W &  & 10 & Putative protein of unknown function; mCherry fusion protein localizes to the cytosol and nucleus \\ \hline \\[-1.8ex]
-		YLR003C & CMS1 & 11 & Putative subunit of the 90S preribosome processome complex; overexpression rescues supressor mutant of mcm10; null mutant is viable; relocalizes from nucleus to cytoplasm upon DNA replication stress \\ 
-		YKL078W & DHR2 & 11 & Predominantly nucleolar DEAH-box ATP-dependent RNA helicase; required for 18S rRNA synthesis \\ 
-		YOL144W & NOP8 & 11 & Nucleolar protein required for 60S ribosomal subunit biogenesis \\ \hline \\[-1.8ex]
-		YGR068C & ART5 & 12 & Protein proposed to regulate endocytosis of plasma membrane proteins; regulates by recruiting the ubiquitin ligase Rsp5p to its target in the plasma membrane; SWAT-GFP and mCherry fusion proteins localize to the cytosol \\ \hline \\[-1.8ex]
-		YEL032W & MCM3 & 13 & Protein involved in DNA replication; component of the Mcm2-7 hexameric helicase complex that binds chromatin as a part of the pre-replicative complex \\ 
-		YLR274W & MCM5 & 13 & Component of the Mcm2-7 hexameric helicase complex; MCM complex is important for priming origins of DNA replication in G1 and becomes an active ATP-dependent helicase that promotes DNA melting and elongation when activated by Cdc7p-Dbf4p in S-phase \\ 
-		\hline \\[-1.8ex] 
-	\end{longtable} 
-
-
+%\section{fused genes}
+%
+%\begin{itemize}
+%	\item Cluster 1: NAD+ Metabolism and Regulation
+%	\item Cluster 2: singleton
+%	\item Cluster 3: G1 arrest / S-phase initiation \citep{schwob1993clb5, stuart1998clb5, crosby2007cell, chang2017yeast, miles2016msa1};
+%	\item Cluster 4: 
+%\end{itemize}
+%
 %	\begin{longtable}{@{\extracolsep{3pt}} cccp{85mm}} 
-%		\\[-1.8ex]\hline 
-%		\hline \\[-1.8ex] 
+%	\\[-1.8ex]\hline 
+%	\hline \\[-1.8ex] 
 %		ORF & Gene & Cluster & Description \\ 
 %		\hline \\[-1.8ex] 
-%		YOR374W & ALD4 & 1 & Mitochondrial aldehyde dehydrogenase;
-%%		required for growth on ethanol and conversion of acetaldehyde to acetate; 
-%		phosphorylated; activity is K+ dependent; utilizes NADP+ or NAD+ equally as coenzymes; expression is glucose repressed 
-%%		can substitute for cytosolic NADP-dependent aldehyde dehydrogenase when directed to the cytosol; human homolog ALDH2 can complement yeast ald4 mutant
-%		\\ 
-%		YGL037C & PNC1 & 1 & Nicotinamidase that converts nicotinamide to nicotinic acid; part of the NAD(+) salvage pathway
-%%		; required for life span extension by calorie restriction; lacks a peroxisomal targeting signal but is imported into peroxisomes via binding to Gpd1p; PNC1 expression responds to all known stimuli that extend replicative life span; protein increases in abundance and relative distribution to cytoplasmic foci decreases upon DNA replication stress
-%		\\ 
-%		YCL040W & GLK1 & 1 & Glucokinase; catalyzes the phosphorylation of glucose at C6 in the first irreversible step of glucose metabolism; one of three glucose phosphorylating enzymes
-%%		; expression regulated by non-fermentable carbon sources; GLK1 has a paralog, EMI2, that arose from the whole genome duplication 
-%		\\  \hline \\ [-1.8ex] 
-%		YBL010C &  & 2 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein colocalizes with clathrin-coated vesicles \\  \hline \\ [-1.8ex] 
-%		YKR077W & MSA2 & 3 & Modulates G1-specific transcription to promote G1 arrest \citep{miles2016msa1}; 
-%		Putative transcriptional activator; interacts with G1-specific transcription factor MBF and G1-specific promoters; MSA2 has a paralog, MSA1, that arose from the whole genome duplication \\
-%		YPL014W & CIP1 & 3 & Cyclin-dependent kinase inhibitor; interacts with and inhibits the Cdc28p/Cln2p, G1/S phase cyclin-dependent kinase complex but not S-phase, or M-phase complexes; overexpression blocks cells in G1 phase and stabilizes the Cdc28p inhibitor Sic1p, while disruption accelerates the G1/S phase transition; phosphorylated during S phase in a Cdc28p-dependent manner
-%%		; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus 
-%		\\ 
-%		YGR109C & CLB6 & 3 & B-type cyclin involved in DNA replication during S phase; activates Cdc28p to promote initiation of DNA synthesis; functions in formation of mitotic spindles along with Clb3p and Clb4p; most abundant during late G1
-%%		; CLB6 has a paralog, CLB5, that arose from the whole genome duplication 
-%		\\  \hline \\ [-1.8ex] 
-%		YNL310C & ZIM17 & 4 & 
-%		Protein co-chaperone with a zinc finger motif; 
-%		essential for protein import into mitochondria; 
-%		may act with Pam18p to facilitate recognition and folding of imported proteins by Ssc1p (mtHSP70) in the mitochondrial matrix; 
-%		required for the maintenance of Ssc1p solubility and assists in the functional interaction of Ssc1p with substrate proteins \\ 
-%		YML020W &  & 4 & Putative protein of unknown function \\ 
-%		YHR159W & TDA11 & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm %; 
-%%		potential Cdc28p substrate; null mutant is sensitive to expression of the top1-T722A allele 
-%		\\ 
-%		YJR154W &  & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ 
+%		YOR374W & ALD4 & 1 & Mitochondrial aldehyde dehydrogenase; required for growth on ethanol and conversion of acetaldehyde to acetate; phosphorylated; activity is K+ dependent; utilizes NADP+ or NAD+ equally as coenzymes; expression is glucose repressed; can substitute for cytosolic NADP-dependent aldehyde dehydrogenase when directed to the cytosol; human homolog ALDH2 can complement yeast ald4 mutant \\ 
+%		YCL040W & GLK1 & 1 & Glucokinase; catalyzes the phosphorylation of glucose at C6 in the first irreversible step of glucose metabolism; one of three glucose phosphorylating enzymes; expression regulated by non-fermentable carbon sources; GLK1 has a paralog, EMI2, that arose from the whole genome duplication \\ 
+%		YGL037C & PNC1 & 1 & Nicotinamidase that converts nicotinamide to nicotinic acid; part of the NAD(+) salvage pathway; required for life span extension by calorie restriction; lacks a peroxisomal targeting signal but is imported into peroxisomes via binding to Gpd1p; PNC1 expression responds to all known stimuli that extend replicative life span; protein increases in abundance and relative distribution to cytoplasmic foci decreases upon DNA replication stress \\ \hline \\[-1.8ex]
+%		YBL010C &  & 2 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein colocalizes with clathrin-coated vesicles \\ \hline \\[-1.8ex]
+%		YPL014W & CIP1 & 3 & Cyclin-dependent kinase inhibitor; interacts with and inhibits the Cdc28p/Cln2p, G1/S phase cyclin-dependent kinase complex but not S-phase, or M-phase complexes; overexpression blocks cells in G1 phase and stabilizes the Cdc28p inhibitor Sic1p, while disruption accelerates the G1/S phase transition; phosphorylated during S phase in a Cdc28p-dependent manner; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus \\ 
+%		YGR109C & CLB6 & 3 & B-type cyclin involved in DNA replication during S phase; activates Cdc28p to promote initiation of DNA synthesis; functions in formation of mitotic spindles along with Clb3p and Clb4p; most abundant during late G1; CLB6 has a paralog, CLB5, that arose from the whole genome duplication \\ 
+%		YKR077W & MSA2 & 3 & Putative transcriptional activator; interacts with G1-specific transcription factor MBF and G1-specific promoters; MSA2 has a paralog, MSA1, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
+%		YER170W & ADK2 & 4 & Mitochondrial adenylate kinase; catalyzes the reversible synthesis of GTP and AMP from GDP and ADP; may serve as a back-up for synthesizing GTP or ADP depending on metabolic conditions; 3' sequence of ADK2 varies with strain background \\ 
 %		YBR073W & RDH54 & 4 & DNA-dependent ATPase; DNA recombination/repair translocase, supercoils DNA and promotes DNA strand opening; stimulates strand exchange by modifying dsDNA topology; involved in recombinational repair of DNA double-strand breaks (DSBs) during mitosis and meiosis; phosphorylated in Mec1p-, Rad53p-dependent way in response to one DSB; contributes to remodelling of nucleosomes; proposed to be involved in crossover interference; interacts with Dmc1p; stimulates Dmc1p and Rad51p \\ 
-%		YER170W & ADK2 & 4 & Mitochondrial adenylate kinase; catalyzes the reversible synthesis of GTP and AMP from GDP and ADP; may serve as a back-up for synthesizing GTP or ADP depending on metabolic conditions; 3' sequence of ADK2 varies with strain background \\  \hline \\ [-1.8ex] 
-%		YNL165W &  & 5 & Putative protein of unknown function; YNL165W is not an essential gene \\ 
+%		YHR159W & TDA11 & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm; potential Cdc28p substrate; null mutant is sensitive to expression of the top1-T722A allele \\ 
+%		YNL310C & ZIM17 & 4 & Protein co-chaperone with a zinc finger motif; essential for protein import into mitochondria; may act with Pam18p to facilitate recognition and folding of imported proteins by Ssc1p (mtHSP70) in the mitochondrial matrix; required for the maintenance of Ssc1p solubility and assists in the functional interaction of Ssc1p with substrate proteins \\ 
+%		YML020W &  & 4 & Putative protein of unknown function \\ 
+%		YJR154W &  & 4 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ \hline \\[-1.8ex]
 %		YIL132C & CSM2 & 5 & Component of Shu complex (aka PCSS complex); Shu complex also includes Psy3, Shu1, Shu2, and promotes error-free DNA repair,; Shu complex mediates inhibition of Srs2p function; promotes formation of Rad51p filaments; Psy3p and Csm2p contain similar DNA-binding regions which work together to form a single DNA binding site; required for accurate chromosome segregation during meiosis \\ 
-%		YKL165C & MCD4 & 5 & Protein involved in GPI anchor synthesis; multimembrane-spanning protein that localizes to the endoplasmic reticulum; highly conserved among eukaryotes; GPI stands for glycosylphosphatidylinositol \\ 
-%		YDR518W & EUG1 & 5 & Protein disulfide isomerase of the endoplasmic reticulum lumen; 
-%%		EUG1 has a paralog, PDI1, that arose from the whole genome duplication; function overlaps with that of Pdi1p; 
-%		may interact with nascent polypeptides in the ER 
-%		\\ 
 %		YGL027C & CWH41 & 5 & Processing alpha glucosidase I; ER type II integral membrane N-glycoprotein involved in assembly of cell wall beta 1,6 glucan and asparagine-linked protein glycosylation; also involved in ER protein quality control and sensing of ER stress \\ 
+%		YDR518W & EUG1 & 5 & Protein disulfide isomerase of the endoplasmic reticulum lumen; EUG1 has a paralog, PDI1, that arose from the whole genome duplication; function overlaps with that of Pdi1p; may interact with nascent polypeptides in the ER \\ 
+%		YKL165C & MCD4 & 5 & Protein involved in GPI anchor synthesis; multimembrane-spanning protein that localizes to the endoplasmic reticulum; highly conserved among eukaryotes; GPI stands for glycosylphosphatidylinositol \\ 
+%		YLR151C & PCD1 & 5 & 8-oxo-dGTP diphosphatase; prevents spontaneous mutagenesis via sanitization of oxidized purine nucleoside triphosphates; can also act as peroxisomal pyrophosphatase with specificity for coenzyme A and CoA derivatives, may function to remove potentially toxic oxidized CoA disulfide from peroxisomes to maintain the capacity for beta-oxidation of fatty acids; nudix hydrolase family member; similar E. coli MutT and human, rat and mouse MTH1 \\ 
 %		YDL093W & PMT5 & 5 & Protein O-mannosyltransferase; transfers mannose residues from dolichyl phosphate-D-mannose to protein serine/threonine residues; acts in a complex with Pmt3p, can instead interact with Pmt2p in some conditions; target for new antifungals \\ 
-%		YLR151C & PCD1 & 5 & 8-oxo-dGTP diphosphatase; prevents spontaneous mutagenesis via sanitization of oxidized purine nucleoside triphosphates; can also act as peroxisomal pyrophosphatase with specificity for coenzyme A and CoA derivatives, may function to remove potentially toxic oxidized CoA disulfide from peroxisomes to maintain the capacity for beta-oxidation of fatty acids; nudix hydrolase family member; similar E. coli MutT and human, rat and mouse MTH1 \\  \hline \\ [-1.8ex] 
-%		YPL163C & SVS1 & 6 & Cell wall and vacuolar protein; required for wild-type resistance to vanadate %; SVS1 has a paralog, SRL1, that arose from the whole genome duplication 
-%		\\  \hline \\ [-1.8ex] 
-%		YDR400W & URH1 & 7 & Uridine nucleosidase (uridine-cytidine N-ribohydrolase); cleaves N-glycosidic bonds in nucleosides; involved in the pyrimidine salvage and nicotinamide riboside salvage pathways \\ 
-%		YNL072W & RNH201 & 7 & Ribonuclease H2 catalytic subunit; removes RNA primers during Okazaki fragment synthesis and errant ribonucleotides misincorporated during DNA replication; role in ribonucleotide excision repair; homolog of RNAse HI; related to human AGS4 which causes Aicardi-Goutieres syndrome \\ 
-%		YOL019W &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cell periphery and vacuole; YOL019W has a paralog, DCV1, that arose from the whole genome duplication \\ 
+%		YNL165W &  & 5 & Putative protein of unknown function; YNL165W is not an essential gene \\ \hline \\[-1.8ex]
+%		YPL163C & SVS1 & 6 & Cell wall and vacuolar protein; required for wild-type resistance to vanadate; SVS1 has a paralog, SRL1, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
 %		YDL010W & GRX6 & 7 & Cis-golgi localized monothiol glutaredoxin, binds Fe-S cluster; more similar in activity to dithiol than other monothiol glutaredoxins; involved in the oxidative stress response; GRX6 has a paralog, GRX7, that arose from the whole genome duplication \\ 
-%		YDL211C &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the vacuole; YDL211C has a paralog, TDA7, that arose from the whole genome duplication \\  \hline \\ [-1.8ex] 
+%		YNL072W & RNH201 & 7 & Ribonuclease H2 catalytic subunit; removes RNA primers during Okazaki fragment synthesis and errant ribonucleotides misincorporated during DNA replication; role in ribonucleotide excision repair; homolog of RNAse HI; related to human AGS4 which causes Aicardi-Goutieres syndrome \\ 
+%		YDR400W & URH1 & 7 & Uridine nucleosidase (uridine-cytidine N-ribohydrolase); cleaves N-glycosidic bonds in nucleosides; involved in the pyrimidine salvage and nicotinamide riboside salvage pathways \\ 
+%		YOL019W &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cell periphery and vacuole; YOL019W has a paralog, DCV1, that arose from the whole genome duplication \\ 
+%		YDL211C &  & 7 & Protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the vacuole; YDL211C has a paralog, TDA7, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
 %		YDR356W & SPC110 & 8 & Inner plaque spindle pole body (SPB) component; ortholog of human kendrin; gamma-tubulin small complex (gamma-TuSC) receptor that interacts with Spc98p to recruit the complex to the nuclear side of the SPB, connecting nuclear microtubules to the SPB; promotes gamma-TuSC assembly and oligomerization to initiate microtubule nucleation; interacts with Tub4p-complex and calmodulin; phosphorylated by Mps1p in cell cycle-dependent manner \\ 
-%		YHR172W & SPC97 & 8 & Component of the microtubule-nucleating Tub4p (gamma-tubulin) complex; interacts with Spc110p at the spindle pole body (SPB) inner plaque and with Spc72p at the SPB outer plaque \\  \hline \\ [-1.8ex] 
-%		YDR389W & SAC7 & 9 & GTPase activating protein (GAP) for Rho1p; regulator of a Tor2p-mediated, Rho1p GTPase switch that controls organization of the actin cytoskeleton; negative regulator of the RHO1-PKC1-MAPK cell integrity (CWI) and membrane fluidity homeostasis signaling pathways; potential Cdc28p substrate; SAC7 has a paralog, BAG7, that arose from the whole genome duplication \\  \hline \\ [-1.8ex] 
-%		YBR242W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and nucleus; YBR242W is not an essential gene; YBR242W has a paralog, YGL101W, that arose from the whole genome duplication \\ 
-%		YOR104W & PIN2 & 10 & Exomer-dependent cargo protein; induces appearance of [PIN+] prion when overproduced; prion-like domain serves as a retention signal in the trans-Golgi network; predicted to be palmitoylated \\ 
-%		YDR514C &  & 10 & Protein of unknown function that localizes to mitochondria; overexpression affects endocytic protein trafficking; YDR514C has a paralog, GFD2, that arose from the whole genome duplication \\ 
-%		YLL028W & TPO1 & 10 & Polyamine transporter of the major facilitator superfamily; member of the 12-spanner drug:H(+) antiporter DHA1 family; recognizes spermine, putrescine, and spermidine; catalyzes uptake of polyamines at alkaline pH and excretion at acidic pH; during oxidative stress exports spermine, spermidine from the cell, which controls timing of expression of stress-responsive genes; phosphorylation enhances activity and sorting to the plasma membrane \\ 
-%		YNL024C & EFM6 & 10 & Putative S-adenosylmethionine-dependent lysine methyltransferase; responsible for modifying Lys-390 in translational elongation factor EF-1 alpha (eEF1A); has seven beta-strand methyltransferase motif; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ 
-%		YCR024C-A & PMP1 & 10 & Regulatory subunit for the plasma membrane H(+)-ATPase Pma1p; small single-membrane span proteolipid; forms unique helix and positively charged cytoplasmic domain that is able to specifically segregate phosphatidylserines; PMP1 has a paralog, PMP2, that arose from the whole genome duplication \\ 
-%		YNR004W & SWM2 & 10 & Protein with a role in snRNA and snoRNA cap trimethylation; interacts with Tgs1p and shows similar phenotypes; required for trimethylation of the caps of spliceosomal snRNAs and the U3 snoRNA, and for efficient 3' end processing of U3 snoRNA; may act as a specificity factor for Tgs1p \\ 
-%		YDR020C & DAS2 & 10 & Putative protein of unknown function; non-essential gene identified in a screen for mutants with increased levels of rDNA transcription; weak similarity with uridine kinases and with phosphoribokinases \\ 
-%		YER140W & EMP65 & 10 & Integral membrane protein of the ER; forms an ER-membrane associated protein complex with Slp1p; identified along with SLP1 in a screen for mutants defective in the unfolded protein response (UPR); proposed to function in the folding of integral membrane proteins; interacts genetically with MPS3; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies \\ 
-%		YIL092W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus \\ 
-%		YOL014W &  & 10 & Putative protein of unknown function; mCherry fusion protein localizes to the cytosol and nucleus \\ 
-%		YOL158C & ENB1 & 10 & Endosomal ferric enterobactin transporter; expressed under conditions of iron deprivation; member of the major facilitator superfamily; expression is regulated by Rcs1p and affected by chloroquine treatment \\ 
-%		YGR177C & ATF2 & 10 & Alcohol acetyltransferase; may play a role in steroid detoxification; forms volatile esters during fermentation, which is important for brewing and winemaking \\ 
+%		YHR172W & SPC97 & 8 & Component of the microtubule-nucleating Tub4p (gamma-tubulin) complex; interacts with Spc110p at the spindle pole body (SPB) inner plaque and with Spc72p at the SPB outer plaque \\ \hline \\[-1.8ex]
+%		YDR389W & SAC7 & 9 & GTPase activating protein (GAP) for Rho1p; regulator of a Tor2p-mediated, Rho1p GTPase switch that controls organization of the actin cytoskeleton; negative regulator of the RHO1-PKC1-MAPK cell integrity (CWI) and membrane fluidity homeostasis signaling pathways; potential Cdc28p substrate; SAC7 has a paralog, BAG7, that arose from the whole genome duplication \\ \hline \\[-1.8ex]
 %		YMR009W & ADI1 & 10 & Acireductone dioxygenease involved in methionine salvage pathway; transcribed as polycistronic mRNA with YMR010W and regulated post-transcriptionally by RNase III (Rnt1p) cleavage; ADI1 mRNA is induced in heat shock conditions; human ortholog ADI1 can complement yeast adi1 mutant \\ 
-%		YPL183C & RTT10 & 10 & WD40 domain-containing protein involved in endosomal recycling; forms a complex with Rrt2p that functions in the retromer-mediated pathway for recycling internalized cell-surface proteins; interacts with Trm7p for 2'-O-methylation of N34 of substrate tRNAs; has a role in regulation of Ty1 transposition; human ortholog is WDR6 \\ 
+%		YGR177C & ATF2 & 10 & Alcohol acetyltransferase; may play a role in steroid detoxification; forms volatile esters during fermentation, which is important for brewing and winemaking \\ 
+%		YDR020C & DAS2 & 10 & Putative protein of unknown function; non-essential gene identified in a screen for mutants with increased levels of rDNA transcription; weak similarity with uridine kinases and with phosphoribokinases \\ 
+%		YNL024C & EFM6 & 10 & Putative S-adenosylmethionine-dependent lysine methyltransferase; responsible for modifying Lys-390 in translational elongation factor EF-1 alpha (eEF1A); has seven beta-strand methyltransferase motif; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm \\ 
+%		YER140W & EMP65 & 10 & Integral membrane protein of the ER; forms an ER-membrane associated protein complex with Slp1p; identified along with SLP1 in a screen for mutants defective in the unfolded protein response (UPR); proposed to function in the folding of integral membrane proteins; interacts genetically with MPS3; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies \\ 
+%		YOL158C & ENB1 & 10 & Endosomal ferric enterobactin transporter; expressed under conditions of iron deprivation; member of the major facilitator superfamily; expression is regulated by Rcs1p and affected by chloroquine treatment \\ 
 %		YHR046C & INM1 & 10 & Inositol monophosphatase; involved in biosynthesis of inositol and in phosphoinositide second messenger signaling; INM1 expression increases in the presence of inositol and decreases upon exposure to antibipolar drugs lithium and valproate \\ 
-%		YBL067C & UBP13 & 10 & Ubiquitin-specific protease that cleaves Ub-protein fusions; UBP13 has a paralog, UBP9, that arose from the whole genome duplication \\ 
+%		YDL044C & MTF2 & 10 & Mitochondrial protein that interacts with mitochondrial RNA polymerase; interacts with an N-terminal region of mitochondrial RNA polymerase (Rpo41p) and couples RNA processing and translation to transcription \\ 
+%		YOR104W & PIN2 & 10 & Exomer-dependent cargo protein; induces appearance of [PIN+] prion when overproduced; prion-like domain serves as a retention signal in the trans-Golgi network; predicted to be palmitoylated \\ 
+%		YCR024C-A & PMP1 & 10 & Regulatory subunit for the plasma membrane H(+)-ATPase Pma1p; small single-membrane span proteolipid; forms unique helix and positively charged cytoplasmic domain that is able to specifically segregate phosphatidylserines; PMP1 has a paralog, PMP2, that arose from the whole genome duplication \\ 
 %		YDR198C & RKM2 & 10 & Ribosomal protein lysine methyltransferase; responsible for trimethylation of the lysine residue at position 3 of Rpl12Ap and Rpl12Bp \\ 
+%		YPL183C & RTT10 & 10 & WD40 domain-containing protein involved in endosomal recycling; forms a complex with Rrt2p that functions in the retromer-mediated pathway for recycling internalized cell-surface proteins; interacts with Trm7p for 2'-O-methylation of N34 of substrate tRNAs; has a role in regulation of Ty1 transposition; human ortholog is WDR6 \\ 
 %		YIL167W & SDL1 & 10 & Blocked reading frame otherwise encoding L-serine dehydratase \\ 
+%		YNR004W & SWM2 & 10 & Protein with a role in snRNA and snoRNA cap trimethylation; interacts with Tgs1p and shows similar phenotypes; required for trimethylation of the caps of spliceosomal snRNAs and the U3 snoRNA, and for efficient 3' end processing of U3 snoRNA; may act as a specificity factor for Tgs1p \\ 
 %		YLR237W & THI7 & 10 & Plasma membrane transporter responsible for the uptake of thiamine; contributes to uptake of 5-aminoimidazole-4-carboxamide-1-beta-D-ribofuranoside (acadesine); member of the major facilitator superfamily of transporters; mutation of human ortholog causes thiamine-responsive megaloblastic anemia \\ 
-%		YDL044C & MTF2 & 10 & Mitochondrial protein that interacts with mitochondrial RNA polymerase; interacts with an N-terminal region of mitochondrial RNA polymerase (Rpo41p) and couples RNA processing and translation to transcription \\  \hline \\ [-1.8ex] 
-%		YKL078W & DHR2 & 11 & Predominantly nucleolar DEAH-box ATP-dependent RNA helicase; required for 18S rRNA synthesis \\ 
+%		YLL028W & TPO1 & 10 & Polyamine transporter of the major facilitator superfamily; member of the 12-spanner drug:H(+) antiporter DHA1 family; recognizes spermine, putrescine, and spermidine; catalyzes uptake of polyamines at alkaline pH and excretion at acidic pH; during oxidative stress exports spermine, spermidine from the cell, which controls timing of expression of stress-responsive genes; phosphorylation enhances activity and sorting to the plasma membrane \\ 
+%		YBL067C & UBP13 & 10 & Ubiquitin-specific protease that cleaves Ub-protein fusions; UBP13 has a paralog, UBP9, that arose from the whole genome duplication \\ 
+%		YBR242W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and nucleus; YBR242W is not an essential gene; YBR242W has a paralog, YGL101W, that arose from the whole genome duplication \\ 
+%		YDR514C &  & 10 & Protein of unknown function that localizes to mitochondria; overexpression affects endocytic protein trafficking; YDR514C has a paralog, GFD2, that arose from the whole genome duplication \\ 
+%		YIL092W &  & 10 & Putative protein of unknown function; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm and to the nucleus \\ 
+%		YOL014W &  & 10 & Putative protein of unknown function; mCherry fusion protein localizes to the cytosol and nucleus \\ \hline \\[-1.8ex]
 %		YLR003C & CMS1 & 11 & Putative subunit of the 90S preribosome processome complex; overexpression rescues supressor mutant of mcm10; null mutant is viable; relocalizes from nucleus to cytoplasm upon DNA replication stress \\ 
-%		YOL144W & NOP8 & 11 & Nucleolar protein required for 60S ribosomal subunit biogenesis \\  \hline \\ [-1.8ex] 
-%		YGR068C & ART5 & 12 & Protein proposed to regulate endocytosis of plasma membrane proteins; regulates by recruiting the ubiquitin ligase Rsp5p to its target in the plasma membrane; SWAT-GFP and mCherry fusion proteins localize to the cytosol \\  \hline \\ [-1.8ex] 
+%		YKL078W & DHR2 & 11 & Predominantly nucleolar DEAH-box ATP-dependent RNA helicase; required for 18S rRNA synthesis \\ 
+%		YOL144W & NOP8 & 11 & Nucleolar protein required for 60S ribosomal subunit biogenesis \\ \hline \\[-1.8ex]
+%		YGR068C & ART5 & 12 & Protein proposed to regulate endocytosis of plasma membrane proteins; regulates by recruiting the ubiquitin ligase Rsp5p to its target in the plasma membrane; SWAT-GFP and mCherry fusion proteins localize to the cytosol \\ \hline \\[-1.8ex]
 %		YEL032W & MCM3 & 13 & Protein involved in DNA replication; component of the Mcm2-7 hexameric helicase complex that binds chromatin as a part of the pre-replicative complex \\ 
 %		YLR274W & MCM5 & 13 & Component of the Mcm2-7 hexameric helicase complex; MCM complex is important for priming origins of DNA replication in G1 and becomes an active ATP-dependent helicase that promotes DNA melting and elongation when activated by Cdc7p-Dbf4p in S-phase \\ 
 %		\hline \\[-1.8ex] 
 %	\end{longtable} 
-%\end{table}
 
-%Further argument for this choice of ensemble, $R=10001$ and $S=1000$, can be made based upon the final clustering obtained for the Timecourse data as seen in figure \ref{fig:timecourseCCTimeSeries}. We believe this clustering appears sensible, with items within clusters having similar time series of expression and most clusters having multiple members.
+In figure \ref{fig:timepointChIPchipFused} we show the data from the Timecourse and ChIP-chip datasets for the genes that integrated between these datasets. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \cite{simon2001serial}.
 
-%\begin{sidewaysfigure}
-%	\centering
-%	\includegraphics[scale=0.6]{./Images/Yeast/TimeSeriesClusterR10001S1000.png}
-%	\caption{Gene expression across time for the predicted clusters in the Timecourse dataset for Consensus clustering of MDI with $R=10001$ and $S=1000$.}
-%	\label{fig:timecourseCCTimeSeries}
-%\end{sidewaysfigure}
-%
-%We also find that the clusters of time series in the Timecourse dataset shown in figure \ref{fig:timecourseCCTimeSeries} to be consistent.
+	\begin{longtable}{@{\extracolsep{3pt}} ccp{85mm}} 
+	\caption{Table of transcription factors prominent in fused clusters for the Timecourse and ChIP-chip datasets.}
+	\\[-1.8ex]\hline 
+	\hline \\[-1.8ex] 
+	Gene & Name & Description \\ 
+	\hline \\[-1.8ex] 
+		YLR131C & ACE2 & Transcription factor required for septum destruction after cytokinesis; phosphorylation by Cbk1p blocks nuclear exit during M/G1 transition; phosphorylation by cyclins Cdc28p and Pho85p prevents nuclear import during cell cycle phases other than cytokinesis; part of RAM network that regulates cellular polarity and morphogenesis; ACE2 has a paralog, SWI5, that arose from the whole genome duplication \\ 
+		YPL049C & DIG1 & MAP kinase-responsive inhibitor of the Ste12p transcription factor; involved in the regulation of mating-specific genes and the invasive growth pathway; Dig1p and paralog Dig2p bind to Ste12p
+		\\ 
+		YIL131C & FKH1 & Forkhead family transcription factor; evolutionarily conserved lifespan regulator; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; regulates transcription elongation, chromatin silencing at mating loci, expression of G2/M phase genes; facilitates clustering, activation of early-firing replication origins; binds HML recombination enhancer, regulates donor preference during mating-type switching \\ 
+		YNL068C & FKH2 & Forkhead family transcription factor; rate-limiting activator of replication origins; evolutionarily conserved regulator of lifespan; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; positively regulates transcriptional elongation; facilitates clustering, activation of early-firing replication origins; negative role in chromatin silencing at HML and HMR; major role in expression of G2/M phase genes; relocalizes to cytosol under hypoxia \\ 
+		YDL056W & MBP1 & Transcription factor; involved in regulation of cell cycle progression from G1 to S phase, forms a complex with Swi6p that binds to MluI cell cycle box regulatory element in promoters of DNA synthesis genes \\ 
+		YMR043W & MCM1 & Transcription factor; involved in cell-type-specific transcription and pheromone response; plays a central role in the formation of both repressor and activator complexes; relocalizes to the cytosol in response to hypoxia \\ 
+		YOR372C & NDD1 & Transcriptional activator essential for nuclear division; localized to the nucleus; essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes; turnover is tightly regulated during cell cycle and in response to DNA damage \\ 
+		YHR084W & STE12 & Transcription factor that is activated by a MAPK signaling cascade; activates genes involved in mating or pseudohyphal/invasive growth pathways; cooperates with Tec1p transcription factor to regulate genes specific for invasive growth \\ 
+		YER111C & SWI4 & DNA binding component of the SBF complex (Swi4p-Swi6p); a transcriptional activator that in concert with MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair \\ 
+		YDR146C & SWI5 & Transcription factor that recruits Mediator and Swi/Snf complexes; activates transcription of genes expressed at the M/G1 phase boundary and in G1 phase; required for expression of the HO gene controlling mating type switching; localization to nucleus occurs during G1 and appears to be regulated by phosphorylation by Cdc28p kinase; SWI5 has a paralog, ACE2, that arose from the whole genome duplication \\ 
+		YLR182W & SWI6 & Transcription cofactor; forms complexes with Swi4p (SBF) and Mbp1p (MBF) to regulate transcription at the G1/S transition \citep{simon2001serial}; involved in meiotic gene expression; also binds Stb1p to regulate transcription at START; also required for the unfolded protein response, independently of its known transcriptional coactivators \\ 
+		YBR083W & TEC1 & Transcription factor targeting filamentation genes and Ty1 expression; Ste12p activation of most filamentation gene promoters depends on Tec1p and Tec1p transcriptional activity is dependent on its association with Ste12p; binds to TCS elements upstream of filamentation genes, which are regulated by Tec1p/Ste12p/Dig1p complex; competes with Dig2p for binding to Ste12p/Dig1p; positive regulator of chronological life span \\ 
+		YML027W & YOX1 & Homeobox transcriptional repressor; binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase; phosphorylated by the cyclin Cdc28p; relocalizes from nucleus to cytoplasm upon DNA replication stress \\ 
+		\hline \\[-1.8ex] 
+		\label{tab:fusedTFs}
+	\end{longtable} 
+
+
+\cite{simon2001serial}
+
+MBF (a complex of Mbp1 and Swi6) and SBF (a complex of Swi4 and Swi6) control late G1 genes.  
+
+Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}.
+
+Mcm1 is also involved in the transcription of some M/G1 genes \cite{simon2001serial}. 
+
+Swi5 and Ace2 regulate genes at the end of M and early G1. It is not yet clear whether this model, developed using a small set of genes, will extrapolate to regulation of all cell cycle genes \cite{simon2001serial}.
+
+
+ Mcm1p regulates two consecutive waves of transcription controlling G1/S and G2/M cell-cycle transitions.
+ Both FKH1 and FKH2 are also periodically transcribed and peak in S phase \cite{zhu2000two}.
+
+ 
+\cite{iyer2001genomic}: SBF and MBF are sequence-specific transcription factors that activate gene expression during the G1/S transition of the cell cycle in yeast. SBF is a heterodimer of Swi4 and Swi6, and MBF is a heterodimer of Mbpl and Swi6. Our results support the hypothesis that SBF activated genes are predominantly involved in budding, and in membrane and cell-wall biosynthesis, whereas DNA replication and repair are the dominant functions among MBF activated genes.
+ 
+\begin{itemize}
+	\item Cluster 1 has both AC2 and SWI5 emerge. M/G1 phase boundary? \cite{mcbride1999distinct} Swi5 and Ace2 activate expression of early G1-specific genes.
+	\item Cluster 2 has SWI5 alone.
+	\item Cluster 5 has MBP1 and some of SWI4 and SWI6.  G1/S transisiton \cite{iyer2001genomic}. The SBF complex (Swi4p-Swi6p) is a transcriptional activator that in concert with	MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair;
+	\item Cluster 9 has MBP1 and some SWI6 - these combine to form MBF .
+	\item Cluster 11 has DIG1, SWI4, SWI6, and STE12 fully with some TEC1. DIG1 inhibits STE12 and regulates mating specific genes. STE12 activates genes involved in mating or pseudohyphal/invasive growth pathways; cooperates with Tec1p transcription factor to regulate genes specific for invasive growth. SWI6 involved in meiotic gene expression. Some sort of growth cluster?
+	\item Cluster 12 is mainly SWI6 and MBP1 with some SWI4. Similar to cluster 5 (again SWI6 and MBP1 form MBF).
+	\item Cluster 16 is all the histone folks - no clear TF in the ChIP-chip.
+	\item Cluster 17 has FKH1 and FKH2. Transcription elongation and chromatim silencing, G2/M phase.
+%	 FKH1 regulates transcription elongation, chromatin silencing at mating loci,	expression of G2/M phase genes. FKH2 binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; positively regulates transcriptional elongation; facilitates clustering, activation of early-ring replication origins; negative role in chromatin silencing at HML and HMR; major role in expression of G2/M phase genes;
+%	\item  Cluster 18 is a singleton
+	\item Cluster 20 has NDD1 and MCM1 with some FKH2.Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}. \cite{breeden2000cyclin} NDD1 and FKH2 transcription is initiated in S phase and the nascent Ndd1 binds the Mcm1–Fkh2–DNA complex at that time.
+%	 MCM1 is involved in cell-type-specific transcription and pheromone response; plays a central role in the formation of both repressor and activator complexes. 
+%	NDD1 is essential for nuclear division; essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes 
+	\cite{koranda2000forkhead} find that NDD1, a positive regulator, becomes associated with G2/M promoter regions in manner that depends on the stage in cell cycle. Its recruitment depends on a permanent protein–DNA complex consisting of the MADS box protein, MCM1, and a recently identified partner Fkh2, a forkhead/winged helix related transcription factor. The lethality of Ndd1 depletion is suppressed by fkh2 null mutations, which indicates that Fkh2 may also have a negative regulatory role in the transcription of G2/M-induced RNAs. We conclude that Ndd1–Fkh2 interactions may be the transcriptionally important process targeted by Cdk activity. 
+%	\cite{breeden2000cyclin} Mcm1 binds as a dimer to its recognition site throughout the cycle. Binding of Fkh2 to the adjacent SFF site is dependent upon Mcm1 binding and can also be detected throughout the cell cycle. NDD1 and FKH2 transcription is initiated in S phase and the nascent Ndd1 protein binds the Mcm1–Fkh2–DNA complex at that time.
+	\item Cluster 26 has YOX1 and MCM1. YOX1 binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase \cite{pramila2002conserved}. 
+\end{itemize}
 
 \subsubsection{Timecourse - ChIP-chip fused}
 
@@ -852,6 +871,22 @@ Our analysis has found significantly more across dataset signal.
 Cluster 16 is nice! Histone proteins and then three others, GAS3, NRM1 and PDS1.
 
 GAS3 is a poorly understood gene. We find that it is associated with HEK2 and SMT3 in the PPI data and SWI6, FKH2 and FKH1 in the ChIP-chip data. 
+
+Yox1p may function together with Nrm1p to confine MBF-dependent transcription to the G1/S transition of the cell cycle via negative feedback \cite{aligianni2009fission}. Is cluster 16 separated from cluster 12 due to the scaling of the timecourse data?
+
+Evidence that they are the same:
+The divergently transcribed histone H3 and H4 genes (hht1 and hhf1, respectively) show enrichment of Yox1p (red), but not of Cdc10p (blue), 
+
+Two negative feedback loops have previously been reported to constrain transcription to G1/S by promoting timely repression of MBF-dependent genes: 1) the cyclin Cig2p, whose gene is activated by MBF, in turn inhibits MBF activity in G2-phase by phosphorylating Res1p [19]; and 2) Nrm1p, whose gene is also activated by MBF, in turn acts as a transcriptional co-repressor for MBF-dependent genes much like Yox1p. 
+
+these findings suggest that Yox1p and Nrm1p operate in the same negative feedback loop in which the role of Yox1p in transcriptional repression depends on Nrm1p. Whether Nrm1p depends on Yox1p for its association with MBF or is a connector protein required for Yox1p-dependent repression of MBF-regulated transcription remains to be determined.
+
+Besides the negative feedback loop based on Yox1p, both yeasts also seem to apply positive feedback loops based on the SBF-regulated SWI4 in budding yeast \cite{mcinerny1997novel, foster1993multiple}
+
+In conclusion, we have uncovered an additional regulatory layer, based on the homeodomain protein Yox1p, to switch-off MBF-dependent transcription during S-phase progression. Similar roles have been identified for Cig2p and Nrm1p. 
+
+\cite{kumar2000forkhead}: Fkh1p and Fkh2p are required for cell-cycle regulation of transcription during G2–M. Forkhead transcription factors, Fkh1p and Fkh2p, collaborate with Mcm1p to control transcription required for M-phase
+
 
 \begin{itemize}
 	\item FKH1: Fkh1p cooperates with Isw1p to remodel chromatin during G2/M. FKH1 has additional roles in the establishment of chromatin silencing at the silent mating-type cassette and in the regulation of donor preference during mating type switching. FKH1 and the Swi4p/Swi6p-containing SCB-binding factor (SBF - note that NRM1 also depends upon SBF) independently regulate donor preference through direct interactions with a cis-acting sequence called the recombination enhancer, with Fkh1p binding in the G2 phase and SBF binding in the G1 phase of the cell cycle. 
@@ -870,7 +905,7 @@ Pds1 is an anaphase inhibitor and plays an essential role in DNA damage and spin
 
 An ESP1/PDS1 complex regulates loss of sister chromatid cohesion at the metaphase to anaphase transition in yeast \citep{ciosk1998esp1}.
 
-\textbf{NRM1}: Transcriptional co-repressor of MBF-regulated gene expression; Nrm1p associates stably with promoters via MCB binding factor (MBF) to repress transcription upon exit from G1 phase. Approximately half of the members of cluster 16 have an interaction with MBF in the ChIP-chip data.
+\textbf{NRM1}: Transcriptional co-repressor of MBF-regulated gene expression; Nrm1p associates stably with promoters via MCB binding factor (MBF) to repress transcription upon exit from G1 phase. Approximately half of the members of cluster 16 have an interaction with MBP in the ChIP-chip data, and some have SWI6 too, so there might be something here.
 
 NRM1, an MBF-specific transcriptional repressor acting at the transition from G1 to S phase of the cell cycle, is at the nexus between the cell cycle transcriptional program and the DNA replication checkpoint in fission yeast. Phosphorylation of Nrm1 by the Cds1 (Chk2) checkpoint protein kinase, which is activated in response to DNA replication stress, promotes its dissociation from the MBF transcription factor. \cite{de2008dna}
 
@@ -884,12 +919,22 @@ Cluster 26 is also very consistent - 3 MCM complex genes and 2 others. Try to ma
 GO terms: Small molcule metabolic process.
 NAD+?
 
-\subsubsection{Cluster 6}
-GO terms: DNA damage and cell stress. DNA replication?
+%\subsubsection{Cluster 6}
+%GO terms: DNA damage and cell stress. DNA replication?
 
 \subsubsection{Cluster 9}
 GO terms: DNA replication, DNA-dependent DNA replication, DNA repair, DNA metabolic process, cellular response to DNA damage stimulus, cellular response to stress, response to stress. 
 POL12, TOF1, DPB2, SEN34, SMC3, MSH6, ASF1, RFA1, MRC1, CDC45, POL1, RAD53, RAD27, IRR1, RFA2, CIN2
+
+\subsubsection{Cluster 12}
+The regulation of the G1- to S-phase transition is critical for cell-cycle progression. This transition is driven by a transient transcriptional wave regulated by transcription factor complexes termed MBF/SBF in yeast \cite{aligianni2009fission}.
+Yox1p homeodomain protein of fission yeast plays a critical role in confining MBF-dependent transcription to the G1/S transition of the cell cycle. \cite{aligianni2009fission}. Cluster 12 is g1/S? Associated with SWI6/MBP1 (i.e. MBF). 
+
+\cite{aligianni2009fission}: Transcript levels of many genes fluctuate periodically as a function of cell growth and division, peaking at specific phases of each cell cycle. Such cell cycle-regulated gene expression seems to be a universal feature of proliferating cells [1]–[3]. The best characterized transcriptional wave is induced during the G1/S transition, named ‘Start’ in yeast and ‘restriction point’ in mammalian cells, when cells commit to DNA replication and thus to a new cell-division cycle. 
+E2F-DP complexes control G1/S transcription and are deregulated in most cancer cells, highlighting the importance of this regulation
+MBF activates transcription during the G1/S transition, binding to MCB promoter elements that are conserved from yeasts to humans.
+
+
 
 
 %YDR113C & PDS1 & 16 & Securin; inhibits anaphase by binding separin Esp1p; blocks cyclin destruction and mitotic exit, essential for meiotic progression and mitotic cell cycle arrest; localization is cell-cycle dependent and regulated by Cdc28p phosphorylation \\ 
@@ -1199,7 +1244,7 @@ YGR068C & ART5 & 25 & Protein proposed to regulate endocytosis of plasma membran
 YOR228C & MCP1 & 25 & Mitochondrial protein of unknown function involved in lipid homeostasis; integral membrane protein that localizes to the mitochondrial outer membrane; involved in mitochondrial morphology; interacts genetically with MDM10, and other members of the ERMES complex; contains five predicted transmembrane domains \\ 
 YOR018W & ROD1 & 25 & Alpha-arrestin involved in ubiquitin-dependent endocytosis; activating dephosphorylation relays glucose signaling to transporter endocytosis; calcineurin dephosphorylation is required for Rsp5p-dependent internalization of agonist-occupied Ste2p, as part of signal desensitization; recruits Rsp5p to Ste2p via its 2 PPXY motifs; protein abundance increases in response to DNA replication stress; ROD1 has a paralog, ROG3, that arose from the whole genome duplication \\ 
 YGR070W & ROM1 & 25 & Guanine nucleotide exchange factor (GEF) for Rho1p; mutations are synthetically lethal with mutations in rom2, which also encodes a GEP; ROM1 has a paralog, ROM2, that arose from the whole genome duplication \\   \hline \\ [-1.8ex] 
-YDR191W & HST4 & 26 & NAD(+)-dependent protein deacetylase; deacetylation targets are primarily mitochondrial proteins; involved along with Hst3p in silencing at telomeres, cell cycle progression, radiation resistance, genomic stability and short-chain fatty acid metabolism; accumulates in mitochondria in response to biotin starvation and may link biotin metabolism with energy homeostasis; member of the Sir2 family and may be the functional equivalent of human SIRT3 \\ 
+YDR191W & HST4 & 26 & NAD(+)-dependent protein deacetylase; deacetylation targets are primarily mitochondrial proteins; involved along with Hst3p in silencing at telomeres, cell cycle progression, radiation resistance, genomic stability and short-chain fatty acid metabolism; accumulates in mitochondria in response to biotin starvation and may link biotin metabolism with energy homeostasis; member of the Sir2 family and may be the functional equivalent of human SIRT3 - SIRT3 is a nuclear NAD+-dependent histone deacetylase that translocates to the mitochondria upon cellular stress citep{scher2007sirt3} \\ 
 YEL032W & MCM3 & 26 & Protein involved in DNA replication; component of the Mcm2-7 hexameric helicase complex that binds chromatin as a part of the pre-replicative complex \\ 
 YLR274W & MCM5 & 26 & Component of the Mcm2-7 hexameric helicase complex; MCM complex is important for priming origins of DNA replication in G1 and becomes an active ATP-dependent helicase that promotes DNA melting and elongation when activated by Cdc7p-Dbf4p in S-phase \\ 
 YBR202W & MCM7 & 26 & Component of the Mcm2-7 hexameric helicase complex; MCM2-7 primes origins of DNA replication in G1 and becomes an active ATP-dependent helicase that promotes DNA melting and elongation in S-phase; forms an Mcm4p-6p-7p subcomplex \\ 
@@ -1233,7 +1278,7 @@ YLR273C & PIG1 & 26 & Putative targeting subunit for type-1 protein phosphatase 
 
 
 \subsection{Bayesian analysis} \label{sec:yeastBayesianAnalysis}
-We ran 10 chains of MDI for 36 hours saving every thousandth sample. This resulted in chains of varying length. We reduced the chains to 676 samples as this was the number of samples achieved by the slowest chain. Similar to section \ref{sec:simBayesianAnalysis} these chains were then investigated for 
+We ran 10 chains of MDI for 36 hours saving every thousandth sample. This resulted in chains of varying length. We reduced the chains to 666 samples as this was the number of samples achieved by the slowest chain. Similar to section \ref{sec:simBayesianAnalysis} these chains were then investigated for 
 \begin{itemize}
 	\item within-chain stationarity using the Geweke convergence diagnostic \citep{geweke1991evaluating}, and
 	\item across-chain convergence using $\hat{R}$ \citep{gelman1992inference} and the Vats-Knudson extension \citep[\emph{stable $\hat{R}$},][]{vats2018revisiting}.

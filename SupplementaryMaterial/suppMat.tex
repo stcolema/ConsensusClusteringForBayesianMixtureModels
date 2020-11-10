@@ -594,8 +594,8 @@ To better understand the regulatory mechanisms and the genes most important in t
 
 \begin{itemize}
 	\item Microarray profiles of RNA expression from \cite{granovskaia2010high}. This dataset comprises measurements of cell-cycle-regulated expression at 5-minute intervals for 41 time points (up to three cell division cycles) and is referred to as the \textbf{Timecourse} dataset. We include only the genes identified by \cite{granovskaia2010high} as having periodic expression profiles. This includes some non-coding RNAs (\textbf{ncRNAs}) of which the majority are anti-sense RNAs.
-	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset discretizes $p$-values from tests of associated between 117 DNA-binding transcriptional regulators and a set of yeast genes. based upon a significance threshold these $p$-values are represented as either a 0 (no interaction) or a 1 (an interaction).
-	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This database consists of of physical and genetic interactions between gene and gene products. The interactions included are a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we used contained 603 proteins as columns. An entry of 1  in the $(i, j)^{th}$ cell indicates that the $i^{th}$ gene has a protein product that interacts with the $j^{th}$ protein.
+	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset discretizes $p$-values from tests of association between 117 DNA-binding transcriptional regulators and a set of yeast genes. Based upon a significance threshold these $p$-values are represented as either a 0 (no interaction) or a 1 (an interaction).
+	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This database consists of of physical and genetic interactions between gene and gene products. The interactions included are a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we used contained 603 proteins as columns. An entry of 1  in the $(i, j)^{th}$ cell indicates that the $i^{th}$ gene has a protein product that is believed to interact with the $j^{th}$ protein.
 \end{itemize}
 We used these datasets to construct sets of co-regulated genes that share biological functions in \emph{Saccharomyces cerevisiae}. We believe such informed gene sets are more relevant to phenotypic traits and offer insight into more complex biological processes. 
 %We used these datasets to perform an integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
@@ -609,7 +609,7 @@ We believe that the integrative aspect of the experiments means that the cluster
 
 %We included three datasets that are generated using different techniques. We expect that including measurements from a variety of experiments offers more useful information about specific genes and their products than any single type of 'omics data. 
 
-We used the MDI model for our integrative analysis. This jointly models the clustering in each dataset, inferring individual clusterings for each dataset that are informed by similarity in the other clusterings. As described in section \ref{sec:models}, MDI learns the similarity between the datasets being analysed and does not assume global structure. This means that the similarity between datasets is not strongly assumed in our model. As the MDI model allows different clusters to align across datasets but does not enforce a global structure; this means that individual clusters or even genes can align across datasets based upon the evidence present in the data without forcing global alignment. Thus we can include the PPI data and expect it to contribute to our final clustering despite the expectation that the ncRNAs might not have common cluster allocation across the Timecourse and PPI datasets.
+We used the MDI model for our integrative analysis. This jointly models the clustering in each dataset, inferring individual clusterings for each dataset that are informed by similarity in the other clusterings. As described in section \ref{sec:models}, MDI learns the similarity between the datasets being analysed and does not assume global structure. This means that the similarity between datasets is not strongly assumed in our model; individual clusters or genes that align across datasets are based solely upon the evidence present in the data not strong modelling assumptions. Thus we can include the PPI data and expect it to contribute to our final clustering despite the expectation that there will be less shared information between the Timecourse dataset with its large set of ncRNAs might and this PPI dataset.
 
 %The additional information from the integrative analysis for each gene and the flexible joint model improve our ability to interpret the clusters that emerge as biological constructs without forcing meaning via agressive assumptions or excessive structure \emph{a priori} due to our model choice (e.g. a model that assumes a global generating structure across all datasets).
 
@@ -622,14 +622,14 @@ We used the MDI model for our integrative analysis. This jointly models the clus
 %	\item Chromatin immunoprecipitation followed by microarray hybridization (\textbf{ChIP-chip}) data from \cite{harbison2004transcriptional}. This dataset has comprises measurements across 117 DNA-binding transcriptional regulators.
 %	\item Protein-protein interaction (\textbf{PPI}) data from BioGrid \citep{stark2006biogrid}. This database consists of of physical and genetic interactions between gene and gene products. The interactions included are a collection of results observed in high throughput experiments and some computationally inferred interactions. The dataset we used contained 603 proteins.
 %\end{itemize}
-The datasets were reduced to 551 items by considering only the genes with no missing data in the PPI and ChIP-chip data. The choices to reduce the datasets to these 551 genes are the same steps as the original MDI paper \citep{kirk2012bayesian}. The datasets are shown in figure \ref{fig:yeastData}.
+The datasets were reduced to 551 items by considering only the genes with no missing data in the PPI and ChIP-chip data. The choices to reduce the datasets to these 551 genes are the same steps as in \cite{kirk2012bayesian}. The datasets are shown in figure \ref{fig:yeastData}.
 
 %Cell-cycle data is exciting as virtually all cellular processes - metabolism, protein synthesis, secretion, DNA replication, organelle biogenesis, cytoskeletal dynamics and chromosome segregation - and diverse regulatory events emerge \citep{granovskaia2010high}. It is also naturally suited to integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}. Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
 
-We used these datasets to perform an integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}; thus the inclusion of the ChIP-chip data means that the clusters that fuse across the datasets should include well studied regulatory proteins. If a cluster of genes are similarly expressed in the Timecourse, share associated regulatory protein in the ChIP-chip and are associated with common protein complexes in the PPI data, than this implies a gene set with strong biological significance.
+We used these datasets to perform an integrative analyis as many of the protein encoding genes in the mitotic cell cycle have well studied genomic binding sites with mapped transcription factors that control phase-specific expression \citep{cho1998genome, spellman1998comprehensive}; thus the inclusion of the ChIP-chip data means that the clusters that align across the datasets should include well studied regulatory proteins and thus be of biological interest. If a cluster of genes are similarly expressed in the Timecourse, share associated regulatory protein in the ChIP-chip and are associated with common protein complexes in the PPI data, than this implies a gene set with strong biological significance.
 %Post-translational regulation also contributes to control of timing of cell-cycle progression in addition to the transcriptional regulation. Thus we hope that for many of our genes that the integration of cell-cycle data, transcription factor data and PPI data should provide meaningful clusters.
 
-For example, if we cluster the Timecourse dataset alone, any clusters that we find are defined by correlation across time. This might be assumed to be driven by shared regulatory mechanisms, but other sources of structure might be encouraging this, even experimental error. However, if a cluster aligns across both the Timecourse dataset and the ChIP-chip dataset we can be more certain that these genes are part of some regulatory network; if this cluster also emerges in the PPI dataset we might believe that the genes are co-regulated as part of the formation of some protein complex.
+In contrast, if we cluster the Timecourse dataset alone, any clusters that we find are defined by correlation across time. This might be assumed to be driven by shared regulatory mechanisms, but other sources of structure might be encouraging this, even experimental error. However, if a cluster aligns across both the Timecourse dataset and the ChIP-chip dataset we can be more certain that these genes are part of some regulatory network; if this cluster also emerges in the PPI dataset we might believe that the genes are co-regulated as part of the formation of some protein complex. Furthermore, this integrative aspect means that clusters that might merge in the Timecourse dataset due to similar periodicity in a standalone analysis might remain separate due to different associated transcription factors in the ChIP-chip dataset.
 
 Thus we performed an integrative analysis using MDI to avoid agressive assumptions about either the biology defining any clusters and modelling assumptions about the latent structure.
 
@@ -659,7 +659,7 @@ The datasets were modelled using a mixture of Gaussian processes in the Timecour
 %\end{itemize}
 
 \subsubsection{Ensemble choice}
-We use an ensemble of depth $R=10001$ and width $S=1000$ with a base learner of MDI \citep[using the software implementation from][]{mason2016mdi}. This ensemble depth and width were decided using the stopping rule from section \ref{sec:stopping}. We include the Consensus matrices for this ensemble and those for the combinations of $R = (1001, 5001, 10001)$, $S=(100, 500, 1,000)$ in the three datasets (shown in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}) and a plot of the mean squared difference between the Consensus matrix for $R=10001$ and $S=1000$ to a range of smaller and shallower ensembles.
+We use an ensemble of depth $R=10001$ and width $S=1000$ with a base learner of MDI \citep[using the software implementation from][]{mason2016mdi}. This ensemble depth and width were decided using the stopping rule from section \ref{sec:stopping}. We include the Consensus matrices for this ensemble and those for the combinations of $R = (1001, 5001, 10001)$, $S=(100, 500, 1,000)$ in the three datasets (shown in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}) and a plot of the mean squared difference between the Consensus matrix for $R=10001$ and $S=1000$ to a range of smaller and shallower ensembles (figure \ref{fig:ensembleChoice}).
 
 \begin{figure}
 	\centering
@@ -672,7 +672,7 @@ We use an ensemble of depth $R=10001$ and width $S=1000$ with a base learner of 
 
 We decide to stop increasing at $R=10001$ as there is little change between Consensus matrices for increasing chain depth from $R=5001$ to $R=10001$ across the three datasets. An example of insufficient depth can be see for $R=1001$ in figure \ref{fig:ppiCMs}; there is a marked difference in the Consensus matrices between $R=1001$ and $R=5001$. 
 
-In terms of the number of chains required, we believe this to have stabilised, as there is no obvious change in increasing $S$ from 100 in any dataset.
+In terms of the number of chains required, we believe this to have stabilised, as there is no obvious change in increasing $S$ from 100 in the Timecourse and ChiP-chip datasets, and none in any dataset for increasing from $S=500$ to $S=1000$.
 
 \subsection{Cluster analysis}
 We use \texttt{maxpear} to infer an estimate clustering from the Consensus matrices as in the Simulations except we set \texttt{k.max = 275}. 
@@ -794,8 +794,9 @@ Our analysis has found significantly more shared structure.
 %		\hline \\[-1.8ex] 
 %	\end{longtable} 
 
-In figure \ref{fig:timepointChIPchipFused} we show the data from the Timecourse and ChIP-chip datasets for the genes that integrated between these datasets. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \cite{simon2001serial}.
+In figure \ref{fig:timepointChIPchipFused} we show the data from the Timecourse and ChIP-chip datasets for the genes that integrated between these datasets. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \citep{simon2001serial}.
 
+\subsubsection{TF table}
 	\begin{longtable}{@{\extracolsep{3pt}} ccp{85mm}} 
 	\caption{Table of transcription factors prominent in fused clusters for the Timecourse and ChIP-chip datasets.}
 	\\[-1.8ex]\hline 
@@ -805,11 +806,11 @@ In figure \ref{fig:timepointChIPchipFused} we show the data from the Timecourse 
 		YLR131C & ACE2 & Transcription factor required for septum destruction after cytokinesis; phosphorylation by Cbk1p blocks nuclear exit during M/G1 transition; phosphorylation by cyclins Cdc28p and Pho85p prevents nuclear import during cell cycle phases other than cytokinesis; part of RAM network that regulates cellular polarity and morphogenesis; ACE2 has a paralog, SWI5, that arose from the whole genome duplication \\ 
 		YPL049C & DIG1 & MAP kinase-responsive inhibitor of the Ste12p transcription factor; involved in the regulation of mating-specific genes and the invasive growth pathway; Dig1p and paralog Dig2p bind to Ste12p
 		\\ 
-		YIL131C & FKH1 & Forkhead family transcription factor; evolutionarily conserved lifespan regulator; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; regulates transcription elongation, chromatin silencing at mating loci, expression of G2/M phase genes; facilitates clustering, activation of early-firing replication origins; binds HML recombination enhancer, regulates donor preference during mating-type switching \\ 
-		YNL068C & FKH2 & Forkhead family transcription factor; rate-limiting activator of replication origins; evolutionarily conserved regulator of lifespan; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; positively regulates transcriptional elongation; facilitates clustering, activation of early-firing replication origins; negative role in chromatin silencing at HML and HMR; major role in expression of G2/M phase genes; relocalizes to cytosol under hypoxia \\ 
+		YIL131C & FKH1 & Forkhead family transcription factor; evolutionarily conserved lifespan regulator; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; regulates transcription elongation, chromatin silencing at mating loci, expression of G2/M phase genes \\ 
+		YNL068C & FKH2 & Forkhead family transcription factor; rate-limiting activator of replication origins; evolutionarily conserved regulator of lifespan; binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; positively regulates transcriptional elongation; negative role in chromatin silencing at HML and HMR; major role in expression of G2/M phase genes \\ 
 		YDL056W & MBP1 & Transcription factor; involved in regulation of cell cycle progression from G1 to S phase, forms a complex with Swi6p that binds to MluI cell cycle box regulatory element in promoters of DNA synthesis genes \\ 
-		YMR043W & MCM1 & Transcription factor; involved in cell-type-specific transcription and pheromone response; plays a central role in the formation of both repressor and activator complexes; relocalizes to the cytosol in response to hypoxia \\ 
-		YOR372C & NDD1 & Transcriptional activator essential for nuclear division; localized to the nucleus; essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes; turnover is tightly regulated during cell cycle and in response to DNA damage \\ 
+		YMR043W & MCM1 & Transcription factor; involved in cell-type-specific transcription and pheromone response; plays a central role in the formation of both repressor and activator complexes; involved in the transcription of some M/G1 genes \cite{simon2001serial}.  \\ 
+		YOR372C & NDD1 & Transcriptional activator essential for nuclear division; essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes; turnover is tightly regulated during cell cycle and in response to DNA damage \\ 
 		YHR084W & STE12 & Transcription factor that is activated by a MAPK signaling cascade; activates genes involved in mating or pseudohyphal/invasive growth pathways; cooperates with Tec1p transcription factor to regulate genes specific for invasive growth \\ 
 		YER111C & SWI4 & DNA binding component of the SBF complex (Swi4p-Swi6p); a transcriptional activator that in concert with MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair \\ 
 		YDR146C & SWI5 & Transcription factor that recruits Mediator and Swi/Snf complexes; activates transcription of genes expressed at the M/G1 phase boundary and in G1 phase; required for expression of the HO gene controlling mating type switching; localization to nucleus occurs during G1 and appears to be regulated by phosphorylation by Cdc28p kinase; SWI5 has a paralog, ACE2, that arose from the whole genome duplication \\ 
@@ -820,44 +821,49 @@ In figure \ref{fig:timepointChIPchipFused} we show the data from the Timecourse 
 		\label{tab:fusedTFs}
 	\end{longtable} 
 
-
-\cite{simon2001serial}
-
-MBF (a complex of Mbp1 and Swi6) and SBF (a complex of Swi4 and Swi6) control late G1 genes.  
-
-Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}.
-
-Mcm1 is also involved in the transcription of some M/G1 genes \cite{simon2001serial}. 
-
-Swi5 and Ace2 regulate genes at the end of M and early G1. It is not yet clear whether this model, developed using a small set of genes, will extrapolate to regulation of all cell cycle genes \cite{simon2001serial}.
-
-
- Mcm1p regulates two consecutive waves of transcription controlling G1/S and G2/M cell-cycle transitions.
- Both FKH1 and FKH2 are also periodically transcribed and peak in S phase \cite{zhu2000two}.
+%
+%\cite{simon2001serial}
+%MBF (a complex of Mbp1 and Swi6) and SBF (a complex of Swi4 and Swi6) control late G1 genes.  
+%
+%Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}.
+%
+%Mcm1 is also involved in the transcription of some M/G1 genes \cite{simon2001serial}. 
+%
+%Swi5 and Ace2 regulate genes at the end of M and early G1. It is not yet clear whether this model, developed using a small set of genes, will extrapolate to regulation of all cell cycle genes \cite{simon2001serial}.
+%
+%
+% Mcm1p regulates two consecutive waves of transcription controlling G1/S and G2/M cell-cycle transitions.
+% Both FKH1 and FKH2 are also periodically transcribed and peak in S phase \cite{zhu2000two}.
 
  
-\cite{iyer2001genomic}: SBF and MBF are sequence-specific transcription factors that activate gene expression during the G1/S transition of the cell cycle in yeast. SBF is a heterodimer of Swi4 and Swi6, and MBF is a heterodimer of Mbpl and Swi6. Our results support the hypothesis that SBF activated genes are predominantly involved in budding, and in membrane and cell-wall biosynthesis, whereas DNA replication and repair are the dominant functions among MBF activated genes.
- 
+%\cite{iyer2001genomic}: SBF and MBF are sequence-specific transcription factors that activate gene expression during the G1/S transition of the cell cycle in yeast. SBF is a heterodimer of Swi4 and Swi6, and MBF is a heterodimer of Mbpl and Swi6. Our results support the hypothesis that SBF activated genes are predominantly involved in budding, and in membrane and cell-wall biosynthesis, whereas DNA replication and repair are the dominant functions among MBF activated genes.
+
+These regulatory proteins are found in different combinations across the clusters. Based upon these combinations we associate each cluster with phases of the cell cycle and or some specific processes.
+
 \begin{itemize}
-	\item Cluster 1 has both AC2 and SWI5 emerge. M/G1 phase boundary? \cite{mcbride1999distinct} Swi5 and Ace2 activate expression of early G1-specific genes.
-	\item Cluster 2 has SWI5 alone.
-	\item Cluster 5 has MBP1 and some of SWI4 and SWI6.  G1/S transisiton \cite{iyer2001genomic}. The SBF complex (Swi4p-Swi6p) is a transcriptional activator that in concert with	MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair;
-	\item Cluster 9 has MBP1 and some SWI6 - these combine to form MBF .
-	\item Cluster 11 has DIG1, SWI4, SWI6, and STE12 fully with some TEC1. DIG1 inhibits STE12 and regulates mating specific genes. STE12 activates genes involved in mating or pseudohyphal/invasive growth pathways; cooperates with Tec1p transcription factor to regulate genes specific for invasive growth. SWI6 involved in meiotic gene expression. Some sort of growth cluster?
-	\item Cluster 12 is mainly SWI6 and MBP1 with some SWI4. Similar to cluster 5 (again SWI6 and MBP1 form MBF).
-	\item Cluster 16 is all the histone folks - no clear TF in the ChIP-chip.
-	\item Cluster 17 has FKH1 and FKH2. Transcription elongation and chromatim silencing, G2/M phase.
+	\item Cluster 1: both AC2 and SWI5 emerge. These regulate specific genes at the end of M and early G1 \citep{mcbride1999distinct, simon2001serial}.
+	\item Cluster 2: SWI5. This is similar to cluster 1, as ACE2 is a paralog of SWI5; therefore associated with M/G1. Furthermore, inspection of the expression in the timecourse data shows that the members of cluster 2 largely differentiate from those of cluster 1 based upon amplitude, not periodicity, suggesting that these clusters could be merged.
+	\item Cluster 5: MBP1, SWI4 and SWI6. The SBF complex (Swi4p-Swi6p) is a transcriptional activator that in concert with	MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair, controlling the transition to S phase \citep{simon2001serial,iyer2001genomic, aligianni2009fission}. Inspection of the individual genes in cluster reveals that many are late G1 genes.
+	\item Cluster 9: MBP1 and SWI6. These combine to form MBF, which regulates DNA replication and repair \citep{iyer2001genomic}. The gene members of this cluster are predominantly involved in DNA replication and repair.
+	\item Cluster 11: DIG1, SWI4, SWI6, and STE12 emerge in all members with some having associations with TEC1. TEC1 and STE12, controls development, including cell adhesion and filament formation and is negatively regulated by DIG1 and DIG2 \citep{van2014transcription}.
+	\item Cluster 12: MBP1 , SWI4 and SWI6. Similar to cluster 5 in both the Timecourse and ChIP-chip datasets and thus G1/S phase.
+	\item Cluster 16: some MBP1, SWI4 and SWI6. The constituents of this cluster are largely associated with proteins contributing to histones H1, H2A, H2B, H3 and H4, suggesting an S-phase cluster \citep{ewen2000cell}.
+	\item Cluster 17: FKH1 and FKH2. Fkh1p and Fkh2p are required for cell-cycle regulation of transcription during G2/M \citep{kumar2000forkhead}. 
+%	Transcription elongation and chromatim silencing, G2/M phase. Many of the gene members are involved in spindle assembly and chromatin remodelling.
+%	Both FKH1 and FKH2 are also periodically transcribed and peak in S phase \cite{zhu2000two}. 
 %	 FKH1 regulates transcription elongation, chromatin silencing at mating loci,	expression of G2/M phase genes. FKH2 binds multiple chromosomal elements with distinct specificities, cell cycle dynamics; positively regulates transcriptional elongation; facilitates clustering, activation of early-ring replication origins; negative role in chromatin silencing at HML and HMR; major role in expression of G2/M phase genes;
 %	\item  Cluster 18 is a singleton
-	\item Cluster 20 has NDD1 and MCM1 with some FKH2.Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}. \cite{breeden2000cyclin} NDD1 and FKH2 transcription is initiated in S phase and the nascent Ndd1 binds the Mcm1–Fkh2–DNA complex at that time.
+	\item Cluster 20: NDD1 and MCM1 with some FKH2. Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes \citep{simon2001serial, koranda2000forkhead}. 
+%	\cite{breeden2000cyclin} NDD1 and FKH2 transcription is initiated in S phase and the nascent Ndd1 binds the Mcm1–Fkh2–DNA complex at that time.
 %	 MCM1 is involved in cell-type-specific transcription and pheromone response; plays a central role in the formation of both repressor and activator complexes. 
 %	NDD1 is essential for nuclear division; essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes 
-	\cite{koranda2000forkhead} find that NDD1, a positive regulator, becomes associated with G2/M promoter regions in manner that depends on the stage in cell cycle. Its recruitment depends on a permanent protein–DNA complex consisting of the MADS box protein, MCM1, and a recently identified partner Fkh2, a forkhead/winged helix related transcription factor. The lethality of Ndd1 depletion is suppressed by fkh2 null mutations, which indicates that Fkh2 may also have a negative regulatory role in the transcription of G2/M-induced RNAs. We conclude that Ndd1–Fkh2 interactions may be the transcriptionally important process targeted by Cdk activity. 
+%	\cite{koranda2000forkhead} find that NDD1, a positive regulator, becomes associated with G2/M promoter regions in manner that depends on the stage in cell cycle. Its recruitment depends on a permanent protein–DNA complex consisting of the MADS box protein, MCM1, and a recently identified partner Fkh2, a forkhead/winged helix related transcription factor. The lethality of Ndd1 depletion is suppressed by fkh2 null mutations, which indicates that Fkh2 may also have a negative regulatory role in the transcription of G2/M-induced RNAs.
+%	Mcm1, together with Fkh1 or Fkh2, recruits the Ndd1 protein in late G2, and thus controls the transcription of G2/M genes. \cite{simon2001serial}.
 %	\cite{breeden2000cyclin} Mcm1 binds as a dimer to its recognition site throughout the cycle. Binding of Fkh2 to the adjacent SFF site is dependent upon Mcm1 binding and can also be detected throughout the cell cycle. NDD1 and FKH2 transcription is initiated in S phase and the nascent Ndd1 protein binds the Mcm1–Fkh2–DNA complex at that time.
-	\item Cluster 26 has YOX1 and MCM1. YOX1 binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase \cite{pramila2002conserved}. 
+	\item Cluster 26: YOX1 and MCM1. YOX1 binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase \citep{pramila2002conserved}. 
 \end{itemize}
 
-\subsubsection{Timecourse - ChIP-chip fused}
+\subsubsection{Timecourse - ChIP-chip integrated genes}
 
 \begin{sidewaysfigure}
 	\centering
@@ -866,26 +872,27 @@ Swi5 and Ace2 regulate genes at the end of M and early G1. It is not yet clear w
 	\label{fig:timepointChIPchipFused}
 \end{sidewaysfigure}
 
+%We find that several of the clusters in the Timecourse dataset have similar periods but different amplitudes (due to the choice of scaling factor). One might be tempted, as suggested by some practitioners, that a post-hoc, manual merging of clusters might improve the analysis. However, this is another benefit of MDI 
 
 \subsubsection{Cluster 16}
-Cluster 16 is nice! Histone proteins and then three others, GAS3, NRM1 and PDS1.
+Histone proteins and then three others, GAS3, NRM1 and PDS1.
 
 GAS3 is a poorly understood gene. We find that it is associated with HEK2 and SMT3 in the PPI data and SWI6, FKH2 and FKH1 in the ChIP-chip data. 
 
-Yox1p may function together with Nrm1p to confine MBF-dependent transcription to the G1/S transition of the cell cycle via negative feedback \cite{aligianni2009fission}. Is cluster 16 separated from cluster 12 due to the scaling of the timecourse data?
+%Yox1p may function together with Nrm1p to confine MBF-dependent transcription to the G1/S transition of the cell cycle via negative feedback \cite{aligianni2009fission}. Is cluster 16 separated from cluster 12 due to the scaling of the timecourse data?
 
-Evidence that they are the same:
-The divergently transcribed histone H3 and H4 genes (hht1 and hhf1, respectively) show enrichment of Yox1p (red), but not of Cdc10p (blue), 
+%Evidence that they are the same:
+%The divergently transcribed histone H3 and H4 genes (hht1 and hhf1, respectively) show enrichment of Yox1p (red), but not of Cdc10p (blue), 
+%
+%Two negative feedback loops have previously been reported to constrain transcription to G1/S by promoting timely repression of MBF-dependent genes: 1) the cyclin Cig2p, whose gene is activated by MBF, in turn inhibits MBF activity in G2-phase by phosphorylating Res1p [19]; and 2) Nrm1p, whose gene is also activated by MBF, in turn acts as a transcriptional co-repressor for MBF-dependent genes much like Yox1p. 
+%
+%these findings suggest that Yox1p and Nrm1p operate in the same negative feedback loop in which the role of Yox1p in transcriptional repression depends on Nrm1p. Whether Nrm1p depends on Yox1p for its association with MBF or is a connector protein required for Yox1p-dependent repression of MBF-regulated transcription remains to be determined.
+%
+%Besides the negative feedback loop based on Yox1p, both yeasts also seem to apply positive feedback loops based on the SBF-regulated SWI4 in budding yeast \cite{mcinerny1997novel, foster1993multiple}
+%
+%In conclusion, we have uncovered an additional regulatory layer, based on the homeodomain protein Yox1p, to switch-off MBF-dependent transcription during S-phase progression. Similar roles have been identified for Cig2p and Nrm1p. 
 
-Two negative feedback loops have previously been reported to constrain transcription to G1/S by promoting timely repression of MBF-dependent genes: 1) the cyclin Cig2p, whose gene is activated by MBF, in turn inhibits MBF activity in G2-phase by phosphorylating Res1p [19]; and 2) Nrm1p, whose gene is also activated by MBF, in turn acts as a transcriptional co-repressor for MBF-dependent genes much like Yox1p. 
-
-these findings suggest that Yox1p and Nrm1p operate in the same negative feedback loop in which the role of Yox1p in transcriptional repression depends on Nrm1p. Whether Nrm1p depends on Yox1p for its association with MBF or is a connector protein required for Yox1p-dependent repression of MBF-regulated transcription remains to be determined.
-
-Besides the negative feedback loop based on Yox1p, both yeasts also seem to apply positive feedback loops based on the SBF-regulated SWI4 in budding yeast \cite{mcinerny1997novel, foster1993multiple}
-
-In conclusion, we have uncovered an additional regulatory layer, based on the homeodomain protein Yox1p, to switch-off MBF-dependent transcription during S-phase progression. Similar roles have been identified for Cig2p and Nrm1p. 
-
-\cite{kumar2000forkhead}: Fkh1p and Fkh2p are required for cell-cycle regulation of transcription during G2–M. Forkhead transcription factors, Fkh1p and Fkh2p, collaborate with Mcm1p to control transcription required for M-phase
+\cite{kumar2000forkhead}: Fkh1p and Fkh2p are required for cell-cycle regulation of transcription during G2/M. Forkhead transcription factors, Fkh1p and Fkh2p, collaborate with Mcm1p to control transcription required for M-phase
 
 
 \begin{itemize}
@@ -895,29 +902,44 @@ In conclusion, we have uncovered an additional regulatory layer, based on the ho
 	\item HEK2: RNA binding protein involved in asymmetric localization of ASH1 mRNA; represses translation of ASH1 mRNA, an effect reversed by Yck1p-dependent phosphoryation; regulates telomere position effect and length; similarity to hnRNP-K.
 	\item SMT3: regulates chromatid cohesion, chromosome segregation, APC-mediated proteolysis, DNA replication and septin ring dynamics.
 \end{itemize}
-This suggests that GAS3 might be assoicated with chromosome/chormatin stuff. Not sure what this ``donor preference" stuff is, but it might be important for this.
+This suggests that GAS3 might be assoicated with anaphase?
+Sister chromatid cohesion ensures the faithful segregation of chromosomes in mitosis and in both meiotic divisions \citep{cooper2009pds1p}.
 
-\textbf{PDS1}: The initial pds1-1 allele was identified by its inviability after transient exposure to microtubule inhibitors and its precocious dissociation of sister chromatids in the presence of these microtubule inhibitors. PDS1p is an important regulator of the onset of anaphase both for the Anaphase Promoting Complex and checkpoint pathways. \citep{yamamoto1996pds1p}
+ chormatin stuff? Not sure how to state this. Try: This association with the forkhead regulators and SMT3 along with the clustering alongside the histone genes suggests that GAS3 might have some role in DNA replication/chromatim stuff (I don't know this biology well enough)  (``guilt by association'').
 
-The DNA damage check- point(s)  requires products encoded by RAD9,  RAD17, RAD24, MECI, MEC3, and RAD53 (MEC2/SAD1) genes while the spindle-damage checkpoint(s) requires a  differ- ent set of products encoded by BUB1, BUB2, BUB3, MAD1,  MAD2, and MAD3 genes (Weinert and Hartwell, 1988, 1993; Hoyt et al.,  1991; Li and Murray, 1991; Allen et al., 1994; Weinart et al., 1994). \citep{yamamoto1996pds1p}
+\textbf{PDS1}: PDS1p is an important regulator of the onset of anaphase both for the Anaphase Promoting Complex and checkpoint pathways. \citep{yamamoto1996pds1p, wang2001pds1}. An ESP1/PDS1 complex regulates loss of sister chromatid cohesion at the metaphase to anaphase transition in yeast \citep{ciosk1998esp1}. This places PDS1 firmly in the M phase of the cell cycle. 
 
-Pds1 is an anaphase inhibitor and plays an essential role in DNA damage and spindle checkpoint pathways. Pds1 is phosphorylated in response to DNA damage but not spindle disruption, indicating distinct mechanisms delaying anaphase entry. Phosphorylation of Pds1 is Mec1 and Chk1 dependent in vivo. Here, we show that Pds1 is phosphorylated at multiple sites in vivo in response to DNA damage by Chk1. \cite{wang2001pds1}.
+Pds1p destruction is required for metaphase I–anaphase I transition \citep{cooper2009pds1p}. 
 
-An ESP1/PDS1 complex regulates loss of sister chromatid cohesion at the metaphase to anaphase transition in yeast \citep{ciosk1998esp1}.
+also involved in recombinational repair,
 
-\textbf{NRM1}: Transcriptional co-repressor of MBF-regulated gene expression; Nrm1p associates stably with promoters via MCB binding factor (MBF) to repress transcription upon exit from G1 phase. Approximately half of the members of cluster 16 have an interaction with MBP in the ChIP-chip data, and some have SWI6 too, so there might be something here.
+%The DNA damage check- point(s)  requires products encoded by RAD9,  RAD17, RAD24, MECI, MEC3, and RAD53 (MEC2/SAD1) genes while the spindle-damage checkpoint(s) requires a  differ- ent set of products encoded by BUB1, BUB2, BUB3, MAD1,  MAD2, and MAD3 genes (Weinert and Hartwell, 1988, 1993; Hoyt et al.,  1991; Li and Murray, 1991; Allen et al., 1994; Weinart et al., 1994). \citep{yamamoto1996pds1p}
 
-NRM1, an MBF-specific transcriptional repressor acting at the transition from G1 to S phase of the cell cycle, is at the nexus between the cell cycle transcriptional program and the DNA replication checkpoint in fission yeast. Phosphorylation of Nrm1 by the Cds1 (Chk2) checkpoint protein kinase, which is activated in response to DNA replication stress, promotes its dissociation from the MBF transcription factor. \cite{de2008dna}
+%Pds1 is an anaphase inhibitor and plays an essential role in DNA damage and spindle checkpoint pathways \cite{wang2001pds1}.
 
-G1-specific transcription in yeast depends upon SBF and MBF. We have identified NRM1 (negative regulator of MBF targets 1), as a stable component of MBF. NRM1(YNR009w), an MBF-regulated gene expressed during late G1 phase, associates with G1-specific promoters via MBF. Transcriptional repression upon exit from G1 phase requires both NRM1 and MBF. Inactivation of NRM1 results in prolonged expression of MBF-regulated transcripts and leads to hydroxyurea (HU) resistance and enhanced bypass of RAD53D- and MEC1D-associated lethality. Constitutive expression of a stabilized form of Nrm1 represses MBF targets and leads to HU sensitivity. The fission yeast homolog SpNrm1, encoded by the MBF target genenrm1+(SPBC16A3.07c), binds to MBF target genes and acts as a corepressor. In both yeasts, MBF represses G1-specific transcription outside of G1 phase. A negative feedback loop involving Nrm1 bound to MBF leads to transcriptional repression as cells exit G1 phase. \citep{de2006constraining}
+%An ESP1/PDS1 complex regulates loss of sister chromatid cohesion at the metaphase to anaphase transition in yeast \citep{ciosk1998esp1}.
 
-\subsubsection{Cluster 26}
-Cluster 26 is also very consistent - 3 MCM complex genes and 2 others. Try to make a story.
+\textbf{NRM1}: transciprtional co-repressor of MBF-regulated gene expression acting at the transition from G1 to S phase \citep{de2006constraining, aligianni2009fission}. NRMA1 is phosphorylated in response to DNA replication stress, promoting its disassocation from MBF \citep{de2008dna}. 
 
+%Transcriptional co-repressor of MBF-regulated gene expression; Nrm1p associates stably with promoters via MCB binding factor (MBF) to repress transcription upon exit from G1 phase. Approximately half of the members of cluster 16 have an interaction with MBP in the ChIP-chip data, and some have SWI6 too, so there might be something here.
 
-\subsubsection{Cluster 3}
-GO terms: Small molcule metabolic process.
-NAD+?
+%NRM1, an MBF-specific transcriptional repressor acting at the transition from G1 to S phase of the cell cycle, is at the nexus between the cell cycle transcriptional program and the DNA replication checkpoint in fission yeast. Phosphorylation of Nrm1 by the Cds1 (Chk2) checkpoint protein kinase, which is activated in response to DNA replication stress, promotes its dissociation from the MBF transcription factor. \cite{de2008dna}
+
+%G1-specific transcription in yeast depends upon SBF and MBF. We have identified NRM1 (negative regulator of MBF targets 1), as a stable component of MBF. NRM1(YNR009w), an MBF-regulated gene expressed during late G1 phase, associates with G1-specific promoters via MBF. Transcriptional repression upon exit from G1 phase requires both NRM1 and MBF. Inactivation of NRM1 results in prolonged expression of MBF-regulated transcripts and leads to hydroxyurea (HU) resistance and enhanced bypass of RAD53D- and MEC1D-associated lethality. Constitutive expression of a stabilized form of Nrm1 represses MBF targets and leads to HU sensitivity. The fission yeast homolog SpNrm1, encoded by the MBF target genenrm1+(SPBC16A3.07c), binds to MBF target genes and acts as a corepressor. In both yeasts, MBF represses G1-specific transcription outside of G1 phase. A negative feedback loop involving Nrm1 bound to MBF leads to transcriptional repression as cells exit G1 phase. \citep{de2006constraining}
+
+%Yox1p may function together with Nrm1p to confine MBF-dependent transcription to the G1/S transition of the cell cycle via negative feedback \cite{aligianni2009fission}.
+
+%MBF represses G1-specific transcription outside of G1 phase. A negative feedback loop involving Nrm1 bound to MBF leads to transcriptional repression as cells exit G1 phase. \citep{de2006constraining}
+
+%Is NRM1 being transcribed as we move into S-phase, repressing G1 transcripts before the DNA is replicated - histone comes into play here?
+
+%\subsubsection{Cluster 26}
+%Cluster 26 is also very consistent - 3 MCM complex genes and 2 others. Try to make a story.
+%
+%
+%\subsubsection{Cluster 3}
+%GO terms: Small molcule metabolic process.
+%NAD+?
 
 %\subsubsection{Cluster 6}
 %GO terms: DNA damage and cell stress. DNA replication?

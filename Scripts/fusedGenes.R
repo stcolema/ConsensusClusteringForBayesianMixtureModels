@@ -455,6 +455,40 @@ ggsave("./SupplementaryMaterial/Images/Yeast/timecourseChIPchipFused.png",
   width = 14
 )
 
+
+long_timecourse_data %>%
+  filter(Cluster %in% c(1, 2, 5, 9, 11, 12, 16, 17, 20, 26)) %>%
+  mutate(Timepoint = as.numeric(str_remove_all(Timepoint, "X"))) %>%
+  ggplot(aes(x = Timepoint, y = Expression, group = Gene)) + #, colour = Cluster)) +
+  geom_line() +
+  facet_wrap(~Cluster, ncol = 1) +
+  scale_y_continuous(breaks = c(-2, 0, 2)) +
+  theme(
+    axis.text.x = element_text(size = 13),
+    axis.text.y = element_text(size = 13),
+    axis.title.y = element_text(size = 16),
+    axis.title.x = element_text(size = 16),
+    strip.text.x = element_text(size = 16),
+    legend.text = element_text(size = 13),
+    legend.title = element_text(size = 16),
+    plot.title = element_text(size = 21),
+    plot.subtitle = element_text(size = 18)
+  ) +
+  geom_vline(
+    xintercept = c(9, 18, 21, 32, 35),
+    colour = "grey"
+  ) +
+  geom_hline(yintercept = c(-1, 0, 1), lty = 2, colour = "dark grey") +
+  labs(
+    subtitle = "Integrated genes",
+    title = "Timecourse data"
+  )
+
+ggsave("./SupplementaryMaterial/Images/Yeast/timecourseOverlappingClusters.png",
+       height = 12, 
+       width = 7)
+
+
 cl_5_and_12 <- timecourse_chipchip_table$Gene[timecourse_chipchip_table$Cluster %in% c(5, 12)]
 
 inds <- match(cl_5_and_12, row.names(alloc_data$CM[[1]]))

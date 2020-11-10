@@ -102,7 +102,7 @@ inferences <- args$models %>% # c("Bayesian", "Frequentist", "Consensus")
   unlist()
 
 gen_dir <- "C:/Users/stephen/Documents/PhD/Year_1/Consensus_inference/Consensus_inference_gen/Simulations/Time/"
-save_dir <- "./Data/"
+save_dir <- "./Data/Simulations/"
 plt_dir <- "./Images/Simulations/"
 inferences <- c("Bayesian", "Frequentist", "Consensus")
 
@@ -409,9 +409,10 @@ p1 <- time_df %>%
   labs(
     title = "Time taken for MCMC iterations",
     # subtitle = "User time for each chain",
-    x = expression(log[10](R)),
-    y = expression(log[10](s)),
-    colour = "P"
+    x = "Number of MCMC iterations", # expression(log[10](R)),
+    y = "Time", # expression(log[10](s)),
+    colour = "Number of features",
+    caption = expr(paste("Both axes are on a ", log[10], " scale"))
     # caption = "Times for different methods across simulations. \nConsensus is running a Gibbs sampler for 10,001 iterations, Bayesian for 1,000,001 (and is a factor of 10^2 slower)."
   ) +
   scale_color_viridis_d() +

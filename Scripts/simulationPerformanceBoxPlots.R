@@ -14,9 +14,9 @@ setMyTheme(axis.text.y=element_text(hjust=0.0, size = 10.5),
            strip.text.x = element_text(size = 10.5)
            )
 
-scenarios <- list.dirs("./Data", recursive = F, full.names = F)
-data_files <- list.files("./Data", recursive = T, full.names = T)
-n_files <- length(data_files)
+scenarios <- list.dirs("./Data/Simulations/", recursive = F, full.names = F)
+data_files <- list.files("./Data/Simulations/", recursive = T, full.names = T, pattern = "all_results.csv")
+n_files <- length(scenarios)
 
 save_dir <- "./Images/Simulations/"
 

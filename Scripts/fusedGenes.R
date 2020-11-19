@@ -443,7 +443,7 @@ p9 + p10 +
   plot_layout(guides = "collect", widths = c(2, 5)) +
   plot_annotation(
     title = "Consensus clustering",
-    subtitle = "Fused clusters across Timecourse and ChIP-chip datasets",
+    subtitle = "Integrated clusters across Timecourse and ChIP-chip datasets",
     theme = theme(
       plot.title = element_text(size = 18),
       plot.subtitle = element_text(size = 16)

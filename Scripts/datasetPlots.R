@@ -64,8 +64,9 @@ uplotter::visualiseUMAP(my_data[[3]]$data, as.factor(my_data[[3]]$cluster_IDs)) 
 
 row_order2D <- findOrder(my_data[[1]]$data)
 col_order2D <- findOrder(t(my_data[[1]]$data))
+
 simple2Dhm <- annotatedHeatmap(my_data[[1]]$data[row_order2D, col_order2D],
-  my_data[[1]]$cluster_IDs,
+  my_data[[1]]$cluster_IDs[row_order2D],
   main = paste0(dataset_names[[1]]),
   show_rownames = F,
   show_colnames = F,
@@ -77,7 +78,7 @@ simple2Dhm <- annotatedHeatmap(my_data[[1]]$data[row_order2D, col_order2D],
 
 row_order_largeP <- findOrder(my_data[[2]]$data)
 col_order_largeP <- findOrder(t(my_data[[2]]$data))
-smallNlargePhm <- annotatedHeatmap(my_data[[2]]$data[row_order_largeP, col_order_largeP],
+smallNlargePhm <- annotatedHeatmap(my_data[[2]]$data[, col_order_largeP],
   my_data[[2]]$cluster_IDs,
   main = paste0(dataset_names[[2]]),
   show_rownames = F,
@@ -89,8 +90,8 @@ smallNlargePhm <- annotatedHeatmap(my_data[[2]]$data[row_order_largeP, col_order
 
 row_order_irr100 <- findOrder(my_data[[3]]$data)
 col_order_irr100 <- findOrder(t(my_data[[3]]$data))
-irr100hm <- annotatedHeatmap(my_data[[3]]$data[row_order_irr100, ],
-  my_data[[3]]$cluster_IDs,
+irr100hm <- annotatedHeatmap(my_data[[3]]$data, #[row_order_irr100, ],
+  my_data[[3]]$cluster_IDs, #[row_order_irr100],
   main = paste0(dataset_names[[3]]),
   show_rownames = F,
   show_colnames = F,

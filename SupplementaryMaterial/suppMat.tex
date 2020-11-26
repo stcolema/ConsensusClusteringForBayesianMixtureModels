@@ -821,7 +821,7 @@ Our analysis has found significantly more shared structure.
 
 \subsubsection{Timecourse ChIP-chip analysis}
 
-We focus upon the dataset pairing of Timecourse + ChIP-chip as the combination with the greatest number of integrated genes. We show that integrated clusters that emerge in figure \ref{fig:timepointChIPchipFused}. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \citep{simon2001serial}.
+We focus upon the dataset pairing of Timecourse + ChIP-chip as the combination with the greatest number of integrated genes. We show the integrated clusters that emerge in figure \ref{fig:timepointChIPchipFused}. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \citep{simon2001serial}.
 
 %\subsubsection{TF table}
 	\begin{longtable}{@{\extracolsep{3pt}} ccp{85mm}} 
@@ -868,7 +868,7 @@ We focus upon the dataset pairing of Timecourse + ChIP-chip as the combination w
 These regulatory proteins are found in different combinations across the clusters. Based upon these combinations we associate each cluster with phases of the cell cycle and or some specific processes.
 
 \begin{itemize}
-	\item Cluster 1: both AC2 and SWI5 emerge. These regulate specific genes at the end of M and early G1 \citep{mcbride1999distinct, simon2001serial}.
+	\item Cluster 1: both ACE2 and SWI5 emerge. These regulate specific genes at the end of M and early G1 \citep{mcbride1999distinct, simon2001serial}.
 	\item Cluster 2: SWI5. This is similar to cluster 1, as ACE2 is a paralog of SWI5; therefore associated with M/G1. Furthermore, inspection of the expression in the timecourse data shows that the members of cluster 2 largely differentiate from those of cluster 1 based upon amplitude, not periodicity, suggesting that these clusters could be merged.
 	\item Cluster 5: MBP1, SWI4 and SWI6. The SBF complex (Swi4p-Swi6p) is a transcriptional activator that in concert with	MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair, controlling the transition to S phase \citep{simon2001serial,iyer2001genomic, aligianni2009fission}. 
 %	Inspection of the individual genes in cluster reveals that many are late G1 genes.
@@ -988,6 +988,7 @@ These regulatory proteins are found in different combinations across the cluster
 We briefly analyse clusters 9 and 16 in greater depth. We used the \texttt{org.Sc.sgd.db} package to find gene descriptions which are included in table \ref{tab:timecoursChIPchipFusedCl916}. Cluster 9 has strong association with MBP1 and some interactions with SWI6 in figure \ref{fig:timepointChIPchipFused}. The Mbp1-Swi6p complex, MBF, is associated with DNA replication \citep{iyer2001genomic}. In table \ref{tab:timecoursChIPchipFusedCl916} it can be seen that many of the genes are S-phase and specifically associated with DNA replication, repair and/or recombination. We see several genes that control the replication checkpoint, TOF1, MRC1 and RAD53 emerge \citep{bando2009csm3, lao2018yeast}. 
 
 IRR1 is sometimes named SCC3 \citep{toth1999yeast}. It forms the complex cohesin, containing Smc1p, Smc3p, Scc1p, and Scc3p, which is required for sister chromatid cohesion in mitotic cells \citep{klein1999central}. Sister chromatid cohesion is established during S-phase \citep{toth1999yeast}.
+Cohesin has many other rules, including transcription regulation, DNA repair, chromosome condensation, homolog pairing\citep{mehta2013cohesin}.
 
 Cluster 16 consists of genes whose products form the histones H1, H2A, H2B, H3 and H4 and then three others, GAS3, NRM1 and PDS1.  Histones are the chief protein components of chromatin \citep{fischle2003histone} and are important contributors to gene regulation \citep{bannister2011regulation}. NRM1 is transciprtional co-repressor of MBF-regulated gene expression acting at the transition from G1 to S phase \citep{de2006constraining, aligianni2009fission}. NRM1 is phosphorylated in response to DNA replication stress, promoting its disassociation from MBF \citep{de2008dna}. 
 

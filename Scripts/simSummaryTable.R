@@ -5,8 +5,8 @@ library(magrittr)
 
 setMyTheme()
 
-scenarios <- list.dirs("./Data", recursive = F, full.names = F)
-data_files <- list.files("./Data", recursive = T, full.names = T)
+scenarios <- list.dirs("./Data/Simulations/", recursive = F, full.names = F)
+data_files <- list.files("./Data/Simulations/", recursive = T, full.names = T, pattern = "*all_results.csv")
 n_files <- length(data_files)
 
 analysis_data <- summary_data <- vector("list", n_files) %>%
@@ -15,11 +15,15 @@ analysis_data <- summary_data <- vector("list", n_files) %>%
 models_of_interest <- c(
   "Bayesian (Pooled)",
   "Maximum likelihood (Mclust)",
+  "Consensus (10, 10)",
+  "Consensus (10, 50)",
+  "Consensus (10, 100)",
   "Consensus (100, 10)",
   "Consensus (100, 50)",
   "Consensus (100, 100)",
   "Consensus (10000, 10)",
-  "Consensus (10, 10)"
+  "Consensus (10000, 50)",
+  "Consensus (10000, 100)"
 )
 
 
@@ -37,16 +41,22 @@ for (i in 1:n_files) {
               Median_ari = median(ARI),
               SD_ari = sd(ARI))
   
-  ari_table[,i] <- curr_data$Mean_ari[match(curr_data$Model, models_of_interest)] %>% 
+  ari_table[,i] <- curr_data$Median_ari[match(models_of_interest, curr_data$Model)] %>% 
     round(digits = 3)
   
   sd_table[, i] <- curr_data$SD_ari[match(curr_data$Model, models_of_interest)] %>% 
     round(digits = 3)
 }
 
-colnames(ari_table) <- c("Irrelevant features 100", "Simple 2D", "Small N, large P")
-colnames(sd_table) <- c("Irrelevant features 100", "Simple 2D", "Small N, large P")
-ari_table[, c(2, 3, 1)]
+my_table <- ari_table[, c(3, 8, 9)]
+
+colnames(my_table) <- c("Irrelevant features 100", "Simple 2D", "Small N, large P")
+
+library(stargazer)
+stargazer(my_table)
+
+# colnames(sd_table) <- c("Irrelevant features 100", "Simple 2D", "Small N, large P")
+my_table[, c(2, 3, 1)]
 sd_table[, c(2, 3, 1)]
 
 

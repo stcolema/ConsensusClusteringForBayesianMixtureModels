@@ -100,10 +100,14 @@ ensemble_elbow_plot <- plt_df %>%
     legend.text = element_text(size = 10),
     legend.title = element_text(size = 12),
   ) +
-  scale_x_continuous(breaks = c(0, 5000, 10000)) 
+  scale_x_continuous(breaks = c(0, 5000, 10000))  +
+  theme(
+    legend.position = c(0.85, 0.8),
+    legend.direction = "vertical"
+    )
 
 ggsave("./SupplementaryMaterial/Images/Yeast/EnsembleChoicePlotAlt.png",
        plot = ensemble_elbow_plot,
        height = 6,
-       width = 8
+       width = 6
 )

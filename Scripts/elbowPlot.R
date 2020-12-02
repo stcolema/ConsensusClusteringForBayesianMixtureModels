@@ -81,8 +81,8 @@ ensemble_elbow_plot <- plt_df %>%
   geom_line() +
   geom_point() +
   labs(
-    title = "Yeast data",
-    subtitle = "Consensus clustering ensemble choice",
+    title = "Ensemble choice", # "Yeast data",
+    # subtitle = "Consensus clustering ensemble choice",
     x = "Chain depth",
     y = "Mean absolute difference of similarity",
     colour = "Number of chains"

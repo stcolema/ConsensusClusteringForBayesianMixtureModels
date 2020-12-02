@@ -429,23 +429,27 @@ p10 <- long_chipchip_data %>%
     axis.title.y = element_text(size = 13),
     axis.title.x = element_text(size = 13),
     strip.text.x = element_text(size = 13),
-    legend.text = element_text(size = 13)
+    legend.text = element_text(size = 13),
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank()
   ) +
   scale_x_continuous(labels = tfs_important, breaks = TF_breaks_used) +
   theme(axis.text.y = element_blank()) +
   labs(x = "Transcription Factor") +
   geom_vline(
     xintercept = long_chipchip_data$TF_num[match(tfs_important, long_chipchip_data$TF)],
-    colour = "red"
+    colour = "red",
+    lty = 2, 
+    alpha = 0.4
   )
 
 p9 + p10 +
   plot_layout(guides = "collect", widths = c(2, 5)) +
   plot_annotation(
-    title = "Consensus clustering",
-    subtitle = "Integrated clusters across Timecourse and ChIP-chip datasets",
+    title = "Integrated genes",  #"Consensus clustering",
+    subtitle = "Timecourse and ChIP-chip datasets",
     theme = theme(
-      plot.title = element_text(size = 18),
+      plot.title = element_text(size = 18, face = "bold"),
       plot.subtitle = element_text(size = 16)
     )
   )

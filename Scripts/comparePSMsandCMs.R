@@ -237,10 +237,14 @@ for (i in 1:n_scn) {
     cm_long_df$Method <- "Consensus clustering"
     cm_long_df$Model <- paste0("CC(", cm_long_df$R, ", ", cm_long_df$S, ")")
 
-    R_labels <- paste0("R = ", unique(R_used)) %>%
+    R_labels <- paste0("D = ", unique(R_used)) %>%
+    # R_labels <- c("1st iteration used", paste0(unique(R_used)[-1], "th iteration")) %>%
       set_names(unique(R_used))
 
-    S_labels <- paste0("S = ", unique(S_used)) %>%
+    # S_labels <- c("1 chain used", paste0(unique(S_used)[-1], " chains used")) %>%
+    #   set_names(unique(S_used))
+    
+    S_labels <- paste0("W = ", unique(S_used)) %>%
       set_names(unique(S_used))
 
     # factor(paste0(psm_long_df$Method, ": chain ", psm_long_df$Chain),

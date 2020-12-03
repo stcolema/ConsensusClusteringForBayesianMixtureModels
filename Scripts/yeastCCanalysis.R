@@ -44,7 +44,7 @@ setMyTheme()
 
 # Original data modelled
 data_dir <- "./Data/Yeast/Original_data/"
-datasets <- c("Timecourse", "ChIP-chip", "PPI")
+datasets <- c("Time course", "ChIP-chip", "PPI")
 data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
 orig_data <- data_files %>%
   lapply(read.csv, row.names = 1) %>%
@@ -361,7 +361,7 @@ names(param_labels) <- colnames(continuous_data$Samples[[1]])
 # Time series of the time course data separated out into predicted clusters
 
 # for(dataset in dataset_names){
-dataset <- "Timecourse"
+dataset <- "Time course"
 curr_inds <- which(alloc_data$Dataset == dataset)
 
 # The data to be plotted
@@ -399,7 +399,7 @@ for (i in curr_inds) {
       legend.text = element_text(size = 10.5)
     )
 
-  ggsave(paste0(save_dir, dataset, "TimeSeriesClusterR", r, "S", s, ".png"),
+  ggsave(paste0(save_dir, "TimeSeriesClusterD", r, "W", s, ".png"),
     plot = p_time_series,
     height = 12,
     width = 14
@@ -427,7 +427,7 @@ for (i in curr_inds) {
       legend.text = element_text(size = 10.5)
     )
 
-  ggsave(paste0(save_dir, dataset, "TimeSeriesClusterR", r, "S", s, "NoSingletons.png"),
+  ggsave(paste0(save_dir, "TimeSeriesClusterD", r, "W", s, "NoSingletons.png"),
     plot = p_time_series_no_singletons,
     height = 12,
     width = 14
@@ -435,11 +435,12 @@ for (i in curr_inds) {
 }
 
 # The CC(10001, 1000) analysis. This plot is used in the supplementary materials
-r <- alloc_data$R[118]
-s <- alloc_data$S[118]
+which_ensemble <- nrow(alloc_data) - 2
+r <- alloc_data$R[which_ensemble]
+s <- alloc_data$S[which_ensemble]
 
 plt_data_transformed <- plt_data %>%
-  mutate(Cluster = alloc_data$Cl[[118]]) %>%
+  mutate(Cluster = alloc_data$Cl[[which_ensemble]]) %>%
   add_count(Cluster) %>%
   pivot_longer(cols = -c(Gene, Cluster, n), values_to = "Expression") %>%
   mutate(Time = stringr::str_extract(name, "[:digit:]+"))
@@ -476,19 +477,27 @@ ggsave(paste0("./SupplementaryMaterial/Images/Yeast/TimeSeriesClusterR", r, "S",
 # Compare consensus matrices for the different ensembles
 
 # The labels of the variables
-R_labels <- paste0("R = ", unlist(R)) %>% set_names(unlist(R))
-S_labels <- paste0("S = ", unlist(S)) %>% set_names(unlist(S))
+R_labels <- paste0("D = ", unlist(R)) %>% set_names(unlist(R))
+S_labels <- paste0("W = ", unlist(S)) %>% set_names(unlist(S))
+r_plotted <- c(1, 101, 1001, 5001, 10001)
+s_plotted <- c(100, 500, 1000)
 
 # Iterate over each dataset and save a grid of heatmaps
 for (dataset in datasets) {
 
   # The indices and CMs of the tibble corresponding to the current dataset
-  curr_inds <- which(alloc_data$Dataset == dataset)
-  curr_cms <- alloc_data$CM[curr_inds]
+  curr_inds <- which(alloc_data$Dataset == dataset &
+                       alloc_data$R %in% r_plotted &
+                       alloc_data$S %in% s_plotted)
+  
+  # Subset the allocation data into that we're interested in plotting
+  .alloc <- alloc_data[curr_inds,] 
+  curr_cms <- .alloc$CM
+  n_models <- nrow(.alloc)
 
   # Find the order for the rows and oclumns of the consensus matrices based on
   # the largest & deepest ensemble (here Consensus(1001, 1000))
-  row_order <- findOrder(curr_cms[[n_ensembles]])
+  row_order <- findOrder(curr_cms[[n_models]])
 
   # Set up the re-ordered items (this will be used to align the data when in
   # long format)
@@ -496,7 +505,7 @@ for (dataset in datasets) {
 
   # Iterate over the different ensembles converting the consensus matrics to
   # long format and prepare them for ggplot
-  for (i in 1:n_ensembles) {
+  for (i in 1:n_models) {
     .cm <- curr_cms[[i]]
 
     .df <- .cm[row_order, row_order] %>%
@@ -513,8 +522,8 @@ for (dataset in datasets) {
       mutate(
         X = match(Gene_i, item_order),
         Y = N - match(Gene_j, item_order),
-        R = ensembles$R[i],
-        S = ensembles$S[i]
+        R = .alloc$R[i],
+        S = .alloc$S[i]
       )
 
     # Bind the data frames together
@@ -563,7 +572,13 @@ for (dataset in datasets) {
       strip.text.x = element_text(size = 10.5),
       legend.text = element_text(size = 10.5)
     )
-
+  
+  plt_save_file <- paste0(save_dir, dataset, "CMcomparison.png")
+  if(dataset == "Time course"){
+    plt_save_file <- paste0(save_dir, "Timecourse", "CMcomparison.png")
+  }
+  
+  
   # Save!
   ggsave(paste0(save_dir, dataset, "CMcomparison.png"),
     plot = p_cm,
@@ -609,7 +624,11 @@ for (l in 1:L) {
       legend.text = element_text(size = 10.5)
     )
 
-  ggsave(paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "CMcomparison.png"),
+  plt_save_file <- paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "CMcomparison.png")
+  if(dataset == "Time course"){
+    plt_save_file <- paste0("./SupplementaryMaterial/Images/Yeast/TimecourseCMcomparison.png")
+  }
+  ggsave(plt_save_file,
     plot = p,
     height = 8,
     width = 7
@@ -686,6 +705,8 @@ ensemble_elbow_plot <- plt_df %>%
     strip.text.x = element_text(size = 12),
     legend.text = element_text(size = 10),
     legend.title = element_text(size = 12),
+    legend.position = c(0.85, 0.8),
+    legend.direction = "vertical"
   ) +
   scale_x_continuous(breaks = c(0, 5000, 10000)) # +
   # geom_hline(yintercept = 30.305, lty = 2, colour = "light grey")
@@ -693,7 +714,7 @@ ensemble_elbow_plot <- plt_df %>%
 ggsave("./SupplementaryMaterial/Images/Yeast/EnsembleChoicePlotAlt.png",
        plot = ensemble_elbow_plot,
        height = 6,
-       width = 8
+       width = 6
 )
 
 plt_df %>%
@@ -722,7 +743,7 @@ plt_df %>%
     legend.title = element_text(size = 12),
   ) +
   scale_x_continuous(breaks = c(0, 5000, 10000)) +
-  geom_hline(yintercept = 30.305, lty = 2, colour = "light grey")
+  geom_hline(yintercept = 0.01, lty = 2, colour = "red")
 
 # === Elbow 2 ==================================================================
 

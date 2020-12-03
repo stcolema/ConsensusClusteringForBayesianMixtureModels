@@ -88,7 +88,7 @@ gewekeDF <- function(x,
 
 # Original data modelled
 data_dir <- "./Data/Yeast/Original_data/"
-datasets <- c("Timecourse", "ChIP-chip", "PPI")
+datasets <- c("Time course", "ChIP-chip", "PPI")
 data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
 orig_data <- data_files %>%
   lapply(read.csv, row.names = 1) %>%
@@ -535,7 +535,7 @@ ggsave("./SupplementaryMaterial/Images/Yeast/densityPlotReduced.png",
 # Time series of the time course data separated out into predicted clusters
 
 # for(dataset in dataset_names){
-dataset <- "Timecourse"
+dataset <- "Time course"
 curr_inds <- which(alloc_data$Dataset == dataset)
 
 # The data to be plotted
@@ -571,7 +571,7 @@ for (i in curr_inds) {
       legend.text = element_text(size = 10.5)
     )
 
-  ggsave(paste0(save_dir, dataset, "TimeSeriesClusterChain", chain, ".png"),
+  ggsave(paste0(save_dir, "TimeSeriesClusterChain", chain, ".png"),
     plot = p_time_series,
     height = 12,
     width = 14
@@ -582,16 +582,18 @@ for (i in curr_inds) {
 
 # Compare PSMs for the different chains
 # Reduce to OK chains
-alloc_data_reduced <- alloc_data[alloc_data$Seed %in% chains_to_keep, ]
-n_kept <- length(chains_to_keep)
+alloc_data_reduced <- alloc_data[alloc_data$Use_chain, ]
+# n_kept <- nrow(alloc_data_reduced)
 
 # Iterate over each dataset and save a grid of heatmaps
 for (dataset in datasets) {
 
   # The indices and CMs of the tibble corresponding to the current dataset
   curr_inds <- which(alloc_data_reduced$Dataset == dataset)
-  curr_psms <- alloc_data_reduced$PSM[curr_inds]
-  chains <- alloc_data_reduced$Seed[curr_inds]
+  .alloc <- alloc_data_reduced[curr_inds, ]
+  curr_psms <- .alloc$PSM
+  chains <- .alloc$Seed
+  n_kept <- length(chains)
 
   # Find the order for the rows and oclumns of the consensus matrices based on
   # the largest & deepest ensemble (here Consensus(1001, 1000))
@@ -686,7 +688,7 @@ psm_all <- psm_plt_data_all %>%
              ) +
   scale_fill_gradient(low = "white", high = "#146EB4") +
   labs(
-    title = "Yeast dataset",
+    title = "Multi-omics analysis",
     subtitle = "Posterior similarity matrices",
     x = "Gene",
     y = "Gene",

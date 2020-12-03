@@ -110,7 +110,7 @@ goOverRep <- function(cl, X, geneTable, universe = row.names(X), drop_na = NULL,
     # png(paste0(home_dir, cc_dir, cc_ver, "goEnrichmentCluster", k, ".png"))
     p <- dotplot(ego[[i]],
       showCategory = 10,
-      title = paste0("Timecourse: Enriched genes for cluster ", k)
+      title = paste0("Time course: Enriched genes for cluster ", k)
     )
     # p <- dotplot(ego[[38]], showCategory = 10, title = paste0("Timecourse: Enriched genes for cluster ", 38))
 
@@ -125,7 +125,7 @@ goOverRep <- function(cl, X, geneTable, universe = row.names(X), drop_na = NULL,
         labs(
           x = "Gene ratio in cluster",
           y = "Description",
-          title = "Timecourse data",
+          title = "Time course data",
           subtitle = paste0("Enriched genes for cluster ", k),
           caption = paste0("Cluster membership is ", N_k, " items.")
         )
@@ -133,7 +133,7 @@ goOverRep <- function(cl, X, geneTable, universe = row.names(X), drop_na = NULL,
 
       p_cc_upset <- enrichplot::upsetplot(ego[[i]], n = 10) +
         labs(
-          title = "Timecourse data",
+          title = "Time course data",
           subtitle = paste0("Enriched genes for cluster ", k),
           caption = paste0("Cluster membership is ", N_k, " items.")
         )
@@ -237,7 +237,7 @@ set.seed(1)
 
 # Original data modelled
 data_dir <- "./Data/Yeast/Original_data/"
-datasets <- c("Timecourse", "ChIP-chip", "PPI")
+datasets <- c("Time course", "ChIP-chip", "PPI")
 data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
 orig_data <- data_files %>%
   lapply(read.csv, row.names = 1) %>%
@@ -633,13 +633,19 @@ for (dataset in datasets) {
       )
 
 
-    ggsave(paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".png"),
+    file_name_1 <- paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".png")
+    file_name_2 <- paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, "Alt.png")
+    if(dataset == "Time course"){
+      file_name_1 <- paste0(save_dir, "TimecourseGOoverRepresentationComparison", ont, ".png")
+      file_name_2 <- paste0(save_dir, "TimecourseGOoverRepresentationComparison", ont, "Alt.png")
+    }
+    ggsave(file_name_1,
       p_comp,
       width = 14,
       height = 14
     )
 
-    ggsave(paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, "Alt.png"),
+    ggsave(file_name_2,
       p_comp_2,
       width = 14,
       height = 8

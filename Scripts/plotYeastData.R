@@ -36,7 +36,7 @@ setMyTheme()
 
 # Original data modelled
 data_dir <- "./Data/Yeast/Original_data/"
-datasets <- c("Timecourse", "ChIP-chip", "PPI")
+datasets <- c("Time course", "ChIP-chip", "PPI")
 data_files <- list.files(data_dir, full.names = T)[c(2, 1, 3)]
 orig_data <- data_files %>%
   lapply(read.csv, row.names = 1) %>%
@@ -48,7 +48,7 @@ save_dir <- "./SupplementaryMaterial/Images/Yeast/"
 timecourse_col_pal <- dataColPal()
 bin_col_pal <- simColPal()
 
-timecourse_breaks <- defineDataBreaks(orig_data$Timecourse, timecourse_col_pal)
+timecourse_breaks <- defineDataBreaks(orig_data$`Time course`, timecourse_col_pal)
 bin_breaks <- defineBreaks(bin_col_pal, lb = 0, ub = 1)
 
 col_pal <- list(timecourse_col_pal, bin_col_pal, bin_col_pal)
@@ -57,22 +57,22 @@ breaks <- list(timecourse_breaks, bin_breaks, bin_breaks)
 compareSimilarityMatricesAnnotated(matrices = orig_data, col_pal = col_pal, breaks = breaks)
 
 # for (dataset in datasets){
-N <- nrow(orig_data$Timecourse)
-item_names <- row.names(orig_data$Timecourse)
+N <- nrow(orig_data$`Time course`)
+item_names <- row.names(orig_data$`Time course`)
 
 # Set up the X and Y co-ordinates for the entries on the heatmap
-row_order <- findOrder(orig_data$Timecourse)
+row_order <- findOrder(orig_data$`Time course`)
 item_order <- item_names[row_order]
 
-timecourse_plt_data <- orig_data$Timecourse %>%
+timecourse_plt_data <- orig_data$`Time course` %>%
   rownames_to_column(var = "Item_i") %>%
   pivot_longer(-Item_i, values_to = "Value", names_to = "Timepoint") %>%
-  mutate(Dataset = "Timecourse",
+  mutate(Dataset = "Time course",
          Y = match(Item_i, item_order),
          X = as.numeric(str_remove_all(Timepoint, "X"))
          )
 
-if(prod(dim(orig_data$Timecourse)) != nrow(timecourse_plt_data)){
+if(prod(dim(orig_data$`Time course`)) != nrow(timecourse_plt_data)){
   stop("Timecourse: Mismatch in size. Data has lost information in transformation.\n")
 }
 
@@ -81,9 +81,9 @@ p_timecourse <- timecourse_plt_data %>%
   geom_tile() +
   scale_fill_gradient2(low = "#146EB4", mid = "white", high = "#FF9900") +
   labs(
-    title = "Timecourse",
+    title = "Time course",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),
-    x = "Timepoint",
+    x = "Time point",
     y = "Gene",
     fill = "Gene expression"
   ) +
@@ -118,9 +118,10 @@ if(prod(dim(orig_data$PPI)) != nrow(ppi_plt_data)){
 }
 
 p_ppi <- ppi_plt_data %>% 
-  ggplot(aes(x = X, y = Y, fill = Interaction)) +
+  ggplot(aes(x = X, y = Y, fill = factor(Interaction))) +
   geom_tile() +
-  scale_fill_gradient(low = "white", high = "#146EB4") +
+  scale_fill_manual(values=c("white", "#146EB4"), labels = c("No", "Yes")) +
+  # scale_fill_gradient(low = "white", high = "#146EB4") +
   labs(
     title = "PPI",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),
@@ -159,9 +160,10 @@ if(prod(dim(orig_data$`ChIP-chip`)) != nrow(chip_chip_plt_data)){
 # chip_chip_plt_data$Item_i %>% unique() %>% length()
 
 p_chipchip <- chip_chip_plt_data %>% 
-  ggplot(aes(x = X, y = Y, fill = Interaction)) +
+  ggplot(aes(x = X, y = Y, fill = factor(Interaction))) +
   geom_tile() +
-  scale_fill_gradient(low = "white", high = "#146EB4") +
+  scale_fill_manual(values=c("white", "#146EB4"), labels = c("No", "Yes")) +
+  # scale_fill_gradient(low = "white", high = "#146EB4") +
   labs(
     title = "ChIP-chip",
     # subtitle = paste0("Posterior similarity matrices (simulation ", j, ")"),

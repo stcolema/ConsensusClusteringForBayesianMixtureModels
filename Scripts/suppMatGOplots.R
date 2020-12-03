@@ -67,7 +67,12 @@ for (ont in c("MF", "BP", "CC")) {
         strip.text.x = element_text(size = 9)
       )
 
-    ggsave(paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "goEnrichmentComp", ont, ".png"),
+    go_supp_file <- paste0("./SupplementaryMaterial/Images/Yeast/", dataset, "goEnrichmentComp", ont, ".png")
+    if(dataset == "Time course"){
+      go_supp_file <- paste0("./SupplementaryMaterial/Images/Yeast/TimecoursegoEnrichmentComp", ont, ".png")
+    }
+    
+    ggsave(go_supp_file,
       plot = p_lst[[ont]][[dataset]],
       height = 6,
       width = 10
@@ -75,7 +80,7 @@ for (ont in c("MF", "BP", "CC")) {
   }
 }
 
-p1 <- p_lst[["MF"]]$Timecourse
+p1 <- p_lst[["MF"]]$`Time course`
 p2 <- p_lst[["MF"]]$`ChIP-chip`
 p3 <- p_lst[["MF"]]$PPI
 

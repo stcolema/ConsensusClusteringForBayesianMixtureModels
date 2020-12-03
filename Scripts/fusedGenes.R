@@ -376,7 +376,8 @@ p9 <- long_timecourse_data %>%
     axis.title.x = element_text(size = 13),
     strip.text.x = element_text(size = 13),
     legend.text = element_text(size = 13)
-  )
+  ) +
+  labs(x = "Time point")
 
 # We also want to highlight the TFs that define the strucutre in the ChIp-chip
 # dataset
@@ -419,9 +420,13 @@ TF_breaks_used <- long_chipchip_data$TF_num[match(tfs_important, long_chipchip_d
 # Now plot the ChIP-chip data with the important proteins highlighted
 p10 <- long_chipchip_data %>%
   filter(Cluster %in% cl_to_plt) %>%
-  ggplot(aes(x = TF_num, y = Gene, fill = Interaction)) +
+  ggplot(aes(x = TF_num, y = Gene, fill = factor(Interaction))) +
   geom_tile() +
-  scale_fill_gradient(low = "white", high = "#146EB4") +
+  scale_fill_manual(values=c("white", "#146EB4"), labels = c("No", "Yes")) +
+  # 
+  # ggplot(aes(x = TF_num, y = Gene, fill = Interaction)) +
+  # geom_tile() +
+  # scale_fill_gradient(low = "white", high = "#146EB4") +
   facet_wrap(~Cluster, ncol = 1, scales = "free_y") +
   theme(
     axis.text.x = element_text(size = 11.5),
@@ -435,7 +440,7 @@ p10 <- long_chipchip_data %>%
   ) +
   scale_x_continuous(labels = tfs_important, breaks = TF_breaks_used) +
   theme(axis.text.y = element_blank()) +
-  labs(x = "Transcription Factor") +
+  labs(x = "Transcription Factor", fill = "Interaction") +
   geom_vline(
     xintercept = long_chipchip_data$TF_num[match(tfs_important, long_chipchip_data$TF)],
     colour = "red",
@@ -446,8 +451,9 @@ p10 <- long_chipchip_data %>%
 p9 + p10 +
   plot_layout(guides = "collect", widths = c(2, 5)) +
   plot_annotation(
-    title = "Integrated genes",  #"Consensus clustering",
-    subtitle = "Timecourse and ChIP-chip datasets",
+    # title = "Integrated genes",  #"Consensus clustering",
+    title = "Time course and ChIP-chip datasets",
+    subtitle = "Clusters of genes that tend to have the same label in both datasets",
     theme = theme(
       plot.title = element_text(size = 18, face = "bold"),
       plot.subtitle = element_text(size = 16)

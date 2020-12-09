@@ -143,12 +143,12 @@ The directed acyclic graph (\textbf{DAG}) for this model is shown in figure \ref
 		%(k) edge[connect, bend right=30] (x_i)
 		;
 	\end{tikzpicture}
-	\caption{Directed acyclic graph for the mixture of Gaussians used.}
+	\caption{Directed acyclic graph for a mixture of Gaussians with independent features, as used in the simulation study.}
 	\label{fig:simpleMixNormalsDAG}
 \end{figure}
 
 \subsection{Integrative clustering}
-We are interested in the use of Consensus clustering for integrative methods. We used Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} as an example of a Bayesian integrative clustering method. MDI models dataset specific clusterings, in contrast to, for example, Clusternomics \citep{gabasova2017clusternomics} in which a \emph{global clustering} is inferred.
+We are interested in the use of consensus clustering for integrative methods. We used Multiple Dataset Integration \citep[\textbf{MDI}, ][]{kirk2012bayesian} as an example of a Bayesian integrative clustering method. MDI models dataset specific clusterings, in contrast to, for example, Clusternomics \citep{gabasova2017clusternomics} in which a \emph{global clustering} is inferred.
 
 %We use the implementation made by \citep{mason2016mdi} which produces MCMC samples of the allocation vector and is thus suited to our construction of Consensus clustering.
 
@@ -274,6 +274,12 @@ The consensus matrix is a symmetric matrix with the $(i, j)^{th}$ entry being th
 	}
 	\caption{Consensus clustering algorithm}
 \end{algorithm}
+
+To partition $X$ based upon the consensus matrix, we use the R function \texttt{maxpear} \citep{fritsch2012mcclust}. \texttt{maxpear} uses a sample average clustering, inferring this by maximising the quantity
+\begin{align}
+	\frac{\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) p_{ij} - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}{\frac{1}{2}\left[\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) + \sum_{i < j}p_{ij}\right] - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}
+\end{align}
+where $p_{ij}$ is the $(i,j)^{th}$ entry of the consensus matrix \citep{fritsch2009improved}.
 
 %\subsubsection{Consensus clustering of Bayesian mixture models}
 %Ensemble methods are rarely applied Bayesian models despite \cite{monti2003consensus} suggesting this. We believe that Bayesian methods are underexploited in the ensemble framework and propose applying consensus clustering to Bayesian mixture models. Our implementation of this is described in algorithm \ref{algorithm:CCforBayesianMixtures}.
@@ -435,6 +441,9 @@ We intend the scenarios to test different aspects of real data or to benchmark p
 	\item \emph{Small $N$, large $P$}: an investigation of behaviour when the number of features is far greater than the number of items.
 \end{itemize}
 
+\subsection{\texttt{Mclust}}
+We called \texttt{Mclust} using the default settings and a range of inputs for the choice of $K$. We used $K = (2, \ldots, \min(\frac{N}{2}, 50))$ to mirror the choice of $K_{max}=50$ used for the overfitted mixture models (the default in the software we used), with the bound of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. In the \emph{No structure} scenarios we extended to range to $K = (1 \ldots, 50)$ to include the correct structure as an option. The model choice was performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}. \texttt{Mclust} tries different covariance matrices and thus the model choice is not just between different values of $K$.
+
 \subsection{Bayesian analysis} \label{sec:simBayesianAnalysis}
 We use the implementation of Bayesian mixture models in C++ provided by \cite{mason2016mdi}. Rather than directly using a Dirichlet process \citep{ferguson1973bayesian} to infer the number of clusters or a mixture that grows and shrinks \citep[][]{richardson1997bayesian}, this implementation follows the logic of \cite{rousseau2011asymptotic} and \cite{van2015overfitting} using an overfitted mixture model to approximate a Dirichlet process. In overfitted mixture models, the number of components, $K_{max}$, included in the model is set to number far larger than the true number of clusters, $K$, present. 
 
@@ -456,7 +465,7 @@ $\hat{R}$ is expected to approach 1.0 if the set of chains are converged. Low $\
 
 We focused upon stationarity of the continuous variables as assesing convergence of the allocation labels is difficult due to label-switching. In our simulations the only recorded continuous variable is the concentration parameter of the Dirichlet distribution for the component weights. 
 
-We pooled the samples from the stationary chains and used these to form a PSM. This and the point estimate clustering found by applying the R function \texttt{maxpear} \citep{fritsch2012mcclust} to this PSM are used in model performance analysis in section \ref{sec:simModelPerformance}. \texttt{maxpear} attempts to find the clustering that maximises the Adjusted Rand Index to the true clustering by using an approximation of the expected clustering under the posterior, $\mathbb{E}(c|X)$, believing that this converges to the true clustering. A sample average clustering is used to approximate the expected clustering. This is estimated from the PSM by maximising
+We pooled the samples from the stationary chains and used these to form a PSM. This and the point estimate clustering found by applying the R function \texttt{maxpear}. In Bayesian inference, \texttt{maxpear} attempts to find the clustering that maximises the Adjusted Rand Index to the true clustering by using an approximation of the expected clustering under the posterior, $\mathbb{E}(c|X)$, believing that this converges to the true clustering. A sample average clustering is used to approximate the expected clustering. This is estimated from the PSM by maximising
 \begin{align}
 	\frac{\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) p_{ij} - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}{\frac{1}{2}\left[\sum_{i < j}\mathbb{I}(c_i^* = c_j^*) + \sum_{i < j}p_{ij}\right] - \sum_{i < j}\mathbb{I}(c_i^* = c_j^*)\sum_{i < j}p_{ij} / {N \choose 2}}
 \end{align}
@@ -506,9 +515,6 @@ We investigated a range of ensembles, using all combinations of chain depth, $D=
 \end{figure}
 
 
-\subsection{\texttt{Mclust}}
-We called \texttt{Mclust} using the default settings and a range of inputs for the choice of $K$. We used $K = (2, \ldots, \min(\frac{N}{2}, 50))$ to mirror the choice of $K_{max}=50$ used for the overfitted mixture models (the default in the software we used), with the bound of $\frac{N}{2}$ to avoid fitting 50 clusters in the \emph{Small $N$, large $P$} scenario where $N=50=K_{max}$. In the \emph{No structure} scenarios we extended to range to $K = (1 \ldots, 50)$ to include the correct structure as an option. The model choice was performed using the Bayesian Information Criterion \citep[][as implemented in \texttt{Mclust}]{schwarz1978estimating}. \texttt{Mclust} tries different covariance matrices and thus the model choice is not just between different values of $K$.
-
 % An example of each scenario may be seen in figure \ref{fig:genData}
 
 \subsection{Model performance} \label{sec:simModelPerformance}
@@ -540,7 +546,7 @@ In several scenarios \texttt{Mclust} performs the best under this metric (e.g. i
 
 For the ensembles there are two parameters changing between each model, the iteration used to provide the clustering in the ensemble, $D$, and the number of chains (and hence samples) used, $W$. In many of the scenarios we find that the benefit of increasing $D$ stabilises by approximately $D = 10$. We believe that in a low-dimensional dataset (such as \emph{2D}), or a highly informative dataset (such as \emph{Base case} or any of the higher dimensional scenarios with no irrelevant features where $\frac{\Delta \mu}{\sigma^2} \geq 1$) the chains quickly find a ``sensible" partition of the data and thus increasing the depth within the chain does not increase the probability that any partition sampled will be closer to the generating partition. For example in figure \ref{fig:simPrediction} in the \emph{Small $N$, large $P$} case, the distribution of the ARI across the ensembles for which $D\geq10$ and $W=1$ is nearly identical; this suggests that the chain is sampling a very similar partition again and again for 9,990 iterations (and possibly beyond based upon the PSMs shown in figure \ref{fig:simPSMsDisagreeExample}) and it is through adding more chains rather than using particularly long chains that we improve the ability to uncover the generating structure. 
 
-We also notice that even if the behaviour has not stabilised for $D$ that the ensemble can uncover meaningful structure. The ARI for the ensembles of short chains can be quite high (as is the case in many of the scenarios). The behaviour of the Consensus matrices also shows that low $D$ is not a disqualifier from meaningful inference even if longer chains would be ideal, a result that might be useful in real applications with large datasets and complex models. Consider the Consensus matrices in figure \ref{fig:simCMsIrr100}, it can be seen that the behaviour has not stabilised before $D=10000$ (and possibly there is still some benefit in increasing $D$ beyond this value), but the structure being uncovered when there is a sufficient number of chains and $D$ is small does correspond to the structure uncovered in the largest and deepest ensemble. We believe that the order in which components merge and items are co-clustered varies depending on initialisation, and thus if the chain is not sufficiently deep that all of the final mergings have occured that a sufficiently large ensemble can still perform meaningful inference of the subpopulation structure despite the poor performance of any individual model. Even though each learner probably has too many clusters for small $D$ the consensus among them will have less if the individual learners have low correlation between their partitions (something we might expect if the chains are stopped very early). This is why the entries of the consensus matrix for $D=100$ and $W=100$ in figure \ref{fig:simCMsIrr100} are more pale than in deeper ensembles; very few items correctly (possibly none) cocluster in every partition, it is only in observing the consensus that the global structure of interest emerges. Thus if there is some limit to the length of chains available for an analysis (e.g. computational or temporal constraints) than the inference obtained from the shorter chains can still be meaningful, with the caveat that the point clustering might have more clusters than the same analysis with longer chains would provide. Additional post-hoc merging of some clusters might be necessary in this case.
+We also notice that even if the behaviour has not stabilised for $D$ that the ensemble can uncover meaningful structure. The ARI for the ensembles of short chains can be quite high (as is the case in many of the scenarios). The behaviour of the consensus matrices also shows that low $D$ is not a disqualifier from meaningful inference even if longer chains would be ideal, a result that might be useful in real applications with large datasets and complex models. Consider the consensus matrices in figure \ref{fig:simCMsIrr100}, it can be seen that the behaviour has not stabilised before $D=10000$ (and possibly there is still some benefit in increasing $D$ beyond this value), but the structure being uncovered when there is a sufficient number of chains and $D$ is small does correspond to the structure uncovered in the largest and deepest ensemble. We believe that the order in which components merge and items are co-clustered varies depending on initialisation, and thus if the chain is not sufficiently deep that all of the final mergings have occured that a sufficiently large ensemble can still perform meaningful inference of the subpopulation structure despite the poor performance of any individual model. Even though each learner probably has too many clusters for small $D$ the consensus among them will have less if the individual learners have low correlation between their partitions (something we might expect if the chains are stopped very early). This is why the entries of the consensus matrix for $D=100$ and $W=100$ in figure \ref{fig:simCMsIrr100} are more pale than in deeper ensembles; very few items correctly (possibly none) cocluster in every partition, it is only in observing the consensus that the global structure of interest emerges. Thus if there is some limit to the length of chains available for an analysis (e.g. computational or temporal constraints) than the inference obtained from the shorter chains can still be meaningful, with the caveat that the point clustering might have more clusters than the same analysis with longer chains would provide. Additional post-hoc merging of some clusters might be necessary in this case.
 
 In contrast, when the dataset is sparse or contains many irrelevant features, we believe that deeper chains are required to reach this steady-state sampling where no single sample is expected to be better than any other (see the \emph{Irrelevant features ($P_n = 100$)} facet of figure \ref{fig:simPrediction}).
 %think that in the scenarios with less distinct clusters (i.e. where the number of irrelevant features, $P_n$, is large or $\frac{\Delta \mu}{\sigma^2} \leq 1$), 
@@ -678,7 +684,7 @@ Thus we performed an integrative analysis using MDI to avoid agressive assumptio
 
 We expect that the complexity of this data and model means that the time required for convergence of the MCMC algorithm would be very large. We avoid this problem by using consensus clustering of MDI, instead basing our final ensemble choice on the stopping rule described in the main paper. % laid out in section \ref{sec:stopping}.
 
-The datasets were modelled using a mixture of Gaussian processes in the time course  dataset and Multinomial distributions in the ChIP-chip and PPI datasets. To ensure that our mixture model is initially overfitted we set $K_{max}=275\approx\frac{N}{2}$, and following from this the point estimate was inferred from the consensus matrix using \texttt{maxpear} as in the Simulations except we set \texttt{k.max = 275}. 
+The datasets were modelled using a mixture of Gaussian processes in the time course  dataset and Multinomial distributions in the ChIP-chip and PPI datasets. To ensure that our mixture model is initially overfitted we set $K_{max}=275\approx\frac{N}{2}$, and following from this the point estimate was inferred from the consensus matrix using \texttt{maxpear} as in the simulated data except we set \texttt{k.max = 275}. 
 
 \subsection{Consensus clustering analysis} \label{sec:consensusClustering}
 
@@ -693,7 +699,7 @@ The datasets were modelled using a mixture of Gaussian processes in the time cou
 %\end{itemize}
 
 %\subsubsection{Ensemble choice}
-We include the Consensus matrices for each dataset for a range of ensembles for further evidence that the ensemble was stable for the $10,000^{th}$ iteration from 1,000 chains in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}. In these figures, there is no strong change between the Consensus matrices for $D=5001$ and $D=10001$.
+We include the consensus matrices for each dataset for a range of ensembles for further evidence that the ensemble was stable for the $10,000^{th}$ iteration from 1,000 chains in figures \ref{fig:timecourseCMs}, \ref{fig:chipchipCMs} and \ref{fig:ppiCMs}. In these figures, there is no strong change between the consensus matrices for $D=5001$ and $D=10001$.
 
 \begin{figure}
 	\centering
@@ -746,16 +752,17 @@ We include the Consensus matrices for each dataset for a range of ensembles for 
 %	\caption{} 
 %	\label{} 
 
-\subsubsection{Integrated genes}
-We wish to identify groups of genes that tend to be grouped together in multiple datasets. We use the concept of \emph{fused genes} proposed by \cite{savage2010discovering} and used by \cite{kirk2012bayesian}, but to avoid confusion due to other possible ideas of fused genes (e.g. those that contribute to a common protein complex, the behaviour of TFs upon a gene) we use the term \emph{integrated}. We define a gene to be integrated across some set of datasets if the gene has the same label in each of these datasets for at least half of the recorded clustering samples. Integrated genes are those most affected by the integrative aspect of the analysis and therefore we focus upon these in the following analysis. In our case we have the possible sets of:
+%\subsubsection{Integrated genes}
+We wish to identify groups of genes that tend to be grouped together in multiple datasets. We focus upon the genes that tend to have the same cluster label in multiple datasets, those which have a common label across some set of datasets in more than half of the observed clusterings, or $\hat{P}(c_{nl} = c_{nm}) > 0.5$, where $c_{nl}$ denotes the cluster label of gene $n$ in dataset $l$. This based upon the the concept of \emph{fused genes} proposed by \cite{savage2010discovering} and used by \cite{kirk2012bayesian}, but to avoid confusion due to other possible ideas of fused genes (e.g. those that contribute to a common protein complex, the behaviour of TFs upon a gene) we avoid this term. 
+These genes with common clustering across datasets are those most affected by the integrative aspect of the analysis and therefore we focus upon these in the our cluster analysis. In our case we have the possible sets of:
 \begin{itemize}
 	\item $\{$Time course$\}$, $\{$ChIP-chip$\}$, $\{$PPI$\}$,
 	\item $\{$Time course, ChIP-chip$\}$, $\{$Time course, PPI$\}$, $\{$ChIP-chip, PPI$\}$, and
 	\item $\{$Time course, ChIP-chip, PPI$\}$.
 \end{itemize}
-Any set of a single dataset is the trivial case that all genes are considered integrated.
+%Any set of a single dataset is the trivial case that all genes are considered integrated.
 
-The number of integrated genes between any two datasets is indicative of how strongly they influence eachother and is expected to align with the $\phi_{lm}$ parameters from the MDI model. We find the following number of unqiue genes integrated between each combination of datasets:
+The number of genes meeting this criteria between any two datasets is indicative of how strongly they influence each other and is expected to align with the $\phi_{lm}$ parameters from the MDI model. We find the following number of unique genes integrated between each combination of datasets:
 \begin{itemize}	
 	\item Time course + ChIP-chip + PPI: 56,
 	\item Time course + ChIP-chip: 205 (261 including the 56 integrated across all datasets),
@@ -767,7 +774,7 @@ The number of integrated genes between any two datasets is indicative of how str
 This shows that the time course  and ChIP-chip datasets contain very similar structure, the ChIP-chip and PPI datasets have some similarity but significantly less and the time course  and PPI datasets have less shared signal again. 
 %Note that the 56 genes that integrate across all three datasets must also integrate in all of the pair combinations of datasets.
 
-Compare this to the original analysis of this data in \cite{kirk2012bayesian}, where the number of integrated genes in each combination is:
+Compare this to the original analysis of this data in \cite{kirk2012bayesian}, where the number of such genes in each combination is:
 
 \begin{itemize}
 	\item Time course + ChIP-chip + PPI: 16,
@@ -859,11 +866,11 @@ Our analysis has found significantly more shared structure.
 
 \subsubsection{Time course ChIP-chip analysis}
 
-We focus upon the dataset pairing of time course + ChIP-chip within the integrative analysis as the combination with the greatest number of integrated genes. We show the integrated clusters that emerge in figure \ref{fig:timepointChIPchipFused}. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \citep{simon2001serial}.
+We focus upon the dataset pairing of time course + ChIP-chip within the integrative analysis as the combination with the greatest number of genes with shared clustering. We show these genes grouped by their inferred cluster in figure \ref{fig:timepointChIPchipFused}. In this plot we exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one. We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters shown here in table \ref{tab:fusedTFs}. Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression, namely MBP1, SWI4, SWI6, MCM1, FKH1, FKH2, NDD1, SWI5, and ACE2 \citep{simon2001serial}.
 
 %\subsubsection{TF table}
 	\begin{longtable}{@{\extracolsep{3pt}} ccp{85mm}} 
-	\caption{Table of transcription factors prominent in integrated clusters for the time course  and ChIP-chip datasets.}
+	\caption{Table of transcription factors prominent in clusters of genes with shared labels for a majority of samples for the time course  and ChIP-chip datasets.}
 	\\[-1.8ex]\hline 
 	\hline \\[-1.8ex] 
 	Gene & Name & Description \\ 
@@ -934,7 +941,7 @@ These regulatory proteins are found in different combinations across the cluster
 \begin{sidewaysfigure}
 	\centering
 	\includegraphics[scale=0.6]{./Images/Yeast/timecourseChIPchipFused.png}
-	\caption{The integrated clusters across the time course  and ChIP-chip datasets (as described in tbale \ref{tab:timecoursChIPchipFused}). We exclude the clusters with no interactions in the ChIP-chip dataset and include a red line for the Transcription factors that dominate the clustering structure in the ChIP-chip dataset.}
+	\caption{The clusters of genes with common labels across the time course  and ChIP-chip datasets (as described in tbale \ref{tab:timecoursChIPchipFused}). We exclude the clusters with no interactions in the ChIP-chip dataset and include a red line for the Transcription factors that dominate the clustering structure in the ChIP-chip dataset.}
 	\label{fig:timepointChIPchipFused}
 \end{sidewaysfigure}
 
@@ -1076,7 +1083,7 @@ YDR224C & HTB1 & 16 & Histone H2B; core histone protein required for chromatin a
 YBL002W & HTB2 & 16 & Histone H2B; core histone protein required for chromatin assembly and chromosome function; nearly identical to HTB1; Rad6p-Bre1p-Lge1p mediated ubiquitination regulates reassembly after DNA replication, transcriptional activation, meiotic DSB formation and H3 methylation \\ 
 YNR009W & NRM1 & 16 & Transcriptional co-repressor of MBF-regulated gene expression; Nrm1p associates stably with promoters via MCB binding factor (MBF) to repress transcription upon exit from G1 phase \\ 
 YDR113C & PDS1 & 16 & Securin; inhibits anaphase by binding separin Esp1p; blocks cyclin destruction and mitotic exit, essential for meiotic progression and mitotic cell cycle arrest; localization is cell-cycle dependent and regulated by Cdc28p phosphorylation \\   \hline \\ [-1.8ex] 
-\caption{Description of the genes that integrated across the time course  and ChIP-chip datasets from clusters 9 and 16.}
+\caption{Description of the genes with common labelling across the time course  and ChIP-chip datasets from clusters 9 and 16.}
 \label{tab:timecoursChIPchipFusedCl916}
 \end{longtable} 
 %
@@ -1407,12 +1414,12 @@ Again we focus upon stationarity of the continuous variables. In the implementat
 %	\caption{None of the chains appear to be standard normal in their distribution. Chain 4 behaves very strangely and is also dropped from the analysis. Of the remaining chains there is less clear distinctions, but chains 1, 2, and 6 appear most extreme and thus are dropped.}
 %	\label{fig:gewekePhiPlot}
 %\end{figure}
-We plot the Geweke-statistic for each chain in figure \ref{fig:gewekePlot}. No chain is perfectly behaved; as we cannot reduce to the set of stationary chains we thus exclude the \textbf{most} poorly behaved chains. Our lack of belief in the convergence of these chains is fortified by the behaviour of $\hat{R}$ (which can be seen in figure \ref{fig:gelmanPlot}) and the different distributions sampled for the $\phi_{lm}$ parameters shown in figure \ref{fig:bayesDensities}.
+We plot the Geweke-statistic for each chain in figure \ref{fig:gewekePlot}. No chain is perfectly behaved; as we cannot reduce to the set of stationary chains we thus exclude the most poorly behaved chains. Our lack of belief in the convergence of these chains is fortified by the behaviour of $\hat{R}$ (which can be seen in figure \ref{fig:gelmanPlot}) and the different distributions sampled for the $\phi_{lm}$ parameters shown in figure \ref{fig:bayesDensities}.
 %where the values of $\hat{R}$ do not drop below 1.25 for the $\phi$ parameters. Stable $\hat{R}$ is also too high, with several million more samples recommended before convergence is expected.
 \begin{figure}
 	\centering
 	\includegraphics[scale=1.0]{./Images/Yeast/Convergence/gelmanPlot.png}
-	\caption{The chains still appear to be unconverged with $\hat{R}$ remaining above 1.25 for the $\phi_{12}, \phi_{13}$ and $\phi_{23}$ parameters. Stable $\hat{R}$ is also too high with values of 1.049, 1.052 and 1.057 for $\phi_{12}, \phi_{13}$ and $\phi_{23}$ respectively.}
+	\caption{The chains still appear to be unconverged with $\hat{R}$ remaining above 1.25 for the $\phi_{12}, \phi_{13}$ and $\phi_{23}$ parameters. Stable $\hat{R}$ is also too high with values of 1.049, 1.052 and 1.057 for $\phi_{12}, \phi_{13}$ and $\phi_{23}$ respectively. The values of $\alpha_l$ cannot be seen due to the scaling of the $y$-axis.}
 	\label{fig:gelmanPlot}
 \end{figure}
 \begin{figure}
@@ -1474,11 +1481,11 @@ If we compare the distribution of sampled values for the $\phi$ parameters for t
 
 \newpage
 \subsection{GO term over-representation} \label{sec:goTermOverRep}
-We show the lack of disagreement between the long chains from section \ref{sec:yeastBayesianAnalysis} in a Gene Ontology (GO) term over-representation analysis. We estimated clusterings from the PSMs of the chains kept from section \ref{sec:yeastBayesianAnalysis} visualised in figure \ref{fig:yeastPSMs} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$) using the \texttt{maxpear} function from the R package \texttt{mcclust} \cite{fritsch2012mcclust} using default settings except for \texttt{k.max} which was set to 275 $\approx N/2$. To perform the GO term over-representation analysis we used the \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org}.
+We further show the lack of disagreement between the long chains from section \ref{sec:yeastBayesianAnalysis} in a Gene Ontology (GO) term over-representation analysis. We estimated clusterings from the PSMs of the chains kept from section \ref{sec:yeastBayesianAnalysis} visualised in figure \ref{fig:yeastPSMs} and the consensus matrix of the largest ensemble run (i.e. $CC(10001, 1000)$) using the \texttt{maxpear} function from the R package \texttt{mcclust} \cite{fritsch2012mcclust} using default settings except for \texttt{k.max} which was set to 275 $\approx N/2$. To perform the GO term over-representation analysis we used the \texttt{Bioconductor} packages \texttt{clusterProfiler} \citep{yu2012clusterProfiler}, \texttt{biomaRt} \citep{durinck2009mapping} and the annotation package \texttt{org.Sc.sgd.db} \citep{carlson2014org}.
 
 We conditioned the test on the background set of the 551 yeast genes in the data. The gene labelled YIL167W was not found in the annotation database and was dropped from the analysis leaving a background universe of 550 genes. A hypergeometric test was used to check if the number of genes associated with specific GO terms within a cluster was greater than expected by random chance. We corrected the $p$-values using the Benjamini-Hochberg correction \citep{benjamini1995controlling} and defined significance by a threshold of 0.01. We plotted the over-represented GO terms for the different clusterings within each dataset using the three different ontologies of ``Molecular function" (\textbf{MF}), ``Biological process" (\textbf{BP}) and ``Cellular component" (\textbf{CC}) (figures \ref{fig:yeastGOMF}, \ref{fig:yeastGOBP} and \ref{fig:yeastGOCC} respectively). 
 
-As we expect based upon the disagreement shown in figure \ref{fig:densityComparison}, we find that the Bayesian chains have very significant disagreements between eachother; there is no consensus on the results with many terms enriched in one or two chains. However, the consensus clustering finds many of the terms common to all of the long chains. This is what we would expect based upon the similarity of the $\phi_{lm}$ distribution in the ensemble and the pooled long chains. Consensus clustering also finds some terms with low $p$-values common to a majority of chains (such as DNA helicase activity in the MF ontology for the time course  dataset) and a small number of GO terms unique to itself. These terms that no long chain find are normally related to other terms already over-represented within either the consensus clustering or a number of the long chains. For example, the transmembrane transporter activity and transporter activity terms uncovered by the ensemble in the time course  dataset are related to terms found across 3 of the chains and by consensus clustering (specifically transferase activity and phosphotransferase). 
+As we expect based upon the disagreement shown in figure \ref{fig:densityComparison}, we find that the Bayesian chains have very significant disagreements between each other; there is no consensus on the results with many terms enriched in one or two chains. However, the consensus clustering finds many of the terms common to all of the long chains. This is what we would expect based upon the similarity of the $\phi_{lm}$ distribution in the ensemble and the pooled long chains. Consensus clustering also finds some terms with low $p$-values common to a majority of chains (such as DNA helicase activity in the MF ontology for the time course  dataset) and a small number of GO terms unique to itself. These terms that no long chain find are normally related to other terms already over-represented within either the consensus clustering or a number of the long chains. For example, the transmembrane transporter activity and transporter activity terms uncovered by the ensemble in the time course  dataset are related to terms found across 3 of the chains and by consensus clustering (specifically transferase activity and phosphotransferase). 
 
 %We argue that the final partition from consensus clustering is more consistent than any of the individual long chains, agreeing where the chains agree and providing sensible differences to any given chain.
 

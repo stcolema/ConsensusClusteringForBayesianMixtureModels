@@ -1,0 +1,19 @@
+Changed directory to /rds/user/sdc56/hpc-work/Scripts/ConsensusInference/YeastData/SLURM.
+
+JobID: 29539253
+======
+Time: Thu  1 Oct 18:19:16 BST 2020
+Running on master node: cpu-e-583
+Current directory: /rds/user/sdc56/hpc-work/Scripts/ConsensusInference/YeastData/SLURM
+Time allocated: 
+
+Nodes allocated:
+================
+cpu-e-583
+
+numtasks=1, numnodes=1, mpi_tasks_per_node=1 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+/home/sdc56/hpc_stuff/scripts/mdipp-1.0.1/mdipp  GP /home/sdc56/rds/hpc-work/Input_data/Yeast_data/Reduced/Granovskaia_time_course_551.csv M /home/sdc56/rds/hpc-work/Input_data/Yeast_data/Reduced/harbison_marina.csv M /home/sdc56/rds/hpc-work/Input_data/Yeast_data/Reduced/ppi.csv -n 1001 -t 100 -s 207 -c 275 > /home/sdc56/rds/hpc-work/MDI_output/YeastData/Consensus/ConsensusYeastN1001T100Seed207K275.csv
+

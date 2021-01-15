@@ -1,5 +1,21 @@
 \PassOptionsToPackage{utf8}{inputenc}
-\documentclass{bioinfo}
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\newtheorem{definition}{Definition}
 
 \usepackage[]{algorithm2e}
 
@@ -11,27 +27,66 @@
 \usetikzlibrary{arrows}
 \usetikzlibrary{fit,positioning, backgrounds}
 
+%%% BibTex packages (url for website references)
+\usepackage[english]{babel}
+\usepackage[round]{natbib}
 
-\copyrightyear{2020} \pubyear{2020}
 
-\access{Advance Access Publication Date: Day Month Year}
-\appnotes{Manuscript Category}
+%%% Multipage tables
+\usepackage{longtable}
+
+% line numbers
+\usepackage{lineno}
+\linenumbers
+
+\title{Consensus clustering for Bayesian mixture models}
+\author{Stephen Coleman\,$^{\text{\sfb 1}*}$, Paul DW Kirk\,$^{\text{\sfb 1, \sfb 2}\dagger}$ and Chris Wallace\,$^{\text{\sfb 1,\sfb 2}\dagger}$}
+
+\author{
+	Stephen Coleman$^1$ \\
+	\texttt{stephen.coleman@mrc-bsu.cam.ac.uk} \\
+	%% examples of more authors
+	\And
+	Paul D.W.~Kirk$^{1,2, *}$ \\
+	\texttt{paul.kirk@mrc-bsu.cam.ac.uk} \\
+	\AND
+	Chris Wallace$^{1,2, *}$ \\
+	\texttt{cew54@cam.ac.uk} \\ 
+	\vspace{1cm} \\
+	$^1$ MRC Biostatistics Unit\\
+	$^2$ Cambridge Institute of Therapeutic Immunology \& Infectious Disease \\
+	University of Cambridge, U.K. \\
+	$^*$ These authors provided an equal contribution.
+}
 
 \begin{document}
-\firstpage{1}
-
-\subtitle{Systems biology}
-
-\title[Consensus clustering for Bayesian mixture models]{Consensus clustering for Bayesian mixture models}
-\author[Coleman \textit{et~al}.]{Stephen Coleman\,$^{\text{\sfb 1}*}$, Paul DW Kirk\,$^{\text{\sfb 1, \sfb 2}\dagger}$ and Chris Wallace\,$^{\text{\sfb 1,\sfb 2}\dagger}$}
-\address{$^{\text{\sf 1}}$MRC Biostatistics Unit, University of Cambridge, Cambridge, CB2 0SR, United Kingdom and \\
-$^{\text{\sf 2}}$Department of Medicine, University of Cambridge, Cambridge, CB2 0AW, United Kingdom.}
-
-\corresp{$^\ast$To whom correspondence should be addressed. \newline $\dagger$ These authors provided an equal contribution.}
-
-\history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
-
-\editor{Associate Editor: XXXXXXX}
+	
+	\maketitle
+	
+	\begin{abstract}
+		Cluster analysis is an integral part of precision medicine and systems biology, used to define groups of patients or biomolecules. However, problems such as choosing the number of clusters and issues with high dimensional data arise consistently. An ensemble approach, such as consensus clustering, can overcome some of the difficulties associated with high dimensional data, frequently exploring more relevant clustering solutions than individual models. Another tool for cluster analysis, Bayesian mixture modelling, has alternative advantages, including the ability to infer the number of clusters present and extensibility. 
+		%modelling various data types through different choices of densities.
+		However, inference of these models is often performed using Markov-chain Monte Carlo (MCMC) methods which can suffer from problems such as poor exploration of the posterior distribution and long runtimes.
+		%, when applied to high dimensional data.
+		This makes applying Bayesian mixture models and their extensions to 'omics data challenging. We apply
+		% the clustering ensemble method, 
+		consensus clustering to Bayesian mixture models to address these problems. 
+		% from clustering complex data.\\ % and are severely under-utilised within ensembles. 
+		\\
+		% Bayesian mixture models have attractive features and been successfully applied in a diverse range of settings. Inference of these models is normally performed using Markov-chain Monte Carlo (MCMC) methods. In high dimensions MCMC methods often explore a limited range of partitions, with a lack of overlap between chains (i.e. a lack of convergence) frequently present.\\
+%		\textbf{Results:} 
+		%We investigate the performance of this approach in simulations, comparing it to Bayesian inference of the same models and \texttt{Mclust}, a popular implementation of MLE inference of mixture models in R. 
+		Consensus clustering of Bayesian mixture models successfully finds the generating structure in our simulation study and captures multiple modes in the likelihood surface. This approach also offers significant reductions in runtime compared to traditional Bayesian inference when a parallel environment is available. We propose a heuristic to decide upon ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integrative analyses, showing consensus clustering can be applied to any MCMC-based clustering method, not just mixture models. We from an integrative analysis of three 'omics datasets for budding yeast and find clusters of co-expressed genes with shared regulatory proteins. We validate these clusters using data external to the analysis. We also uncover novel biology, finding evidence for a more direct role for the GAS3 gene in DNA replication. This demonstrates the potential of using consensus clustering in multi-omics studies.
+		% and offers improvements in runtime in a parallel environment and better exploration of clustering space. 
+		\\
+		% compare this to inference performed using MCMC methods and also to \texttt{mclust}, a popular mixture model R package. We show that CC can be extended to Bayesian integrative clustering models. CC is then demonstrated on real datasets in both the single dataset and multiple dataset context. CC is shown to capture more modes in the clustering distribution than either the maximum-likelihood estimate (MLE) or any individual Markov chain. CC also reduces the computation time required when a parallel environment is present compared to Bayesian inference. \\
+		%\textbf{Availability:} www.github.com/stcolema/ccbm \\
+%		\textbf{Contact:} \href{stephen.coleman@mrc-bsu.cam.ac.uk}{stephen.coleman@mrc-bsu.cam.ac.uk}\\
+%		\textbf{Supplementary information:}
+		The code and data from this paper are available at \\ \texttt{https://github.com/stcolema/ConsensusClusteringForBayesianMixtureModels}.
+	\end{abstract}
+	
+	\maketitle
 
 %\abstract{\textbf{Motivation:} 
 %Ensemble  methods  have  been  highly  successful  in  many  applications. They frequently describe multiple feasible results with more ease than any individual learner.  ensemble methods may offer computational gains, using many independent, weak learners that may be run in parallel and thus faster than a comprehensive individual model. Bayesian mixture models are powerful and flexible tools for cluster analysis, enabling inference of the number of clusters present and modelling various data types through different choices of densities. However, inference is often performed using Markov-chain Monte Carlo methods which can suffer from problems, such as poor exploration of the posterior distribution and long runtimes, when applied ot high dimensional data. This makes applying Bayesian mixture models and their extensions to modern biomedical data a difficult matter. We apply the clustering ensemble method,consensus clustering, to Bayesian mixture models to address or sidestep problems with applying these methods to complex data.
@@ -39,50 +94,48 @@ $^{\text{\sf 2}}$Department of Medicine, University of Cambridge, Cambridge, CB2
 %Consensus clustering of Bayesian mixture models finds generating structure in our simulation study. This approach successfully captures multiple modes in the likelihood surface and offers significant reductions in runtime when a parallel environment is available compared to use of a single long chain for traditional Bayesian inference. We propose a heuristic to decide upon the ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integra-tive analyses, on three ’omics datasets for the cell-cycle of budding yeast. We find clusters of genes that are co-expressed and have common regulatory proteins. These results show that consensus clusteringcan also be applied to more complex extensions of mixture models.
 %}
 
-\abstract{\textbf{Motivation:} 
-Cluster analysis is an integral part of precision medicine and systems biology,
-used to define groups of patients or biomolecules.
-%and plays a role in more general analyses.
-% and data exploration. 
-However, problems such as choosing the number of clusters and issues with high dimensional data arise consistently. An ensemble approach, such as consensus clustering, can overcome some of the difficulties associated with high dimensional data, frequently exploring more relevant clustering solutions than individual models. Another tool for cluster analysis, Bayesian mixture modelling, has alternative advantages, including the ability to infer the number of clusters present and extensibility. 
-%modelling various data types through different choices of densities.
-However, inference of these models is often performed using Markov-chain Monte Carlo (MCMC) methods which can suffer from problems such as poor exploration of the posterior distribution and long runtimes.
-%, when applied to high dimensional data.
-This makes applying Bayesian mixture models and their extensions to 'omics data challenging. We apply
-% the clustering ensemble method, 
-consensus clustering to Bayesian mixture models to address these problems. 
-% from clustering complex data.\\ % and are severely under-utilised within ensembles. 
-\\
-% Bayesian mixture models have attractive features and been successfully applied in a diverse range of settings. Inference of these models is normally performed using Markov-chain Monte Carlo (MCMC) methods. In high dimensions MCMC methods often explore a limited range of partitions, with a lack of overlap between chains (i.e. a lack of convergence) frequently present.\\
-\textbf{Results:} 
-%We investigate the performance of this approach in simulations, comparing it to Bayesian inference of the same models and \texttt{Mclust}, a popular implementation of MLE inference of mixture models in R. 
-Consensus clustering of Bayesian mixture models successfully finds generating structure in our simulation study and captures multiple modes in the likelihood surface. This approach also offers significant reductions in runtime compared to
-% use of a single long chain for 
-traditional Bayesian inference when a parallel environment is available. We propose a heuristic to decide upon ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integrative analyses, on three 'omics datasets for budding yeast. We find clusters of genes that are co-expressed and have common regulatory proteins which we validate using external knowledge, showing consensus clustering can be applied to any MCMC-based clustering method.
-% and offers improvements in runtime in a parallel environment and better exploration of clustering space. 
-\\
-% compare this to inference performed using MCMC methods and also to \texttt{mclust}, a popular mixture model R package. We show that CC can be extended to Bayesian integrative clustering models. CC is then demonstrated on real datasets in both the single dataset and multiple dataset context. CC is shown to capture more modes in the clustering distribution than either the maximum-likelihood estimate (MLE) or any individual Markov chain. CC also reduces the computation time required when a parallel environment is present compared to Bayesian inference. \\
-%\textbf{Availability:} www.github.com/stcolema/ccbm \\
-\textbf{Contact:} \href{stephen.coleman@mrc-bsu.cam.ac.uk}{stephen.coleman@mrc-bsu.cam.ac.uk}\\
-\textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online.}
-
-\maketitle
+%\abstract{\textbf{Motivation:} 
+%Cluster analysis is an integral part of precision medicine and systems biology,
+%used to define groups of patients or biomolecules.
+%%and plays a role in more general analyses.
+%% and data exploration. 
+%However, problems such as choosing the number of clusters and issues with high dimensional data arise consistently. An ensemble approach, such as consensus clustering, can overcome some of the difficulties associated with high dimensional data, frequently exploring more relevant clustering solutions than individual models. Another tool for cluster analysis, Bayesian mixture modelling, has alternative advantages, including the ability to infer the number of clusters present and extensibility. 
+%%modelling various data types through different choices of densities.
+%However, inference of these models is often performed using Markov-chain Monte Carlo (MCMC) methods which can suffer from problems such as poor exploration of the posterior distribution and long runtimes.
+%%, when applied to high dimensional data.
+%This makes applying Bayesian mixture models and their extensions to 'omics data challenging. We apply
+%% the clustering ensemble method, 
+%consensus clustering to Bayesian mixture models to address these problems. 
+%% from clustering complex data.\\ % and are severely under-utilised within ensembles. 
+%\\
+%% Bayesian mixture models have attractive features and been successfully applied in a diverse range of settings. Inference of these models is normally performed using Markov-chain Monte Carlo (MCMC) methods. In high dimensions MCMC methods often explore a limited range of partitions, with a lack of overlap between chains (i.e. a lack of convergence) frequently present.\\
+%\textbf{Results:} 
+%%We investigate the performance of this approach in simulations, comparing it to Bayesian inference of the same models and \texttt{Mclust}, a popular implementation of MLE inference of mixture models in R. 
+%Consensus clustering of Bayesian mixture models successfully finds generating structure in our simulation study and captures multiple modes in the likelihood surface. This approach also offers significant reductions in runtime compared to
+%% use of a single long chain for 
+%traditional Bayesian inference when a parallel environment is available. We propose a heuristic to decide upon ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integrative analyses, on three 'omics datasets for budding yeast. We find clusters of genes that are co-expressed and have common regulatory proteins which we validate using external knowledge, showing consensus clustering can be applied to any MCMC-based clustering method.
+%% and offers improvements in runtime in a parallel environment and better exploration of clustering space. 
+%\\
+%% compare this to inference performed using MCMC methods and also to \texttt{mclust}, a popular mixture model R package. We show that CC can be extended to Bayesian integrative clustering models. CC is then demonstrated on real datasets in both the single dataset and multiple dataset context. CC is shown to capture more modes in the clustering distribution than either the maximum-likelihood estimate (MLE) or any individual Markov chain. CC also reduces the computation time required when a parallel environment is present compared to Bayesian inference. \\
+%%\textbf{Availability:} www.github.com/stcolema/ccbm \\
+%\textbf{Contact:} \href{stephen.coleman@mrc-bsu.cam.ac.uk}{stephen.coleman@mrc-bsu.cam.ac.uk}\\
+%\textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online and code at \textit{https://github.com/stcolema/ConsensusClusteringForBayesianMixtureModels}.}
+%
+%\maketitle
 
 \section{Introduction}
 
 %\subsection{Why cluster?}
 From defining a taxonomy of disease to creating molecular sets, grouping items can help us to understand and make decisions using complex biological data. For example, grouping patients based upon disease characteristics and personal omics data may allow the identification of more homogeneous subgroups, enabling stratified medicine approaches. Defining and studying molecular sets can improve our understanding of biological systems as these sets are more interpretable than their constituent members \citep{hejblum2015time}, and study of their interactions and perturbations may have ramifications for diagnosis and drug targets \citep{bai2013strategic, emmert2014gene}. 
-
 %allows the reaction and progression of individuals within a cluster to inform treatment decisions about other members of the same group. 
-
-
 %Clustering data is about maximising the quantity of relevant data for each individual within a specific analysis, reducing from the complexity of the entire set without contracting to the individual level. The clustering approximates complex variation within the dataset, enabling local downstream analysis and decisions upon each group rather than at the global level. 
-
 %\subsection{Why model-based clustering?}
-The act of identifying such groups is referred to as “cluster analysis”. Traditional methods such as $K$-means clustering \citep{lloyd1982least, forgy1965cluster} or hierarchical clustering condition upon a user inputted choice of $K$, the number of occupied clusters present.  These methods are often heuristic in nature, relying on rules of thumb to decide upon a final model choice. For example, different choices of $K$ are compared under some metric such as silhouette or the within-cluster sum of squared errors (\textbf{SSE}) as a function of $K$. For $K$-means clustering, its sensitivity to initialisation means multiple runs are often used in practice, with that which minimises SSE used \citep{arthur2006k}. This problem arises as the algorithm has no guarantees on finding the global minimum of SSE.
+The act of identifying such groups is referred to as “cluster analysis”. Traditional methods such as $K$-means clustering \citep{lloyd1982least, forgy1965cluster} or hierarchical clustering condition upon a fixed choice of $K$, the number of clusters.  These methods are often heuristic in nature, relying on rules of thumb to decide upon a final model choice. For example, different choices of $K$ are compared under some metric such as silhouette or the within-cluster sum of squared errors (\textbf{SSE}) as a function of $K$. For $K$-means clustering, its sensitivity to initialisation means multiple runs are often used in practice, with that which minimises SSE used \citep{arthur2006k}. This problem arises as the algorithm has no guarantees on finding the global minimum of SSE.
 
 %\subsection{Why Bayesian models?}
-In many analyses or decision-making processes, quantifying confidence in the clustering can be of interest. Returning to the stratified medicine example of clustering patients, there might be individuals with almost equal probability of being allocated between several clusters which might influence decisions made.
+In many analyses
+%or decision-making processes, 
+quantifying confidence in the clustering can be of interest. Returning to the stratified medicine example of clustering patients, there might be individuals with almost equal probability of being allocated between several clusters which might influence decisions made.
 %Knowing which individuals have uncertain membership could strongly influence decisions about treatment. 
 However, many clustering algorithms provide only a point clustering.
 % and thus one is no wiser about which individuals are boundary members of clusters. 
@@ -93,7 +146,7 @@ Ensemble methods offer a solution to the problems of sensitivity to initialisati
 
 \cite{monti2003consensus} proposed some methods for choosing $K$ using the consensus matrix, but this remains a problem in the methods mentioned so far. An alternative clustering framework, model-based clustering or \emph{mixture models}, embeds the cluster analysis within a formal, statistical framework \citep{fraley2002model}. This means that models can be compared formally, and problems such as the choice of $K$ can be addressed as a model selection problem with all the associated tools. Mixture models are also attractive, as they have great flexibility in the type of data they can be applied to due to different choice of densities.
 
-Furthermore, \emph{Bayesian mixture models} can treat $K$ as a random variable that is inferred from the data and thus the final clustering is not conditional upon a user chosen value, but $K$ is jointly modelled along with the clustering. Such inference can be performed through use of a Dirichlet Process \citep{ferguson1973bayesian}, a mixture of finite mixture models \citep{richardson1997bayesian, miller2018mixture} or an over-fitted mixture model \citep{rousseau2011asymptotic, van2015overfitting}. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles \citep{medvedovic2002bayesian}, cell types in flow cytometry \citep{chan2008statistical, hejblum2019sequential} or scRNAseq experiments \citep{prabhakaran2016dirichlet}, and estimating protein localisation \citep{crook2018bayesian}. Bayesian mixture models can be extended to jointly model the clustering across multiple datasets \citep{kirk2012bayesian, gabasova2017clusternomics}. More details of Bayesian mixture models and an example of an extension to an integrative setting can be found in section 2 of the Supplementary Material.
+Furthermore, \emph{Bayesian mixture models} can treat $K$ as a random variable that is inferred from the data. The final clustering is not conditional upon a user chosen value, but $K$ is jointly modelled along with the clustering. Such inference can be performed through use of a Dirichlet Process \citep{ferguson1973bayesian}, a mixture of finite mixture models \citep{richardson1997bayesian, miller2018mixture} or an over-fitted mixture model \citep{rousseau2011asymptotic}. These models and their extensions have a history of successful application to a diverse range of biological problems such as finding clusters of gene expression profiles \citep{medvedovic2002bayesian}, cell types in flow cytometry \citep{chan2008statistical, hejblum2019sequential} or scRNAseq experiments \citep{prabhakaran2016dirichlet}, and estimating protein localisation \citep{crook2018bayesian}. Bayesian mixture models can be extended to jointly model the clustering across multiple datasets \citep{kirk2012bayesian, gabasova2017clusternomics} (section 2 of the Supplementary Material).
 
 %The most common models where $K$ is inferred are the mixture of finite mixtures (\citealp{miller2018mixture}, frequently implemented using Reversible Jump MCMC moves via \citealp{richardson1997bayesian}), the Dirichlet process \citep{ferguson1973bayesian, neal2000markov} or the overfitted mixture model \citep{van2015overfitting}.
 
@@ -168,11 +221,12 @@ Furthermore, \emph{Bayesian mixture models} can treat $K$ as a random variable t
 %\end{itemize}
 
 %\subsection{Problem}
-Inference may be performed upon Bayesian mixture models using variational inference \citep[\textbf{VI},][]{blei2006variational}.
+Variational inference \citep[\textbf{VI},][]{blei2006variational} may be used to perform approximate inference of Bayesian mixture models \citep{martin2020computing}. However,
 % or the sequential updating and greedy search \citep[\textbf{SUGS},][]{wang2011fast, zhang2014sequential, crook2019fast}.
-While VI is powerful, ``it is not yet well understood'' \citep{blei2017variational}. Furthermore, VI can struggle with multi-modality, underestimates the variance in the posterior distribution \citep{two2011turner} and it has been shown to have a very computationally heavy initialisation cost to have good results \citep{wang2011fast}. Implementation is difficult, requiring either complex derivations \citep[see the Appendix Supplementary Methods of][for an example]{argelaguet2018multi} or black-box, approximate solutions \citep{kucukelbir2017automatic}.
+while VI is powerful, ``it is not yet well understood'' \citep{blei2017variational}, can struggle with multi-modality, underestimates the variance in the posterior distribution \citep{two2011turner} and it has been shown to have a very computationally heavy initialisation cost to have good results \citep{wang2011fast}. Implementation is difficult, requiring either complex derivations \citep[see the Appendix Supplementary Methods of][for an example]{argelaguet2018multi} or black-box, approximate solutions \citep{kucukelbir2017automatic}.
 
-However, Markov chain Monte Carlo (MCMC) methods are the most popularly method for Bayesian inference. In Bayesian clustering methods, MCMC methods are used to construct a chain of clusterings, and then an assessment of the convergence of this chain is made, to determine if its behaviour aligns with the expected asymptotic theory. This chain of samples will converge to the posterior distribution of the Bayesian model and explore its entire support given an infinite runtime. However, in practice problems arise. Individual chains often fail to explore the full support of the posterior distribution \citep[an example of different chains becoming trapped in a single mode of the likelihood surface can be seen in the Supplementary Materials of ][]{strauss2020gpseudoclust} and experience slow runtimes. Some MCMC methods make efforts to overcome the problem of exploration, often at the cost of increased computational cost per iteration. For a description of some of the problems and attempted solutions for MCMC methods, both generally and in clustering, see \cite{robert2018accelerating, yao2020stacking, chandra2020bayesian}. 
+However, it is Markov chain Monte Carlo (MCMC) methods that remain the most popular method for Bayesian inference. In Bayesian clustering methods, MCMC methods are used to construct a chain of clusterings, and then an assessment of the convergence of this chain is made, to determine if its behaviour aligns with the expected asymptotic theory. This chain of samples will converge to the posterior distribution of the Bayesian model and explore its entire support given an infinite runtime. However, in practice problems arise. Individual chains often fail to explore the full support of the posterior distribution \citep[an example of different chains becoming trapped in a single mode of the likelihood surface can be seen in the Supplementary Materials of ][]{strauss2020gpseudoclust} and experience slow runtimes. Some MCMC methods make efforts to overcome the problem of exploration, often at the cost of increased computational cost per iteration. See, e.g., \cite{robert2018accelerating, yao2020stacking} for examples of problems and attempted solutions for MCMC methods.
+%For a description of some of the problems and attempted solutions for MCMC methods, both generally and in clustering, see \cite{robert2018accelerating, yao2020stacking, chandra2020bayesian}. 
 
 We propose that applying consensus clustering to Bayesian mixture models can overcome some of the issues endemic in high dimensional Bayesian clustering. \cite{monti2003consensus} suggest this application as part of their original paper, but no investigation has been attempted to our knowledge. This ensemble approach  sidesteps the problems of convergence associated MCMC methods and offers computational gains through using shorter chains run in parallel. Furthermore, this approach could be directly used on any existing MCMC based implementation of Bayesian mixture models or their extensions and would avoid the re-implementation process that changing to newer MCMC methods or VI would entail.
 
@@ -409,9 +463,7 @@ We apply consensus clustering to MCMC based Bayesian clustering models using the
 	}
 	\caption{Consensus clustering for Bayesian mixture models. }
 \end{algorithm}
-Our application of consensus clustering has two main parameters at the ensemble level, the chain depth, $D$, and ensemble width, $W$. 
-
-We use the \texttt{maxpear} function \citep{fritsch2009improved} from the R package \texttt{mcclust} \citep{fritsch2012mcclust} to infer a point clustering from the consensus matrix (some details of which are given in section 3 of the Supplementary Material).
+Our application of consensus clustering has two main parameters at the ensemble level, the chain depth, $D$, and ensemble width, $W$. We infer a point clustering from the consensus matrix using the \texttt{maxpear} function \citep{fritsch2009improved} from the R package \texttt{mcclust} \citep{fritsch2012mcclust} to (section 3 of the Supplementary Material for details).
 
 \subsubsection{Determining the ensemble depth and width} \label{sec:ensembleChoice}
 As our ensemble sidesteps the problem of convergence within each chain, we need an alternative stopping rule for growing the ensemble in chain depth, $D$, and number of chains, $W$. We propose a heuristic based upon the consensus matrix to decide if a given value of $D$ and $W$ are sufficient. We suspect that increasing $W$ and $D$ might continuously improve the performance of the ensemble, but we observe in our simulations that these improvements will become smaller and smaller for greater values, approaching some asymptote for each of $W$ and $D$. We notice that this behaviour is analogous to PCA in that where for consensus clustering some improvement might always be expected for increasing chain depth or ensemble width, more variance will always be captured by increasing the number of components used in PCA. However, increasing this number beyond some threshold has diminishing returns, diagnosed in PCA by a scree plot. Following from this, we recommend, for some set of ensemble parameters, $D' = \{d_1, \ldots, d_I\}$ and $W'=\{w_1, \ldots, w_J\}$, find the mean absolute difference of the consensus matrix for the $d_i^{th}$ iteration from $w_j$ chains to that for the $d_{(i-1)}^{th}$ iteration from $w_j$ chains and plot these values as a function of chain depth, and the analogue for sequential consensus matrices for increasing ensemble width and constant depth.
@@ -424,7 +476,7 @@ As our ensemble sidesteps the problem of convergence within each chain, we need 
 %However, comparing an array of consensus matrices by eye is both difficult and time consuming. Inspired by the logic of using a scree plot in Principal Component Analysis (\textbf{PCA}) to decide the number of components to keep we use a plot of the mean absolute difference between sequential consensus matrices as a tool in the decision making progress. PCA is analogous to consensus clustering in that where for consensus clustering some improvement might always be expected for increasing chain length or number, more variance will always be captured by increasing the number of components used. However, increasing this number beyond a certain point has diminishing returns. We recommend a plot of the mean absolute difference between the sequential consensus matrices for a set of values of $D' = \{d_1, \ldots, d_I\}$ and $W'=\{w_1, \ldots, w_J\}$, comparing the consensus matrix for the $d_i^{th}$ iteration from $w_j$ chains to that for the $d_{(i-1)}^{th}$ iteration from $w_j$ chains. If the values are no longer dropping sharply (i.e. the partial derivative of the mean absolute difference with respect to $D$ and $W$ is as small as it is appears likely to become) than the change in the analysis for greater values of $D$ or $W$ is probably marginal.
 %An example of this is included in the analysis of the yeast data in figure \ref{fig:ensembleChoice}. 
 
-If this heuristic is used, we believe that the consensus matrix and the resulting inference should be stable, providing a robust estimate of the clustering. In contrast, if there is still strong variation in the consensus matrix for varying chain length or number, then we believe that the inferred clustering is influenced significantly by the random initialisation. This means that the inferred partition that it is unlikely to be stable for similar datasets or reproducible for a random choice of seeds. This stability is often a desirous property in a clustering method \citep{von2005towards, meinshausen2010stability}.
+If this heuristic is used, we believe that the consensus matrix and the resulting inference should be stable \citep[see, e.g.,][]{von2005towards, meinshausen2010stability}, providing a robust estimate of the clustering. In contrast, if there is still strong variation in the consensus matrix for varying chain length or number, then we believe that the inferred clustering is influenced significantly by the random initialisation and that the inferred partition is unlikely to be stable for similar datasets or reproducible for a random choice of seeds.
 
 \subsection{Simulation study}
 
@@ -442,8 +494,7 @@ Within this model there exist ``irrelevant features'' \citep{law2003feature} tha
 The generating model is
 %The generating model has a fixed number of clusters chosen by us and is thus, extending from equation \ref{eqn:jointMixModel},
 \begin{align*}
-	p(X, c, \theta, \pi| K) &= p(K) p(\pi| K) p(\theta|K) \prod_{i=1}^N p (c_i | \pi, K)  \times \\
-	& \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^ {\phi_p} p(x_{ip} | \theta_p) ^ {(1 - \phi_p)}
+	p(X, c, \theta, \pi| K) &= p(K) p(\pi| K) p(\theta|K) \prod_{i=1}^N p (c_i | \pi, K)  \prod_{p=1}^P p(x_{ip} | c_i, \theta_{c_ip})^ {\phi_p} p(x_{ip} | \theta_p) ^ {(1 - \phi_p)}
 	% &= \prod_{i=1}^N p(x_i | c_i, \theta_{c_i}) \prod_{i=1}^N p (c_i | \pi) p(\pi) p(\theta)  \\
 \end{align*}
 for data $X=(x_1, \ldots, x_N)$, cluster label or allocation variable $c=(c_1, \ldots, c_N)$, cluster weight $\pi=(\pi_1, \ldots, \pi_K)$, $K$ clusters and the relevance variable, $\phi \in \{0, 1\}$ with $\phi_p=1$ indicating that the $p^{th}$ feature is relevant to the clustering. We used a \emph{Gaussian} density, so $\theta_{kp} = (\mu_{kp}, \sigma^2_{kp})$. We defined three scenarios and simulated 100 datasets in each (Figure \ref{fig:genData} and Table \ref{table:scenarioTable}) 
@@ -459,7 +510,7 @@ Additional details of the simulation process and additional scenarios are includ
 
 %We test different scenarios that change various parameters in this model. The scenarios tested and there defining parameters are shown in table \ref{table:scenarioTable}. In this case the number of relevant features (\(P_s\)) is $\sum_p \phi_p$, and $P_n = P - P_s$.
 
-\begin{table}[ht]
+\begin{table}[ht!]
 	\centering
 	\caption{Parameters defining the simulation scenarios as used in generating data and labels. $\Delta \mu$ is the distance between neighbouring cluster means within a single feature.
 %		Results for \emph{2D}, \emph{Small N, large P} and \emph{Irrelevant features} scenarios are shown in this report, please see the supplementary material for additional results. 
@@ -491,9 +542,9 @@ Additional details of the simulation process and additional scenarios are includ
 		%		\hline
 		%		Small N, large P & 50 & 500 & 0 & 5 & 0.2 & 1 &  $(\frac{1}{5} , \frac{1}{5}, \frac{1}{5}, \frac{1}{5}, \frac{1}{5})$
 		%	\\
-		%	\hline
+			\hline
 		%		\\
-		\botrule
+%		\botrule
 	\end{tabular}
 %	\caption{Parameters defining the simulation scenarios as used in generating data and labels.}
 	\label{table:scenarioTable}
@@ -501,7 +552,7 @@ Additional details of the simulation process and additional scenarios are includ
 
 \begin{figure}
 	\centering
-	\includegraphics[scale=0.55]{./Images/Simulations/Data.png}
+	\includegraphics[scale=0.75]{./Images/Simulations/Data.png}
 	\caption{Example of generated datasets. Each row is an item being clustered and each column a feature of generated data. The 2D dataset (which is ordered by hierarchical clustering here) should enable proper mixing of chains in the MCMC. The small $N$, large $P$ case has clear structure (observable by eye). This is intended to highlight the problems of poor mixing due to high dimensions even when the generating labels are quite identifiable. In the irrelevant features case, the structure is clear in the relevant features (on the left-hand side of this heatmap). This setting is intended to test how sensitive each approach is to noise.}
 	\label{fig:genData}
 \end{figure}
@@ -712,11 +763,11 @@ Additional details of the simulation process and additional scenarios are includ
 %	\item a wide dataset representative of the \emph{small $N$, large $P$} paradigm prevalent in genetics, and
 %	\item a dataset with a large number of irrelevant features.
 %\end{itemize}
-\noindent In each of these scenarios we apply a variety of methods (listd below) and compare the inferred point clusterings to the generating labels using the Adjusted Rand Index \citep[\textbf{ARI}][]{hubert1985comparing}.
+\noindent In each of these scenarios we apply a variety of methods (listd below) and compare the inferred point clusterings to the generating labels using the Adjusted Rand Index \citep[\textbf{ARI},][]{hubert1985comparing}.
 \begin{itemize}
 	\item \texttt{Mclust}, a maximum likelihood implementation of finite mixture models (for a range of modelled clusters, $K$),
 	\item 10 chains of 1 million iterations, thinning to every thousandth sample for the overfitted Bayesian mixture model, and
-	\item a variety of consensus clustering ensembles defined by inputs of $W$ chains and $D$ iterations within each chain (see algorithm \ref{algorithm:CCforBayesianMixtures}) with $W \in \{1, 10, 30, 50, 100\}$ and $D \in \{1, 10, 100, 1000, 10000\}$.
+	\item A variety of consensus clustering ensembles defined by inputs of $W$ chains and $D$ iterations within each chain (see algorithm \ref{algorithm:CCforBayesianMixtures}) with $W \in \{1, 10, 30, 50, 100\}$ and $D \in \{1, 10, 100, 1000, 10000\}$.
 \end{itemize}
 The ARI is a measure of similarity between two partitions,$c_1, c_2$, corrected for chance, with 0 indicating $c_1$ is no more similar to $c_2$ than a random partition would be expected to be and a value of 1 showing that $c_1$ and $c_2$ perfectly align. Details of the methods in the simulation study can be found in sections 4.2, 4.3 and 4.4 of the Supplementary Material.
 
@@ -857,15 +908,15 @@ We aim to create clusters of genes that are co-expressed, have common regulatory
 \end{itemize}
 %We believe such informed gene sets are more relevant to phenotypic traits and offer insight into more complex biological processes. 
 %We believe that the integrative aspect of the analysis means that the clusters are more interpretable than in a standalone cluster analysis. Cluster analysis of a single dataset entails interpreting the clusters defined by similarity within a single experiment which often involves strong assumptions about the biological processes behind the result (e.g., correlation of transcripts implies co-regulation).
-The datasets were reduced to the genes with no missing data in the PPI and ChIP-chip data, reducing to the 551 genes. %\cite{kirk2012bayesian}. 
+The datasets were reduced to the 551 genes with no missing data in the PPI and ChIP-chip data, as in \cite{kirk2012bayesian}. 
 
 \subsubsection{Multiple dataset integration}
-We applied consensus clustering to MDI for our integrative analysis. MDI jointly models the clustering in each dataset, inferring individual clusterings for each dataset that are informed by similarity in the other clusterings. MDI learns the similarity between the datasets being analysed and does not assume global structure. This means that the similarity between datasets is not strongly assumed in our model; individual clusters or genes that align across datasets are based solely upon the evidence present in the data not strong modelling assumptions. Thus, datasets that share less common information can be included without fearing that this will warp the final clusterings in some way.
+We applied consensus clustering to MDI for our integrative analysis. Details of MDI are in section 2.2 of the Supplementary Material, but in short MDI jointly models the clustering in each dataset, inferring individual clusterings for each dataset. These partitions are informed by similar structure in the other datasets, with MDI learning this similarity as it models the partitions. The model does not assume global structure. This means that the similarity between datasets is not strongly assumed in our model; individual clusters or genes that align across datasets are based solely upon the evidence present in the data and not due to strong modelling assumptions. Thus, datasets that share less common information can be included without fearing that this will warp the final clusterings in some way.
 % we can include the PPI data and expect it to contribute to our final clustering despite the expectation that there will be less shared information between the time course  dataset with its large set of ncRNAs might and this PPI dataset. 
-Additional model details are in section 2.2 of the Supplementary Material and \cite{kirk2012bayesian}.
+%Additional model details are in section 2.2 of the Supplementary Material and \cite{kirk2012bayesian}.
 
 %The datasets are shown in Figure \ref{fig:yeastData}.
-The datasets were modelled using a mixture of Gaussian processes in the time course dataset and Multinomial distributions in the ChIP-chip and PPI datasets. 
+The datasets were modelled using a mixture of Gaussian processes in the time course dataset and Multinomial distributions in the ChIP-chip and PPI datasets.
 %To ensure that our mixture model is initially overfitted we set $K_{max}=275\approx\frac{N}{2}$.
 
 %the 551 yeast genes considered in the original MDI paper \citep{kirk2012bayesian} in an integrative setting. This consists of three datasets
@@ -896,7 +947,7 @@ The datasets were modelled using a mixture of Gaussian processes in the time cou
 We use the ARI between the generating labels and the inferred clustering of each method to be our metric of predictive performance.
 \begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.55]{./Images/Simulations/simulation_model_prediction.png}
+	\includegraphics[scale=0.75]{./Images/Simulations/simulation_model_prediction.png}
 	\caption{Model performance in the 100 simulated datasets for each scenario, defined as the ARI between the generating labels and the inferred clustering. $CC(d, w)$ denotes consensus clustering using the clustering from the $d^{th}$ iteration from $w$ different chains. }
 	\label{fig:simResults}
 \end{figure}
@@ -965,7 +1016,7 @@ For the PSMs from the individual chains, all entries are 0 or 1. This means only
 
 \begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.17]{./Images/Simulations/small_n_large_p_base/comp_psms_cm_edited.png}	
+	\includegraphics[scale=0.30]{./Images/Simulations/small_n_large_p_base/comp_psms_cm_edited.png}	
 %PSMs/BayesianSimulation2PSMs.png}
 %	\caption{PSMs for 8 chains that pass within chain convergence test. Rows and columns are ordered by a hierarchical clustering applied to the matrix in the bottom right. Annotations are the generating labels. The top row of PSMs are all in a common mode where Cluster 3 does not merge instead remaining as singletons. In the bottom row the first, second and fourth matrices correctly cluster all 5 clusters. The third matrix uncovers a different mode where Cluster 5 does not merge. The matrices appear binary, suggesting no diversity in the partitions being sampled.}
 	\caption{Comparison of similarity matrices from a dataset for the Small $N$, large $P$ scenario. In each matrix, the $(i, j)^{th}$ entry is the proportion of clusterings for which the $i^{th}$ and $j^{th}$ items co-clustered for the method in question. In the first row the PSM of the pooled Bayesian samples is compared to the CM for CC(100, 50), with a common ordering of rows and columns in both heatmaps. In the following rows, 6 of the long chains that passed the tests of convergence are shown.}
@@ -977,7 +1028,7 @@ For the PSMs from the individual chains, all entries are 0 or 1. This means only
 
 \begin{figure} %[!tpb]
 	\centering
-	\includegraphics[scale=0.45]{./Images/Simulations/TimeComparison.png}	
+	\includegraphics[scale=0.7]{./Images/Simulations/TimeComparison.png}	
 	\caption{The time taken for different numbers of iterations of MCMC moves in $\log_{10}(seconds)$. The relationship between chain length, $D$, and the time taken is linear (the slope is approximately 1 on the $\log_{10}$ scale), with a change of intercept for different dimensions. The runtime of each Markov chain was recorded using the terminal command \texttt{time}, measured in milliseconds.}
 	\label{fig:timeMCMC}
 \end{figure}
@@ -1034,7 +1085,7 @@ We use the stopping rule proposed in \ref{sec:ensembleChoice} to determine our e
 
 \begin{figure}
 	\centering
-	\includegraphics[scale=0.5]{./SupplementaryMaterial/Images/Yeast/EnsembleChoicePlotAlt.png}
+	\includegraphics[scale=0.7]{./SupplementaryMaterial/Images/Yeast/EnsembleChoicePlotAlt.png}
 	\caption{The mean absolute difference between the sequential Consensus matrices. For a set of chain lengths, $D'=\{d_1, \ldots, d_I\}$ and number of chains, $W'=\{w_1, \ldots, w_J\}$, we take the mean of the absolute difference between the consensus matrix for $(d_i, w_j)$ and $(d_{i-1}, w_{j})$ (here $D'=\{101, 501, 1001, 2001, \ldots, 10001\}$ and $W'=\{100, 500, 1000\}$). 
 		%	to the consensus matrix for chain depth 10,001 and 1,000 chains. 
 %		We find that increasing $s$ beyond 500 has marginal effect except in the PPI dataset.
@@ -1057,12 +1108,12 @@ We show the gene expression and regulatory proteins of these genes separated by 
 %exclude the 15 clusters where more than half of the member genes have no interactions in the ChIP-chip data and any clusters of one gene. 
 %We find that a small number of transcription factors dominate, with different combinations emerging across the 10 clusters (these and some relevant details are listed in Table 2 of the Supplementary Material). Many of these 10 correspond to transcription factors that are well known to regulate cell cycle expression \citep{simon2001serial}.
 
-\begin{figure*}
+\begin{sidewaysfigure}
 	\centering
-	\includegraphics[scale=0.45]{./SupplementaryMaterial/Images/Yeast/timecourseChIPchipFused.png}
+	\includegraphics[scale=0.62]{./SupplementaryMaterial/Images/Yeast/timecourseChIPchipFused.png}
 	\caption{The gene clusters which tend to have a common label across the time course and ChIP-chip datasets, shown in these datasets. We include only the clusters with more than one member and more than half the members having some interactions in the ChIP-chip data. Red lines for the most common transcription factors are included.}
 	\label{fig:timepointChIPchipFused}
-\end{figure*}
+\end{sidewaysfigure}
 
 As an example, we briefly analyse clusters 9 and 16 in greater depth. Cluster 9 has strong association with MBP1 and some interactions with SWI6, as can be seen in Figure \ref{fig:timepointChIPchipFused}. The Mbp1-Swi6p complex, MBF, is associated with DNA replication \citep{iyer2001genomic}. The first time point, 0 minutes, in the time course data is at the START checkpoint, or the G1/S transition. The members of cluster 9 begin highly expressed at this point before quickly dropping in expression (in the first of the 3 cell cycles). This suggests that many transcripts are produced immediately in advance of S-phase, and thus are required for the first stages of DNA synthesis. 
 %We used the \texttt{org.Sc.sgd.db} \citep{carlson2014org} package to find gene descriptions (which are included in Table 3 of the Supplemenatry Material). 
@@ -1155,15 +1206,15 @@ We expect that researchers interested in applying some of the Bayesian integrati
 %text text text\vspace*{-12pt}
 
 \section*{Funding}
-This work was funded by the MRC (MC UU 00002/4, MC UU 00002/13) and the Wellcome Trust (WT107881). 
+This work was funded by the MRC (MC UU 00002/4, MC UU 00002/13). This research was funded in whole, or in part, by the Wellcome Trust [WT107881]. For the purpose of Open Access, the author has applied a CC BY public copyright licence to any Author Accepted Manuscript version arising from this submission.
 %SC is supported by an UKRI Studentship via the MRC https://mrc.ukri.org/ (MC UU 00002/4). PK is supported by the MRC (MC UU 00002/13). CW is supported by the Wellcome Trust https://wellcome.ac.uk/ (WT107881) and the MRC (MC UU 00002/4). This research was funded in whole, or in part, by the Wellcome Trust [Grant number WT107881]. For the purpose of open access, the author has applied a CC BY public copyright licence to any Author Accepted Manuscript version arising from this submission. The funders had no role in study design, data collection and analysis, decision to publish, or preparation of the manuscript.
 \vspace*{-12pt}
 
-\bibliographystyle{natbib}
+%\bibliographystyle{natbib}
+%\bibliographystyle{vancouver}
+\bibliographystyle{plainnat}
 %\bibliographystyle{achemnat}
-%\bibliographystyle{plainnat}
 %\bibliographystyle{abbrv}
-%\bibliographystyle{bioinformatics}
 %
 %\bibliographystyle{plain}
 %

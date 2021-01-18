@@ -1,5 +1,5 @@
 \PassOptionsToPackage{utf8}{inputenc}
-\documentclass{article}
+\documentclass[12pt]{article}
 
 \usepackage{arxiv}
 
@@ -39,29 +39,37 @@
 \usepackage{lineno}
 \linenumbers
 
+%% DOuble spacing
+\usepackage{setspace}
+\doublespacing
+
 \title{Consensus clustering for Bayesian mixture models}
-\author{Stephen Coleman\,$^{\text{\sfb 1}*}$, Paul DW Kirk\,$^{\text{\sfb 1, \sfb 2}\dagger}$ and Chris Wallace\,$^{\text{\sfb 1,\sfb 2}\dagger}$}
+%\author{Stephen Coleman\,$^{\text{\sfb 1}\textrm{\ddagger}}$, Paul DW Kirk\,$^{\text{\sfb 1, \sfb 2}\dagger}$ and Chris Wallace\,$^{\text{\sfb 1,\sfb 2}\dagger}$}
 
 \author{
-	Stephen Coleman$^1$ \\
+	Stephen Coleman$^{1,*}$ \\
 	\texttt{stephen.coleman@mrc-bsu.cam.ac.uk} \\
 	%% examples of more authors
-	\And
-	Paul D.W.~Kirk$^{1,2, *}$ \\
+	\AND
+	Paul D.W.~Kirk$^{1,2,\dagger}$ \\
 	\texttt{paul.kirk@mrc-bsu.cam.ac.uk} \\
 	\AND
-	Chris Wallace$^{1,2, *}$ \\
+	Chris Wallace$^{1,2,\dagger}$ \\
 	\texttt{cew54@cam.ac.uk} \\ 
 	\vspace{1cm} \\
 	$^1$ MRC Biostatistics Unit\\
 	$^2$ Cambridge Institute of Therapeutic Immunology \& Infectious Disease \\
 	University of Cambridge, U.K. \\
-	$^*$ These authors provided an equal contribution.
+	\vspace{2cm} \\
+	$*$ Corresponding author. \\
+	$\dagger$ These authors provided an equal contribution.	
 }
 
 \begin{document}
 	
 	\maketitle
+	
+	\newpage
 	
 	\begin{abstract}
 		Cluster analysis is an integral part of precision medicine and systems biology, used to define groups of patients or biomolecules. However, problems such as choosing the number of clusters and issues with high dimensional data arise consistently. An ensemble approach, such as consensus clustering, can overcome some of the difficulties associated with high dimensional data, frequently exploring more relevant clustering solutions than individual models. Another tool for cluster analysis, Bayesian mixture modelling, has alternative advantages, including the ability to infer the number of clusters present and extensibility. 
@@ -76,7 +84,7 @@
 		% Bayesian mixture models have attractive features and been successfully applied in a diverse range of settings. Inference of these models is normally performed using Markov-chain Monte Carlo (MCMC) methods. In high dimensions MCMC methods often explore a limited range of partitions, with a lack of overlap between chains (i.e. a lack of convergence) frequently present.\\
 %		\textbf{Results:} 
 		%We investigate the performance of this approach in simulations, comparing it to Bayesian inference of the same models and \texttt{Mclust}, a popular implementation of MLE inference of mixture models in R. 
-		Consensus clustering of Bayesian mixture models successfully finds the generating structure in our simulation study and captures multiple modes in the likelihood surface. This approach also offers significant reductions in runtime compared to traditional Bayesian inference when a parallel environment is available. We propose a heuristic to decide upon ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integrative analyses, showing consensus clustering can be applied to any MCMC-based clustering method, not just mixture models. We from an integrative analysis of three 'omics datasets for budding yeast and find clusters of co-expressed genes with shared regulatory proteins. We validate these clusters using data external to the analysis. We also uncover novel biology, finding evidence for a more direct role for the GAS3 gene in DNA replication. This demonstrates the potential of using consensus clustering in multi-omics studies.
+		Consensus clustering of Bayesian mixture models successfully finds the generating structure in our simulation study and captures multiple modes in the likelihood surface. This approach also offers significant reductions in runtime compared to traditional Bayesian inference when a parallel environment is available. We propose a heuristic to decide upon ensemble size and then apply consensus clustering to Multiple Dataset Integration, an extension of Bayesian mixture models for integrative analyses, showing consensus clustering can be applied to any MCMC-based clustering method, not just mixture models. We from an integrative analysis of three 'omics datasets for budding yeast and find clusters of co-expressed genes with shared regulatory proteins. We validate these clusters using data external to the analysis. These clusters can help assign likely function to understudied genes, for example \emph{GAS3} clusters with histones active in S-phase, suggesting a role in DNA replication.
 		% and offers improvements in runtime in a parallel environment and better exploration of clustering space. 
 		\\
 		% compare this to inference performed using MCMC methods and also to \texttt{mclust}, a popular mixture model R package. We show that CC can be extended to Bayesian integrative clustering models. CC is then demonstrated on real datasets in both the single dataset and multiple dataset context. CC is shown to capture more modes in the clustering distribution than either the maximum-likelihood estimate (MLE) or any individual Markov chain. CC also reduces the computation time required when a parallel environment is present compared to Bayesian inference. \\
@@ -122,6 +130,10 @@
 %\textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics} online and code at \textit{https://github.com/stcolema/ConsensusClusteringForBayesianMixtureModels}.}
 %
 %\maketitle
+
+\subsection*{Author summary}
+Understanding molecular drivers of disease and interactions between genes is a key aspect of modern medicine, having implications for disease diagnosis and treatment. Grouping genes is one method for improving this understanding, with groups of genes being used, for example, to help us interpret the function of previously understudied genes. Bayesian mixture models are powerful tools that can be used to define such groups, and have been extended to integrate multiple datasets, enabling simultaneous modelling of various related datasets. However, modern ‘omics technologies provide huge, complex datasets that these models struggle with, limiting their use despite the increased demand for integrative, multi-omics studies. We use an ensemble method, consensus clustering, to overcome some of the problems these models face and improve their applicability to large datasets. Our approach to these models is shown to be successful in simulated datasets, and we show the potential of the method in a multi-omics analysis of the cell cycle of yeast, finding potential interpretation for previously understudied genes.
+
 
 \section{Introduction}
 
@@ -245,7 +257,7 @@ and diverse regulatory events \citep{granovskaia2010high}. The cell cycle is cru
 %; it is fundamental to sustaining life 
 \citep{tyson2013cell, chen2004integrative, alberts2018molecular}. The regulatory proteins of the 
 %system first appeared over a billion years ago and are
-cell cycle are so highly conserved among eukaryotes that many of them function perfectly when transferred from a human cell to a yeast cell \citep{alberts2018molecular}. This conservation means that a relatively simple eukaryote such as \emph{Saccharomyces cerevisiae} can provide insight into a variety of cell cycle perturbations including those that occur in human cancer \citep{ingalls2007systems, chen2004integrative} and ageing \citep{jimenez2015live}. Budding yeast is particularly attractive for genetic analysis as
+cell cycle are so highly conserved among eukaryotes that many of them function perfectly when transferred from a human cell to a yeast cell \citep{alberts2018molecular}. This conservation means that a relatively simple eukaryote such as \emph{S. cerevisiae} can provide insight into a variety of cell cycle perturbations including those that occur in human cancer \citep{ingalls2007systems, chen2004integrative} and ageing \citep{jimenez2015live}. Budding yeast is particularly attractive for genetic analysis as
 %it can proliferate as haploid cells, its genetic makeup can be easily altered by standard tools of molecular genetics \citep{tyson2013cell}, and 
 large numbers of cells may be synchronised in a particular stage of the cell cycle  \citep{juanes2017methods}. We apply consensus clustering to an extension of Bayesian mixture models, Multiple Dataset Integration (\textbf{MDI}), a multiple dataset clustering method. 
 %Cluster analysis of a single 'omics dataset entails interpreting the clusters defined by similarity within a single experiment which often involves strong assumptions about the biological processes behind the result (e.g. correlation of transcripts implies co-regulation). However, by integrating multiple experiments we believe that the analysis is more interpretable, and the greater information modelled means that the cluster 
@@ -1117,9 +1129,9 @@ We show the gene expression and regulatory proteins of these genes separated by 
 
 As an example, we briefly analyse clusters 9 and 16 in greater depth. Cluster 9 has strong association with MBP1 and some interactions with SWI6, as can be seen in Figure \ref{fig:timepointChIPchipFused}. The Mbp1-Swi6p complex, MBF, is associated with DNA replication \citep{iyer2001genomic}. The first time point, 0 minutes, in the time course data is at the START checkpoint, or the G1/S transition. The members of cluster 9 begin highly expressed at this point before quickly dropping in expression (in the first of the 3 cell cycles). This suggests that many transcripts are produced immediately in advance of S-phase, and thus are required for the first stages of DNA synthesis. 
 %We used the \texttt{org.Sc.sgd.db} \citep{carlson2014org} package to find gene descriptions (which are included in Table 3 of the Supplemenatry Material). 
-These genes' descriptions \citep[found using \texttt{org.Sc.sgd.db},][and shown in Table 3 of the Supplementary Material]{carlson2014org} support this hypothesis, as many of the members are associated with DNA replication, repair and/or recombination. Additionally, TOF1, MRC1 and RAD53, members of the replication checkpoint \citep{bando2009csm3, lao2018yeast} emerge in the cluster as do members of the cohesin complex. Cohesin is associated with sister chromatid cohesion which is established during the S-phase of the cell cycle \citep{toth1999yeast} and also contributes to transcription regulation, DNA repair, chromosome condensation, homolog pairing \citep{mehta2013cohesin}, fitting the theme of cluster 9.
+These genes' descriptions \citep[found using \texttt{org.Sc.sgd.db},][and shown in Table 3 of the Supplementary Material]{carlson2014org} support this hypothesis, as many of the members are associated with DNA replication, repair and/or recombination. Additionally, \emph{TOF1}, \emph{MRC1} and \emph{RAD53}, members of the replication checkpoint \citep{bando2009csm3, lao2018yeast} emerge in the cluster as do members of the cohesin complex. Cohesin is associated with sister chromatid cohesion which is established during the S-phase of the cell cycle \citep{toth1999yeast} and also contributes to transcription regulation, DNA repair, chromosome condensation, homolog pairing \citep{mehta2013cohesin}, fitting the theme of cluster 9.
 
-Cluster 16 appears to be a cluster of S-phase genes, consisting of GAS3, NRM1 and PDS1 and the genes encoding the histones H1, H2A, H2B, H3 and H4. Histones are the chief protein components of chromatin \citep{fischle2003histone} and are important contributors to gene regulation \citep{bannister2011regulation}. They are known to peak in expression in S-phase \citep{granovskaia2010high}, which matches the first peak of this cluster early in the time series. Of the other members, NRM1 is a transcriptional co-repressor of MBF-regulated gene expression acting at the transition from G1 to S-phase \citep{de2006constraining, aligianni2009fission}. Pds1p binds to and inhibits the Esp1 class of sister separating proteins, preventing sister chromatids separation before M phase \citep{ciosk1998esp1, toth1999yeast}. GAS3, is not well studied. It interacts with SMT3 which regulates chromatid cohesion, chromosome segregation and DNA replication (among other things). Chromatid cohesion ensures the faithful segregation of chromosomes in mitosis and in both meiotic divisions \citep{cooper2009pds1p} and is instantiated in S-phase \citep{toth1999yeast}. These results, along with the very similar expression profile to the histone genes in the time course data, suggest that GAS3 may be more directly involved in DNA replication or chromatid cohesion than is currently believed.
+Cluster 16 appears to be a cluster of S-phase genes, consisting of \emph{GAS3}, \emph{NRM1} and \emph{PDS1} and the genes encoding the histones H1, H2A, H2B, H3 and H4. Histones are the chief protein components of chromatin \citep{fischle2003histone} and are important contributors to gene regulation \citep{bannister2011regulation}. They are known to peak in expression in S-phase \citep{granovskaia2010high}, which matches the first peak of this cluster early in the time series. Of the other members, \emph{NRM1} is a transcriptional co-repressor of MBF-regulated gene expression acting at the transition from G1 to S-phase \citep{de2006constraining, aligianni2009fission}. Pds1p binds to and inhibits the Esp1 class of sister separating proteins, preventing sister chromatids separation before M-phase \citep{ciosk1998esp1, toth1999yeast}. \emph{GAS3}, is not well studied. It interacts with \emph{SMT3} which regulates chromatid cohesion, chromosome segregation and DNA replication (among other things). Chromatid cohesion ensures the faithful segregation of chromosomes in mitosis and in both meiotic divisions \citep{cooper2009pds1p} and is instantiated in S-phase \citep{toth1999yeast}. These results, along with the very similar expression profile to the histone genes in the time course data, suggest that \emph{GAS3} may be more directly involved in DNA replication or chromatid cohesion than is currently believed.
 
 We attempt to perform a similar analysis using traditional Bayesian inference of MDI, but after 36 hours of runtime there is no consistency or convergence across chains. Each chain provides different parameter distributions and clustering estimates, leaving no clear clustering solution. For details of this analysis, see section 5.2 of the Supplementary Material.
 
@@ -1158,7 +1170,7 @@ We attempt to perform a similar analysis using traditional Bayesian inference of
 %\end{figure*}
 
 \section{Discussion}
-Our proposed method has demonstrated good performance on simulation studies, uncovering generating structure and approximating Bayesian inference when the Markov chain is exploring the full support of the posterior. However, we have shown that if a finite Markov chain fails to describe the full posterior and is itself only approximating Bayesian inference, our method has better ability to represent several modes in the data than individual chains and thus offers a more consistent and reproducible analysis. Furthermore, consensus clustering is significantly faster in a parallel environment than inference using individual chains, while retaining the ability to robustly infer $K$, the number of occupied components present. 
+Our proposed method has demonstrated good performance on simulation studies, uncovering the generating structure and approximating Bayesian inference when the Markov chain is exploring the full support of the posterior distribution. However, we have shown that if a finite Markov chain fails to describe the full posterior and is itself only approximating Bayesian inference, our method has better ability to represent several modes in the data than individual chains and thus offers a more consistent and reproducible analysis. Furthermore, consensus clustering is significantly faster in a parallel environment than inference using individual chains, while retaining the ability to robustly infer $K$, the number of occupied components present. 
 
 We proposed a method of assessing ensemble stability and deciding upon ensemble size which we used when performing an integrative analysis of yeast cell cycle data using MDI, an extension of Bayesian mixture models that jointly models multiple datasets. 
 %Consensus clustering sidesteps the convergence issues and decrease the computational cost of such a large model, and this shows the flexibility of consensus clustering, being applicable to any MCMC-based clustering method. In the integrative analysis,

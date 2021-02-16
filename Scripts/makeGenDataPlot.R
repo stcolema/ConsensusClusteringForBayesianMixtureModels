@@ -61,7 +61,7 @@ simple2D_gen <- generateSimulationDataset(K, N, P_s,
   pi = pi
 )
 
-col_order <- findOrder(t(noStructure_gen$data))
+col_order <- findOrder(t(simple2D_gen$data))
 
 simple_2d_ph <- annotatedHeatmap(scale(simple2D_gen$data[, col_order]), simple2D_gen$cluster_IDs,
   main = "2D", # paste0(scn, " (seed 1)"),

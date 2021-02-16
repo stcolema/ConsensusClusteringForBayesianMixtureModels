@@ -8,6 +8,10 @@ library(tibble)
 library(magrittr)
 library(ggplot2)
 library(tidyr)
+library(dplyr)
+library(mdiHelpR)
+setMyTheme()
+set.seed(1)
 
 # Tibbles containing samples and metadata
 bayes_cont <- readRDS("./Data/Yeast/BayesContParamsTibble.rds")
@@ -66,7 +70,7 @@ p_param_density <- plt_data %>%
   ) +
 
   labs(
-    title = "Parameter density",
+    # title = "Parameter density",
     x = "Value",
     y = "Density"
   ) +
@@ -82,8 +86,9 @@ p_param_density +
     plot.subtitle = element_text(size = 14),
     strip.text.x = element_text(size = 10.5),
     legend.text = element_text(size = 10.5)
-  )
+  )  +
+  theme(legend.position="bottom")
 
 ggsave("./SupplementaryMaterial/Images/Yeast/ComparisonDensities.png",
        height = 11,
-       width = 10)
+       width = 8)

@@ -3,6 +3,10 @@
 # GO term over-representation in the predicted clusters for each dataset for 
 # the long chains and a number of ensembles.
 
+# Note:: connecting to the database might cause an ssh error. If so please run
+# ``httr::set_config(httr::config(ssl_verifypeer = FALSE))`` in the local 
+# environment.
+
 # === Packages =================================================================
 
 #
@@ -18,6 +22,7 @@ library(biomaRt)
 
 # Annotaiton database for yeast
 # library(AnnotationHub)
+# BiocManager::install("org.Sc.sgd.db")
 library(org.Sc.sgd.db)
 
 # Visualisation
@@ -363,6 +368,8 @@ universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
 # === Random partition =========================================================
 
+# This should return no enriched terms. It is included to enable sense-checking
+
 R_max <- max(tibbles$CC$R)
 S_max <- max(tibbles$CC$S)
 
@@ -372,41 +379,41 @@ K_cc <- cc_tib$Cl[which(cc_tib$S == S_max & cc_tib$R == R_max)] %>%
   unlist() %>% 
   set_names(datasets)
 
-rand_cl <- K_cc %>% lapply(function(k){
-  sample(1:k, size = N, replace = T)
-})
-
-rand_go <- list()
-for(l in 1:L){
-rand_go[[l]] <- tryCatch(
-    {
-      doClusterComparison(rand_cl[[l]], orig_data[[l]], geneTable, universe, 
-                          ont = "ALL",
-                          drop_na = drop_na,
-                          min_cluster_size = min_cluster_size)
-    },
-    error=function(cond) {
-      message(paste("\nNo enriched GO terms found."))
-      message(cond)
-      # Choose a return value in case of error
-      return(NA)
-    },
-    warning=function(cond) {
-      message(paste("\nClusterign cause a warning?"))
-      message("Here's the original warning message:")
-      message(cond)
-      # Choose a return value in case of warning
-      return(NULL)
-    }
-  )    
-}
-
-rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]],
-                                    geneTable,
-                                    universe, ont = "ALL",
-                                    drop_na = drop_na,
-                                    min_cluster_size = min_cluster_size)
-rand_time_cl
+# rand_cl <- K_cc %>% lapply(function(k){
+#   sample(1:k, size = N, replace = T)
+# })
+# 
+# rand_go <- list()
+# for(l in 1:L){
+# rand_go[[l]] <- tryCatch(
+#     {
+#       doClusterComparison(rand_cl[[l]], orig_data[[l]], geneTable, universe, 
+#                           ont = "ALL",
+#                           drop_na = drop_na,
+#                           min_cluster_size = min_cluster_size)
+#     },
+#     error=function(cond) {
+#       message(paste("\nNo enriched GO terms found."))
+#       message(cond)
+#       # Choose a return value in case of error
+#       return(NA)
+#     },
+#     warning=function(cond) {
+#       message(paste("\nClusterign cause a warning?"))
+#       message("Here's the original warning message:")
+#       message(cond)
+#       # Choose a return value in case of warning
+#       return(NULL)
+#     }
+#   )    
+# }
+# 
+# rand_time_cl <- doClusterComparison(rand_cl[[1]], orig_data[[1]],
+#                                     geneTable,
+#                                     universe, ont = "ALL",
+#                                     drop_na = drop_na,
+#                                     min_cluster_size = min_cluster_size)
+# rand_time_cl
 # Error in compareCluster(geneCluster = clustered_genes, fun = "enrichGO",  : 
 # No enrichment found in any of gene cluster, please check your input... 
 
@@ -416,10 +423,14 @@ my_data <- NULL
 R_used <- c(501, 1001,5001,10001)
 S_used <- c(100, 500, 1000)
 
+# This shouldn't be necessary, but it might be necessary to uncomment this
+# tc_inds <- which(tibbles$Bayes$Dataset == "Timecourse")
+# tibbles$Bayes$Dataset[tc_inds] <- "Time course"
+
 for (dataset in datasets) {
   save_dir <- paste0("./Images/Yeast/", dataset, "/")
-  dir.create(save_dir)
-
+  # dir.create(save_dir)
+  
   drop_na <- gene_names[missing]
   universe <- geneTable$GeneID[match(gene_names, geneTable$Locus)]
 
@@ -639,17 +650,19 @@ for (dataset in datasets) {
       file_name_1 <- paste0(save_dir, "TimecourseGOoverRepresentationComparison", ont, ".png")
       file_name_2 <- paste0(save_dir, "TimecourseGOoverRepresentationComparison", ont, "Alt.png")
     }
-    ggsave(file_name_1,
-      p_comp,
-      width = 14,
-      height = 14
-    )
-
-    ggsave(file_name_2,
-      p_comp_2,
-      width = 14,
-      height = 8
-    )
+    
+    # ggsave(file_name_1,
+    #   p_comp,
+    #   width = 14,
+    #   height = 14
+    # )
+    # 
+    # ggsave(file_name_2,
+    #   p_comp_2,
+    #   width = 14,
+    #   height = 8
+    # )
+    
     }
     # write.csv(p_comp$data, paste0(save_dir, dataset, "GOoverRepresentationComparison", ont, ".csv"))
 
